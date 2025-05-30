@@ -1,0 +1,50 @@
+<!-- Barra lateral de navegación principal del sistema -->
+<div class="d-flex flex-column flex-shrink-0 p-3 sidebar vh-100 position-fixed" style="width: 250px;" id="sidebar">
+    <!-- Logo y nombre del café -->
+    <div class="logo text-center pb-3 mb-3 border-bottom">
+        <img src="cafe-logo.png" alt="Logo Café" class="img-fluid" style="width: 40px;">
+        <h1 class="h5 my-1 logo-text">LA COMUNA</h1>
+        <p class="small mb-0 logo-text">CAFÉ</p>
+    </div>
+    <!-- Menú de navegación, las opciones se muestran según el rol -->
+    <ul class="nav nav-pills flex-column mb-auto">
+        <!-- data-role indica para qué tipo de usuario es visible la opción -->
+        <li class="nav-item" data-role="Administrador Cajero Mesero">
+            <a href="#" class="nav-link text-white menu-item" data-view="Caja"> <i class="fas fa-cash-register me-2"></i> <span class="menu-text">Caja</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Inventario"> <i class="fas fa-boxes me-2"></i> <span class="menu-text">Inventario</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Productos"> <i class="fas fa-coffee me-2"></i> <span class="menu-text">Productos</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Insumos"> <i class="fas fa-utensils me-2"></i> <span class="menu-text">Insumos</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador Cajero Mesero">
+            <a href="#" class="nav-link text-white menu-item" data-view="Recetas"> <i class="fas fa-book me-2"></i> <span class="menu-text">Recetas</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Ventas"> <i class="fas fa-shopping-cart me-2"></i> <span class="menu-text">Ventas</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Gastos"> <i class="fas fa-money-bill-wave me-2"></i> <span class="menu-text">Gastos</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Reportes"> <i class="fas fa-chart-bar me-2"></i> <span class="menu-text">Reportes</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Bitacora"> <i class="fas fa-clipboard-list me-2"></i> <span class="menu-text">Bitácora</span></a>
+        </li>
+        <li class="nav-item" data-role="Administrador">
+            <a href="#" class="nav-link text-white menu-item" data-view="Usuarios"> <i class="fas fa-users me-2"></i> <span class="menu-text">Usuarios</span></a>
+        </li>
+    </ul>
+    <!-- Botón de cerrar sesión -->
+    <div class="dropdown mt-auto">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-sign-out-alt me-2"></i>
+            <span class="menu-text">Cerrar Sesión</span>
+        </a>
+    </div>
+</div> 

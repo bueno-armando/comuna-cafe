@@ -1,0 +1,162 @@
+<!-- Vista de Gestión de Ventas -->
+<div class="main-content container bg-white rounded-3 p-4">
+    <!-- Título principal -->
+    <h1 class="page-title mb-4">Gestión de Ventas</h1>
+    <!-- Filtros de búsqueda por fecha -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-end">
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Buscar Desde</label>
+            <input type="date" id="fechaInicio" class="form-control">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Hasta</label>
+            <input type="date" id="fechaFin" class="form-control">
+        </div>
+        <button id="buscarVentasBtn" class="btn btn-cafe"><i class="bi bi-search"></i></button>
+    </div>
+    <!-- Tabla de ventas -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Método de Pago</th>
+                    <th>Usuario</th>
+                    <th>Ver detalles</th>
+                </tr>
+            </thead>
+            <tbody id="ventasTableBody">
+                <!-- Ejemplo de fila de venta (debe llenarse dinámicamente por el backend) -->
+                <tr>
+                    <td>01.</td>
+                    <td>21/03/25</td>
+                    <td>300</td>
+                    <td>Tarjeta</td>
+                    <td>AlanaRivas</td>
+                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="1">Ver detalles</button></td>
+                </tr>
+                <tr>
+                    <td>02.</td>
+                    <td>22/03/25</td>
+                    <td>150</td>
+                    <td>Efectivo</td>
+                    <td>GaboMtz</td>
+                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="2">Ver detalles</button></td>
+                </tr>
+                <tr>
+                    <td>03.</td>
+                    <td>23/03/25</td>
+                    <td>70</td>
+                    <td>Efectivo</td>
+                    <td>GaboMtz</td>
+                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="3">Ver detalles</button></td>
+                </tr>
+                <tr>
+                    <td colspan="6" class="text-center py-4">No hay ventas registradas.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Detalles de Venta -->
+<div class="modal fade" id="detalleVentaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Detalles de Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">ID Venta</label>
+                            <input type="text" class="form-control" id="detalleVentaId" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Usuario</label>
+                            <input type="text" class="form-control" id="detalleVentaUsuario" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha</label>
+                            <input type="text" class="form-control" id="detalleVentaFecha" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Método de Pago</label>
+                            <input type="text" class="form-control" id="detalleVentaMetodo" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total de Venta</label>
+                            <input type="text" class="form-control" id="detalleVentaTotal" readonly>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive mb-3">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleVentaProductos">
+                            <!-- Ejemplo de productos vendidos (debe llenarse dinámicamente por el backend) -->
+                            <tr>
+                                <td>Latte</td>
+                                <td>1</td>
+                                <td>45.00</td>
+                                <td>45.00</td>
+                            </tr>
+                            <tr>
+                                <td>Frappe de Oreo</td>
+                                <td>2</td>
+                                <td>55.00</td>
+                                <td>110.00</td>
+                            </tr>
+                            <tr>
+                                <td>Sandwich Clásico</td>
+                                <td>1</td>
+                                <td>60.00</td>
+                                <td>60.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex gap-3 justify-content-end">
+                    <button type="button" class="btn btn-success">Exportar a PDF</button>
+                    <button type="button" class="btn btn-cafe">Exportar a Excel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle con Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Inicialización de eventos para la vista de ventas
+// Todo lo visual, la lógica real la implementa el backend
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Evento para mostrar el modal de detalles de venta y cargar los datos
+    document.getElementById('detalleVentaModal').addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget; // Botón que disparó el modal
+        const ventaId = button.getAttribute('data-venta-id');
+        // Aquí iría la lógica para cargar los datos de la venta y sus productos
+        console.log('Cargando detalles de la venta ID:', ventaId);
+    });
+    // Eventos de exportar (simulación visual)
+    document.querySelector('#detalleVentaModal .btn-success').onclick = function() {
+        alert('Funcionalidad de exportar a PDF a implementar por el backend');
+    };
+    document.querySelector('#detalleVentaModal .btn-cafe').onclick = function() {
+        alert('Funcionalidad de exportar a Excel a implementar por el backend');
+    };
+});
+</script> 

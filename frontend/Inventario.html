@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Sistema de Gestión</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-cafe">
+        <div class="container">
+            <a class="navbar-brand" href="#">Sistema de Gestión</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="ventas">Ventas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="inventario">Inventario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="usuarios">Usuarios</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn">Cerrar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container mt-4">
+<!-- Vista de Gestión de Inventario -->
+<div class="main-content container bg-white rounded-3 p-4">
+    <!-- Título principal -->
+    <h1 class="page-title mb-4">Gestión de Inventario</h1>
+    <!-- Barra de búsqueda y botón principal -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+        <div class="search-container flex-grow-1 position-relative">
+            <i class="bi bi-search search-icon position-absolute"></i>
+            <input type="text" id="inventorySearch" class="form-control ps-5" placeholder="Buscar Insumo...">
+        </div>
+        <button id="registerMovementBtn" class="btn btn-cafe" data-bs-toggle="modal" data-bs-target="#registerMovementModal">Registrar Movimiento</button>
+    </div>
+    <!-- Tabla de inventario -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Insumo</th>
+                    <th>Unidad</th>
+                    <th>Cantidad</th>
+                    <th>Ver Movimientos</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+                        <!-- Se llenará dinámicamente -->
+            </tbody>
+        </table>
+            </div>
+    </div>
+</div>
+
+<!-- Modal: Registrar Movimiento -->
+<div class="modal fade" id="registerMovementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Registrar Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerMovementForm">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Seleccionar Insumo</label>
+                            <select class="form-select" id="movementInsumo" required>
+                                <option value="">Seleccione un insumo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="movementCantidad" min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Unidad</label>
+                                <input type="text" class="form-control" id="movementUnidad" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" id="movementTipo" required>
+                                <option value="">Seleccione tipo</option>
+                                <option value="Entrada">Entrada</option>
+                                <option value="Salida">Salida</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" class="form-control" id="movementDescripcion" placeholder="Ej. Compra, Venta, Merma...">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ver Movimientos -->
+<div class="modal fade" id="movementsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="movementsModalLabel">Historial de Movimientos – Insumo: <span id="movInsumoName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Usuario</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movementsTableBody">
+                                <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle con Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts de autenticación y navegación -->
+    <script src="js/auth.js"></script>
+    <script src="js/router.js"></script>
+</body>
+</html> 

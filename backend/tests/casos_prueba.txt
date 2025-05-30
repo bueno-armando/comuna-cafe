@@ -1,0 +1,25 @@
+REQUISITO | CASOS DE PRUEBA | ENTRADA | RESULTADO ESPERADO | CRITERIO DE ÉXITO
+
+VALIDACIÓN
+----------
+Registro de Usuario | Validar formato de nombre de usuario | Nombre: "Ana", Apellido: "Rivas" | Usuario generado: "ARivas" | El sistema genera un nombre de usuario único usando la primera letra del nombre y el apellido completo
+Registro de Usuario | Validar contraseña segura | Contraseña: "1234" | Error: "La contraseña debe tener al menos 8 caracteres" | El sistema rechaza contraseñas débiles
+Registro de Venta | Validar método de pago | Método: "Efectivo" | Venta registrada exitosamente | El sistema acepta métodos de pago válidos (Efectivo, Tarjeta, Transferencia)
+
+ERROR
+-----
+Registro de Usuario | Usuario duplicado | Usuario: "ARivas" (ya existe) | Error: "El nombre de usuario ya está en uso" | El sistema detecta y previene duplicados
+Registro de Venta | Monto inválido | Total: -100 | Error: "El monto debe ser mayor a 0" | El sistema valida montos positivos
+Registro de Gasto | Fecha futura | Fecha: "2026-01-01" | Error: "No se pueden registrar gastos con fecha futura" | El sistema valida fechas válidas
+
+RENDIMIENTO
+-----------
+Carga de Productos | Tiempo de respuesta | 100 productos | < 2 segundos | El sistema carga la lista completa de productos en menos de 2 segundos
+Búsqueda de Productos | Tiempo de filtrado | Búsqueda: "frappe" | < 500ms | El sistema filtra y muestra resultados en menos de 500ms
+Registro de Venta | Tiempo de procesamiento | Venta con 5 productos | < 1 segundo | El sistema procesa y registra la venta en menos de 1 segundo
+
+USABILIDAD
+----------
+Interfaz de Venta | Navegación intuitiva | Click en "Nueva Venta" | Muestra formulario de venta con campos claros | El usuario puede iniciar una venta en menos de 3 clicks
+Búsqueda de Productos | Autocompletado | Escribir "fra" | Muestra sugerencias de "frappe" | El sistema sugiere productos mientras el usuario escribe
+Gestión de Inventario | Acceso rápido | Click en "Inventario" | Muestra stock actual y opciones de gestión | El usuario accede a la información de inventario en menos de 2 clicks 

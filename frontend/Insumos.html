@@ -1,0 +1,186 @@
+<!-- Vista de Gestión de Insumos -->
+<div class="main-content container bg-white rounded-3 p-4">
+    <!-- Título principal -->
+    <h1 class="page-title mb-4">Gestión de Insumos</h1>
+    <!-- Barra de búsqueda y botones principales -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+        <div class="search-container flex-grow-1 position-relative">
+            <i class="bi bi-search search-icon position-absolute"></i>
+            <input type="text" id="insumoSearch" class="form-control ps-5" placeholder="Buscar Insumo...">
+        </div>
+        <button id="addInsumoBtn" class="btn btn-cafe" data-bs-toggle="modal" data-bs-target="#addInsumoModal">Agregar Nuevo Insumo</button>
+        <button id="proveedoresBtn" class="btn btn-cafe" data-bs-toggle="modal" data-bs-target="#proveedoresModal">Proveedores</button>
+    </div>
+    <!-- Tabla de insumos -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Unidad</th>
+                    <th>Costo</th>
+                    <th>Proveedor</th>
+                    <th>Editar</th>
+                </tr>
+            </thead>
+            <tbody id="insumosTableBody">
+                <!-- Los datos se cargarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Agregar Insumo -->
+<div class="modal fade" id="addInsumoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Agregar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addInsumoForm">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="addInsumoNombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Unidad</label>
+                            <select class="form-select" id="addInsumoUnidad" required>
+                                <option value="">Seleccione una unidad</option>
+                                <option value="ml">ml</option>
+                                <option value="g">g</option>
+                                <option value="Pza">Pza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Costo</label>
+                            <input type="number" class="form-control" id="addInsumoCosto" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" id="addInsumoProveedor" required>
+                                <option value="">Seleccione un proveedor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Editar Insumo -->
+<div class="modal fade" id="editInsumoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Editar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInsumoForm">
+                    <input type="hidden" id="editInsumoId">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editInsumoNombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Unidad</label>
+                            <select class="form-select" id="editInsumoUnidad" required>
+                                <option value="">Seleccione una unidad</option>
+                                <option value="ml">ml</option>
+                                <option value="g">g</option>
+                                <option value="Pza">Pza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Costo</label>
+                            <input type="number" class="form-control" id="editInsumoCosto" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" id="editInsumoProveedor" required>
+                                <option value="">Seleccione un proveedor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 mt-4">
+                        <button type="button" class="btn btn-danger" id="deleteInsumoBtn">Eliminar</button>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-cafe">Guardar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Proveedores -->
+<div class="modal fade" id="proveedoresModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Proveedores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario para agregar/editar proveedor -->
+                <form id="proveedorForm" class="mb-4">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="proveedorNombre" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="proveedorTelefono" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="proveedorDireccion" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <button type="button" class="btn btn-secondary" id="cancelProveedorEdit">Cancelar</button>
+                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                    </div>
+                </form>
+                <!-- Tabla de proveedores existentes -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
+                                <th>Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proveedoresTableBody">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle con Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Script para la funcionalidad de insumos -->
+<script src="js/insumos.js"></script>
+
+</body>
+</html> 

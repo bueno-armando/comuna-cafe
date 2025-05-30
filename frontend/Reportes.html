@@ -1,0 +1,225 @@
+<!-- Vista de Generación de Reportes -->
+<div class="main-content container bg-white rounded-3 p-4">
+    <!-- Título principal -->
+    <h1 class="page-title mb-4">Generación de Reportes</h1>
+    <!-- Filtros de generación y búsqueda de reportes -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-end">
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Tipo de Reporte:</label>
+            <select id="tipoReporte" class="form-select" style="width: 150px;">
+                <!-- NOTA PARA EL BACKEND: Opciones llenadas dinámicamente -->
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+            </select>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Desde</label>
+            <input type="date" id="fechaGenInicio" class="form-control">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Hasta</label>
+            <input type="date" id="fechaGenFin" class="form-control">
+        </div>
+        <button id="generarReporteBtn" class="btn btn-cafe">Generar</button>
+    </div>
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-end">
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Buscar Desde</label>
+            <input type="date" id="fechaBusqInicio" class="form-control">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0">Hasta</label>
+            <input type="date" id="fechaBusqFin" class="form-control">
+        </div>
+        <button id="buscarReportesBtn" class="btn btn-cafe"><i class="bi bi-search"></i></button>
+    </div>
+    <!-- Tabla de reportes -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Gastos</th>
+                    <th>Ventas</th>
+                    <th>Ganancia</th>
+                    <th>Ver detalles</th>
+                </tr>
+            </thead>
+            <tbody id="reportesTableBody">
+                <!-- Ejemplo de fila de reporte (debe llenarse dinámicamente por el backend) -->
+                <tr>
+                    <td>01.</td>
+                    <td>Diario</td>
+                    <td>21/03/25</td>
+                    <td>22/03/25</td>
+                    <td>500</td>
+                    <td>2000</td>
+                    <td>1500</td>
+                    <td><button class="btn btn-sm btn-outline-success ver-detalle-reporte-btn" data-bs-toggle="modal" data-bs-target="#detalleReporteModal" data-reporte-id="1">Ver detalles</button></td>
+                </tr>
+                <tr>
+                    <td colspan="8" class="text-center py-4">No hay reportes generados.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Detalles de Reporte -->
+<div class="modal fade" id="detalleReporteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Detalles de Reporte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-2">
+                            <label class="form-label">ID Reporte</label>
+                            <input type="text" class="form-control" id="detalleReporteId" value="1" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Tipo</label>
+                            <input type="text" class="form-control" id="detalleReporteTipo" value="Semanal" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="text" class="form-control" id="detalleReporteFechaInicio" value="25/11/2022" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="text" class="form-control" id="detalleReporteFechaFin" value="02/12/2022" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Ganancias Totales</label>
+                            <input type="text" class="form-control" id="detalleReporteGanancia" value="$200" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Gastos Totales</label>
+                            <input type="text" class="form-control" id="detalleReporteGastos" value="$200" readonly>
+                        </div>
+                    </div>
+                </form>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <div class="table-responsive mb-3">
+                            <label class="form-label">Ventas Incluidas</label>
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Total</th>
+                                        <th>Met. Pago</th>
+                                        <th>Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalleReporteVentas">
+                                    <!-- Ejemplo de ventas incluidas (debe llenarse dinámicamente por el backend) -->
+                                    <tr>
+                                        <td>1</td>
+                                        <td>02/12/2022</td>
+                                        <td>45.00</td>
+                                        <td>Efectivo</td>
+                                        <td>AlanaRivas</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>02/12/2022</td>
+                                        <td>55.00</td>
+                                        <td>Efectivo</td>
+                                        <td>AlanaRivas</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>02/12/2022</td>
+                                        <td>60.00</td>
+                                        <td>Efectivo</td>
+                                        <td>AlanaRivas</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-responsive mb-3">
+                            <label class="form-label">Gastos Incluidos</label>
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Descripción</th>
+                                        <th>Monto</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalleReporteGastos">
+                                    <!-- Ejemplo de gastos incluidos (debe llenarse dinámicamente por el backend) -->
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Renta</td>
+                                        <td>45.00</td>
+                                        <td>02/12/2022</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Reparación</td>
+                                        <td>55.00</td>
+                                        <td>02/12/2022</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Agua</td>
+                                        <td>60.00</td>
+                                        <td>02/12/2022</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Producto más vendido:</label>
+                            <input type="text" class="form-control mb-2" id="detalleReporteMasVendido" value="Frappe" readonly>
+                            <label class="form-label">Día con más ventas:</label>
+                            <input type="text" class="form-control" id="detalleReporteDiaMasVentas" value="25/11/2022" readonly>
+                        </div>
+                        <div class="d-flex flex-column gap-2 mt-4">
+                            <button type="button" class="btn btn-success">Exportar a PDF</button>
+                            <button type="button" class="btn btn-cafe">Exportar a Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle con Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Inicialización de eventos para la vista de reportes
+// Todo lo visual, la lógica real la implementa el backend
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Evento para mostrar el modal de detalles de reporte y cargar los datos
+    document.getElementById('detalleReporteModal').addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget; // Botón que disparó el modal
+        const reporteId = button.getAttribute('data-reporte-id');
+        // Aquí iría la lógica para cargar los datos del reporte y sus tablas
+        console.log('Cargando detalles del reporte ID:', reporteId);
+    });
+    // Eventos de exportar (simulación visual)
+    document.querySelector('#detalleReporteModal .btn-success').onclick = function() {
+        alert('Funcionalidad de exportar a PDF a implementar por el backend');
+    };
+    document.querySelector('#detalleReporteModal .btn-cafe').onclick = function() {
+        alert('Funcionalidad de exportar a Excel a implementar por el backend');
+    };
+});
+</script> 

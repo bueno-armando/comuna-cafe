@@ -1,0 +1,130 @@
+<!-- recetas.html -->
+<div class="container bg-white rounded-3 p-4">
+    <!-- Título principal -->
+    <h1 class="page-title mb-4">Gestión de Recetas</h1>
+    
+    <!-- Barra de búsqueda de productos -->
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+        <div class="search-container flex-grow-1 position-relative">
+            <i class="bi bi-search search-icon position-absolute"></i>
+            <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
+            <div id="searchResults" class="search-results position-absolute w-100 bg-white shadow-sm rounded mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        <!-- Botón para agregar insumo -->
+        <button id="addIngredientBtn" class="btn btn-cafe" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal">
+            <i class="bi bi-plus-lg me-2"></i>Agregar Insumo
+        </button>
+    </div>
+
+    <!-- Tabla de insumos -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Cantidad Necesaria</th>
+                    <th>Unidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="recipeTableBody">
+                <!-- Contenido dinámico -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar insumo -->
+<div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="addIngredientModalLabel">Agregar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ingredientForm">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="ingredientName" class="form-label">Insumo</label>
+                            <select class="form-select" id="ingredientName" required>
+                                <option value="">Seleccione un insumo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ingredientQuantity" class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" id="ingredientQuantity" placeholder="Cantidad necesaria" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar insumo -->
+<div class="modal fade" id="editIngredientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Editar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editIngredientForm">
+                    <input type="hidden" id="editIngredientId">
+                    <input type="hidden" id="editProductoId">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editIngredientName" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" id="editIngredientQuantity" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between gap-3 mt-4">
+                        <button type="button" class="btn btn-danger" id="deleteIngredientBtn">Eliminar Insumo</button>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-cafe">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos para los resultados de búsqueda -->
+<style>
+.search-results {
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<!-- Incluir el archivo JavaScript de recetas -->
+<script src="js/recetas.js"></script>

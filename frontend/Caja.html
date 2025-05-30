@@ -1,0 +1,107 @@
+<!-- caja.html -->
+<div class="container bg-white rounded-3 p-4">
+    <!-- Encabezado de la vista -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <h1 class="page-title mb-0">Caja</h1>
+    </div>
+    
+    <!-- Barra de búsqueda de productos -->
+    <div class="search-container mb-4 position-relative">
+        <i class="bi bi-search search-icon position-absolute"></i>
+        <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
+    </div>
+    
+    <!-- Sección de productos disponibles -->
+    <h2 class="h4 mb-3">Seleccione Productos</h2>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4" id="productList">
+        <!-- Productos se cargarán dinámicamente -->
+    </div>
+    
+    <!-- Detalles de la venta actual -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4 mb-3">Detalle de Venta</h2>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saleItems">
+                        <!-- Items de venta se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de pago -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="h5 card-title">Total a Pagar</h3>
+                    <div class="total-section bg-light rounded p-3 text-end">
+                        <span class="h4" id="totalAmount">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="h5 card-title">Método de Pago</h3>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cash" value="Efectivo" checked>
+                        <label class="form-check-label" for="cash">Efectivo</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="card" value="Tarjeta">
+                        <label class="form-check-label" for="card">Tarjeta</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="transfer" value="Transferencia">
+                        <label class="form-check-label" for="transfer">Transferencia</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button id="processPayment" class="btn btn-success text-white w-100 py-3" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                <i class="bi bi-credit-card me-2"></i>Realizar Pago
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de pago -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Confirmar pago por <span id="modalTotalAmount">$0.00</span>?</p>
+                <div id="cashPaymentSection" class="mt-3">
+                    <label for="cashReceived" class="form-label">Efectivo recibido:</label>
+                    <input type="number" id="cashReceived" class="form-control" step="0.01" min="0">
+                    <div id="cashChange" class="mt-2 text-end fw-bold"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmPayment" class="btn btn-success">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir el archivo JavaScript de Caja -->
+<script src="js/caja.js"></script>
