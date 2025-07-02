@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../../frontEND/BASE')));
+app.use(express.static(path.join(__dirname, '../../frontend')));
 
 // Rutas de la API
 app.use('/api', routes);
@@ -36,7 +36,7 @@ app.use('/api/recetas', recetasRoutes);
 
 // Ruta para el frontend
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontEND/BASE/index.html'));
+  res.sendFile(path.join(__dirname, '../../frontend/index.html'));
 });
 
 // Puerto

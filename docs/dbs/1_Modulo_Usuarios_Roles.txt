@@ -1,0 +1,101 @@
+
+Módulo de Gestión de Usuarios y Roles
+--------------------------------------
+
+Este módulo permite el control de acceso y administración de usuarios dentro del sistema. Cada usuario está asociado a un rol, y cada rol tiene permisos específicos sobre los módulos del sistema.
+
+TABLAS INVOLUCRADAS:
+---------------------
+- usuarios
+- roles
+- permisos_rol
+- modulos
+
+ESTRUCTURA GENERAL:
+--------------------
+
+1. Tabla 'usuarios':
+   - ID_Usuario (INT, PRIMARY KEY, AUTO_INCREMENT)
+   - Nombre (VARCHAR)
+   - Apellido (VARCHAR)
+   - Usuario (VARCHAR, único)
+   - Contraseña (VARCHAR)
+   - ID_Rol (INT, FOREIGN KEY)
+   - Estado (ENUM: 'Activo', 'Inactivo')
+
+2. Tabla 'roles':
+   - ID_Rol (INT, PRIMARY KEY)
+   - Nombre (VARCHAR)
+   - Descripción (VARCHAR)
+
+3. Tabla 'modulos':
+   - ID_Modulo (INT, PRIMARY KEY)
+   - Nombre (VARCHAR): nombre del módulo (Inventario, Caja, Usuarios, etc.)
+
+4. Tabla 'permisos_rol':
+   - ID_Permiso (INT, PRIMARY KEY)
+   - ID_Rol (INT, FOREIGN KEY)
+   - ID_Modulo (INT, FOREIGN KEY)
+   - Ver, Agregar, Editar, Eliminar (BOOLEAN)
+
+FUNCIONALIDADES:
+------------------
+
+✅ Agregar Usuario:
+- Se debe ingresar nombre, apellido, contraseña y rol.
+- La contraseña se encripta desde la lógica de la app. (O no sé, como la vean, sí no no, UuU)
+- El nombre de usuario se genera automáticamente combinando la primera letra del nombre con el apellido (ej: Ana Rivas → ARivas).
+- Si ya existe, se añaden números secuenciales hasta que sea único (ej: ARivas1, ARivas2...). ESTO SE HACE CON EL PROCEDIMIENTO (lo pueden usar si quieren UuU)
+
+✅ Editar Usuario:
+- Permite modificar nombre, apellido, contraseña, estado y rol.
+- No se actualiza automáticamente el nombre de usuario si cambian nombre o apellido. Esto evita perder referencias internas. El cambio de nombre de usuario debe hacerse manualmente si se desea.
+
+✅ Agregar Rol:
+- Se define el nombre del rol, descripción y los permisos por módulo.
+
+✅ Editar Rol:
+- Se pueden actualizar permisos o eliminar el rol si no está asignado.
+
+CONSIDERACIONES:
+------------------
+- Todos los accesos y visibilidad en la app se gestionan en base a los permisos del rol del usuario.
+- Se recomienda controlar desde backend si un usuario tiene permiso para ejecutar cierta acción.
+- Los cambios en roles no deben afectar a usuarios activos en sesión hasta que vuelvan a iniciar.
+
+--------------------------------------
+PROCEDIMIENTO ALMACENADO PARA CREAR USUARIO
+--------------------------------------
+
+DELIMITER //
+
+CREATE PROCEDURE CrearUsuario(
+    IN p_nombre VARCHAR(100),
+    IN p_apellido VARCHAR(100),
+    IN p_contrasena VARCHAR(255),
+    IN p_rol_id INT
+)
+BEGIN
+    DECLARE base_usuario VARCHAR(100);
+    DECLARE nuevo_usuario VARCHAR(100);
+    DECLARE contador INT DEFAULT 0;
+
+    SET base_usuario = CONCAT(LEFT(p_nombre, 1), p_apellido);
+    SET nuevo_usuario = base_usuario;
+
+    WHILE EXISTS (SELECT 1 FROM usuarios WHERE Usuario = nuevo_usuario) DO
+        SET contador = contador + 1;
+        SET nuevo_usuario = CONCAT(base_usuario, contador);
+    END WHILE;
+
+    INSERT INTO usuarios (Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado)
+    VALUES (p_nombre, p_apellido, nuevo_usuario, p_contrasena, p_rol_id, 'Activo');
+END //
+
+DELIMITER ;
+
+NOTA:
+-----
+- El nombre de usuario generado automáticamente solo se usa en la creación.
+- Si luego se edita el nombre o apellido del usuario, el campo `Usuario` **no se actualiza automáticamente**, ya que puede estar vinculado con ventas, movimientos, etc.
+- O no sé como la vean, ya lo deje así, pueden moverle a lo que sea...

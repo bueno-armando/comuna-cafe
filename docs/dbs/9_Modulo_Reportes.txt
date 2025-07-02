@@ -1,0 +1,124 @@
+
+Módulo de Reportes: Generación y Detalle
+----------------------------------------
+
+Este módulo permite generar reportes consolidados de ventas y gastos, y consultar su información detallada. Es útil para conocer el estado financiero de la cafetería en un periodo específico.
+
+TABLAS INVOLUCRADAS:
+- reportes
+- ventas
+- detalle_venta
+- gastos
+- productos_venta
+- usuarios
+
+-------------------------
+GENERACIÓN DE REPORTE
+-------------------------
+
+Procedimiento almacenado: generar_reporte
+
+Parámetros:
+- p_tipo (VARCHAR): tipo de reporte (Diario, Semanal, etc.)
+- p_fecha_inicio (DATE): inicio del periodo
+- p_fecha_fin (DATE): fin del periodo
+
+Proceso:
+1. Calcula el total de gastos entre las fechas dadas.
+2. Calcula el total de ventas del mismo periodo.
+3. Calcula la ganancia neta como la diferencia.
+4. Inserta un nuevo reporte en la tabla reportes.
+
+Código:
+
+DELIMITER //
+
+CREATE PROCEDURE generar_reporte (
+    IN p_tipo VARCHAR(50),
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE
+)
+BEGIN
+    DECLARE total_gastos DECIMAL(10,2);
+    DECLARE total_ventas DECIMAL(10,2);
+    DECLARE ganancia DECIMAL(10,2);
+
+    SELECT IFNULL(SUM(Monto), 0)
+    INTO total_gastos
+    FROM gastos
+    WHERE Fecha BETWEEN p_fecha_inicio AND p_fecha_fin;
+
+    SELECT IFNULL(SUM(Total), 0)
+    INTO total_ventas
+    FROM ventas
+    WHERE Fecha BETWEEN p_fecha_inicio AND p_fecha_fin;
+
+    SET ganancia = total_ventas - total_gastos;
+
+    INSERT INTO reportes (Tipo, Fecha_Inicio, Fecha_Fin, Total_Gastos, Total_Ventas, Ganancia)
+    VALUES (p_tipo, p_fecha_inicio, p_fecha_fin, total_gastos, total_ventas, ganancia);
+END //
+
+DELIMITER ;
+
+Ejemplo de uso:
+CALL generar_reporte('Diario', '2025-03-21', '2025-03-22');
+
+-------------------------
+DETALLE DE REPORTE
+-------------------------
+
+Cuando el usuario presiona "Ver detalles", se consulta lo siguiente:
+
+1. ENCABEZADO DEL REPORTE:
+SELECT * FROM reportes WHERE ID_Reporte = ?;
+
+2. VENTAS INCLUIDAS:
+SELECT v.ID_Venta, v.Fecha, v.Total, v.Metodo_Pago, u.Usuario
+FROM ventas v
+JOIN usuarios u ON v.ID_Usuario = u.ID_Usuario
+WHERE v.Fecha BETWEEN (
+    SELECT Fecha_Inicio FROM reportes WHERE ID_Reporte = ?
+) AND (
+    SELECT Fecha_Fin FROM reportes WHERE ID_Reporte = ?
+);
+
+3. GASTOS INCLUIDOS:
+SELECT ID_Gasto, Descripcion, Monto, Fecha
+FROM gastos
+WHERE Fecha BETWEEN (
+    SELECT Fecha_Inicio FROM reportes WHERE ID_Reporte = ?
+) AND (
+    SELECT Fecha_Fin FROM reportes WHERE ID_Reporte = ?
+);
+
+4. PRODUCTO MÁS VENDIDO:
+SELECT p.Nombre, SUM(dv.Cantidad) AS TotalVendido
+FROM detalle_venta dv
+JOIN productos_venta p ON dv.ID_Producto = p.ID_Producto
+JOIN ventas v ON dv.ID_Venta = v.ID_Venta
+WHERE v.Fecha BETWEEN (
+    SELECT Fecha_Inicio FROM reportes WHERE ID_Reporte = ?
+) AND (
+    SELECT Fecha_Fin FROM reportes WHERE ID_Reporte = ?
+)
+GROUP BY p.Nombre
+ORDER BY TotalVendido DESC
+LIMIT 1;
+
+5. DÍA CON MÁS VENTAS:
+SELECT Fecha, SUM(Total) AS TotalDia
+FROM ventas
+WHERE Fecha BETWEEN (
+    SELECT Fecha_Inicio FROM reportes WHERE ID_Reporte = ?
+) AND (
+    SELECT Fecha_Fin FROM reportes WHERE ID_Reporte = ?
+)
+GROUP BY Fecha
+ORDER BY TotalDia DESC
+LIMIT 1;
+
+
+ALGO ASI, NO EXACTAMENTE... muevan lo que quieran
+
+FIN :/

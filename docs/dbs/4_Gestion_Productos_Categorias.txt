@@ -1,0 +1,70 @@
+
+Módulo de Gestión de Productos y Categorías
+-------------------------------------------
+
+Este módulo permite al administrador registrar, editar y eliminar productos disponibles para la venta, así como organizar dichos productos por categoría.
+
+TABLAS INVOLUCRADAS:
+- productos_venta
+- categorias
+
+FUNCIONALIDADES Y CONSULTAS:
+
+1. MOSTRAR LISTADO DE PRODUCTOS
+--------------------------------
+Consulta:
+SELECT 
+    p.ID_Producto,
+    p.Nombre AS Producto,
+    c.Nombre AS Categoria,
+    p.Precio_Venta
+FROM productos_venta p
+JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+ORDER BY p.ID_Producto;
+
+Esta consulta alimenta la tabla principal en la interfaz de gestión.
+
+
+2. AGREGAR NUEVO PRODUCTO
+--------------------------
+INSERT INTO productos_venta (Nombre, ID_Categoria, Precio_Venta)
+VALUES ('Frappe de Oreo', 2, 55.00);
+
+La categoría se selecciona por ID desde un combobox desplegable.
+
+
+3. EDITAR PRODUCTO EXISTENTE
+-----------------------------
+UPDATE productos_venta
+SET Nombre = 'Frappe de Oreo', ID_Categoria = 2, Precio_Venta = 55.00
+WHERE ID_Producto = 2;
+
+Esta acción se ejecuta desde el formulario "Editar Producto".
+
+
+4. ELIMINAR PRODUCTO
+---------------------
+DELETE FROM productos_venta
+WHERE ID_Producto = 2;
+
+*Nota:* Para no eliminar productos que tengan registros en ventas o recetas, espero haber puesto ya las restricciones UuU
+
+
+5. LISTAR CATEGORÍAS PARA COMBOS
+--------------------------------
+SELECT ID_Categoria, Nombre FROM categorias;
+
+Esta consulta se utiliza para llenar el select en los formularios de agregar y editar productos.
+
+
+6. AGREGAR NUEVA CATEGORÍA
+---------------------------
+INSERT INTO categorias (Nombre)
+VALUES ('Frappes');
+
+No se requiere más que el nombre. No hay lógica adicional. CREO, yo no...
+
+
+
+
+FIN 

@@ -1,346 +1,212 @@
-// Funciones para manejar la autenticación y tokens
-function getAuthHeader() {
-    const token = localStorage.getItem('token');
-    console.log('Token obtenido:', token ? 'Token presente' : 'No hay token');
-    return {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
-}
+(function() {
+    const API_URL = '/api/insumos'; // URL relativa
+    let insumos = []; // Para almacenar la lista de insumos
+    let editInsumoId = null;
+    let currentFilters = { nombre: '', categoria: '' };
+    let currentPage = 1;
+    const rowsPerPage = 10;
 
-// Función para cargar todos los proveedores
-async function loadProviders() {
-    console.log('=== Iniciando carga de proveedores ===');
-    try {
-        console.log('Realizando petición a /api/insumos/proveedores');
-        const response = await fetch('/api/insumos/proveedores', {
-            headers: getAuthHeader()
-        });
-        
-        console.log('Respuesta recibida:', {
-            status: response.status,
-            ok: response.ok,
-            statusText: response.statusText
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error al cargar proveedores: ${response.status} ${response.statusText}`);
-        }
-
-        const proveedores = await response.json();
-        console.log('Proveedores recibidos:', proveedores);
-
-        const addProviderSelect = document.getElementById('addInsumoProveedor');
-        const editProviderSelect = document.getElementById('editInsumoProveedor');
-        
-        console.log('Selects encontrados:', {
-            addProviderSelect: addProviderSelect ? 'Sí' : 'No',
-            editProviderSelect: editProviderSelect ? 'Sí' : 'No'
-        });
-
-        // Limpiar opciones existentes excepto la primera
-        while (addProviderSelect.options.length > 1) {
-            addProviderSelect.remove(1);
-        }
-        while (editProviderSelect.options.length > 1) {
-            editProviderSelect.remove(1);
-        }
-
-        // Agregar nuevos proveedores
-        proveedores.forEach(proveedor => {
-            console.log('Agregando proveedor:', proveedor);
-            const addOption = new Option(proveedor.Nombre, proveedor.ID_Proveedor);
-            const editOption = new Option(proveedor.Nombre, proveedor.ID_Proveedor);
-            addProviderSelect.add(addOption);
-            editProviderSelect.add(editOption);
-        });
-
-        console.log('=== Finalización carga de proveedores ===');
-    } catch (error) {
-        console.error('Error en loadProviders:', error);
-        alert('Error al cargar los proveedores');
+    function getToken() {
+        return localStorage.getItem('token');
     }
-}
 
-// Función para cargar todos los insumos
-async function loadInsumos() {
-    console.log('=== Iniciando carga de insumos ===');
-    try {
-        console.log('Realizando petición a /api/insumos');
-        const response = await fetch('/api/insumos', {
-            headers: getAuthHeader()
-        });
-        
-        console.log('Respuesta recibida:', {
-            status: response.status,
-            ok: response.ok,
-            statusText: response.statusText
-        });
-        
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.log('Token no válido, redirigiendo a login');
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error(`Error al cargar insumos: ${response.status} ${response.statusText}`);
-        }
-
-        const insumos = await response.json();
-        console.log('Insumos recibidos:', insumos);
-
-        const tableBody = document.getElementById('insumosTableBody');
-        console.log('TableBody encontrado:', tableBody ? 'Sí' : 'No');
-        
-        tableBody.innerHTML = '';
-
-        if (insumos.length === 0) {
-            console.log('No hay insumos para mostrar');
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-4">No hay insumos registrados.</td>
-                </tr>
-            `;
-            return;
-        }
-
-        console.log('Agregando insumos a la tabla');
-        insumos.forEach(insumo => {
-            console.log('Procesando insumo:', insumo);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${insumo.ID_Insumo}.</td>
-                <td>${insumo.Nombre}</td>
-                <td>${insumo.Unidad}</td>
-                <td>$${parseFloat(insumo.Costo).toFixed(2)}</td>
-                <td>${insumo.Proveedor_Nombre || '-'}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary edit-insumo-btn" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#editInsumoModal" 
-                            data-insumo-id="${insumo.ID_Insumo}">
-                        Editar
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-        console.log('=== Finalización carga de insumos ===');
-    } catch (error) {
-        console.error('Error en loadInsumos:', error);
-        alert('Error al cargar los insumos');
-    }
-}
-
-// Función para crear un nuevo insumo
-async function createInsumo(insumoData) {
-    try {
-        const response = await fetch('/api/insumos', {
-            method: 'POST',
-            headers: getAuthHeader(),
-            body: JSON.stringify(insumoData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al crear el insumo');
-        }
-
-        await loadInsumos();
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
-}
-
-// Función para actualizar un insumo
-async function updateInsumo(id, insumoData) {
-    try {
-        const response = await fetch(`/api/insumos/${id}`, {
-            method: 'PUT',
-            headers: getAuthHeader(),
-            body: JSON.stringify(insumoData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al actualizar el insumo');
-        }
-
-        await loadInsumos();
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
-}
-
-// Función para eliminar un insumo
-async function deleteInsumo(id) {
-    try {
-        const response = await fetch(`/api/insumos/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeader()
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al eliminar el insumo');
-        }
-
-        await loadInsumos();
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
-}
-
-// Función para buscar insumos
-async function searchInsumos(query) {
-    try {
-        const response = await fetch(`/api/insumos/buscar?q=${encodeURIComponent(query)}`, {
-            headers: getAuthHeader()
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al buscar insumos');
-        }
-
-        const insumos = await response.json();
-        const tableBody = document.getElementById('insumosTableBody');
-        tableBody.innerHTML = '';
-
-        if (insumos.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-4">No se encontraron insumos.</td>
-                </tr>
-            `;
-            return;
-        }
-
-        insumos.forEach(insumo => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${insumo.ID_Insumo}.</td>
-                <td>${insumo.Nombre}</td>
-                <td>${insumo.Unidad}</td>
-                <td>$${parseFloat(insumo.Costo).toFixed(2)}</td>
-                <td>${insumo.Proveedor_Nombre || '-'}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary edit-insumo-btn" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#editInsumoModal" 
-                            data-insumo-id="${insumo.ID_Insumo}">
-                        Editar
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al buscar insumos');
-    }
-}
-
-// Función para inicializar el módulo
-function initInsumos() {
-    console.log('=== Inicializando módulo de Insumos ===');
-    console.log('Configurando eventos');
-    
-    // Cargar insumos y proveedores al iniciar
-    console.log('Iniciando carga de datos');
-    loadInsumos();
-    loadProviders();
-
-    // Evento para agregar insumo
-    document.getElementById('addInsumoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    async function fetchInsumos(filters = {}, page = 1, limit = 10) {
         try {
-            const insumoData = {
-                Nombre: document.getElementById('addInsumoNombre').value,
-                ID_Proveedor: document.getElementById('addInsumoProveedor').value,
-                Costo: parseFloat(document.getElementById('addInsumoCosto').value),
-                Unidad: document.getElementById('addInsumoUnidad').value
-            };
+            // Construir query params para filtros y paginación
+            const params = new URLSearchParams();
+            if (filters.nombre) params.append('nombre', filters.nombre);
+            if (filters.categoria) params.append('categoria', filters.categoria);
+            params.append('page', page);
+            params.append('limit', limit);
 
-            await createInsumo(insumoData);
-            bootstrap.Modal.getInstance(document.getElementById('addInsumoModal')).hide();
-            this.reset();
-        } catch (error) {
-            alert('Error al crear el insumo');
-        }
-    });
-
-    // Evento para editar insumo
-    document.getElementById('editInsumoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        try {
-            const insumoId = document.getElementById('editInsumoId').value;
-            const insumoData = {
-                Nombre: document.getElementById('editInsumoNombre').value,
-                ID_Proveedor: document.getElementById('editInsumoProveedor').value,
-                Costo: parseFloat(document.getElementById('editInsumoCosto').value),
-                Unidad: document.getElementById('editInsumoUnidad').value
-            };
-
-            await updateInsumo(insumoId, insumoData);
-            bootstrap.Modal.getInstance(document.getElementById('editInsumoModal')).hide();
-        } catch (error) {
-            alert('Error al actualizar el insumo');
-        }
-    });
-
-    // Evento para eliminar insumo
-    document.getElementById('deleteInsumoBtn').addEventListener('click', async function() {
-        if (confirm('¿Está seguro que desea eliminar este insumo?')) {
-            try {
-                const insumoId = document.getElementById('editInsumoId').value;
-                await deleteInsumo(insumoId);
-                bootstrap.Modal.getInstance(document.getElementById('editInsumoModal')).hide();
-            } catch (error) {
-                alert('Error al eliminar el insumo');
-            }
-        }
-    });
-
-    // Evento para buscar insumos
-    document.getElementById('insumoSearch').addEventListener('input', function(e) {
-        const query = e.target.value.trim();
-        if (query.length >= 2) {
-            searchInsumos(query);
-        } else if (query.length === 0) {
-            loadInsumos();
-        }
-    });
-
-    // Evento para cargar datos al modal de edición
-    document.getElementById('editInsumoModal').addEventListener('show.bs.modal', async function(event) {
-        const button = event.relatedTarget;
-        const insumoId = button.getAttribute('data-insumo-id');
-        
-        try {
-            const response = await fetch(`/api/insumos/${insumoId}`, {
-                headers: getAuthHeader()
+            const response = await fetch(`${API_URL}?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
             });
-
-            if (!response.ok) {
-                throw new Error('Error al cargar el insumo');
+            if (!response.ok) throw new Error('Error al obtener insumos');
+            const data = await response.json();
+            insumos = data.insumos || data; // Ajustar según la estructura de respuesta del backend
+            renderTable(insumos);
+            if (data.totalPages) {
+                renderPagination(data.totalPages, page);
             }
-
-            const insumo = await response.json();
-            document.getElementById('editInsumoId').value = insumo.ID_Insumo;
-            document.getElementById('editInsumoNombre').value = insumo.Nombre;
-            document.getElementById('editInsumoUnidad').value = insumo.Unidad;
-            document.getElementById('editInsumoCosto').value = insumo.Costo;
-            document.getElementById('editInsumoProveedor').value = insumo.ID_Proveedor;
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al cargar los datos del insumo');
+            console.error('Error en fetchInsumos:', error);
+            alert('No se pudieron cargar los insumos.');
         }
-    });
-}
+    }
+    
+    // ... (Resto de las funciones: renderTable, renderPagination, addInsumo, editInsumo, saveEditInsumo, deleteInsumo, etc.)
+    // Todas deben estar definidas dentro de la IIFE
 
-// Inicializar el módulo inmediatamente
-initInsumos(); 
+    function initInsumos() {
+        console.log('=== Inicializando módulo Insumos ===');
+        fetchInsumos(currentFilters, currentPage, rowsPerPage);
+
+        const addInsumoForm = document.getElementById('addInsumoForm');
+        if (addInsumoForm) addInsumoForm.addEventListener('submit', addInsumo);
+        else console.warn('Insumos: addInsumoForm no encontrado');
+
+        const editInsumoForm = document.getElementById('editInsumoForm');
+        if (editInsumoForm) editInsumoForm.addEventListener('submit', saveEditInsumo);
+        else console.warn('Insumos: editInsumoForm no encontrado');
+        
+        const searchNombreInput = document.getElementById('searchNombre');
+        if (searchNombreInput) searchNombreInput.addEventListener('input', (e) => {
+            currentFilters.nombre = e.target.value;
+            currentPage = 1; // Reset page on new search
+            fetchInsumos(currentFilters, currentPage, rowsPerPage);
+        });
+        else console.warn('Insumos: searchNombreInput no encontrado');
+
+        const searchCategoriaSelect = document.getElementById('searchCategoria');
+        if (searchCategoriaSelect) searchCategoriaSelect.addEventListener('change', (e) => {
+            currentFilters.categoria = e.target.value;
+            currentPage = 1; // Reset page on new search
+            fetchInsumos(currentFilters, currentPage, rowsPerPage);
+        });
+        else console.warn('Insumos: searchCategoriaSelect no encontrado');
+
+        // Delegación de eventos para botones de editar/eliminar en la tabla
+        const insumosTableBody = document.getElementById('insumosTableBody');
+        if (insumosTableBody) {
+            insumosTableBody.addEventListener('click', function(e) {
+                if (e.target.classList.contains('edit-btn')) {
+                    const id = e.target.dataset.id;
+                    editInsumo(id);
+                }
+                if (e.target.classList.contains('delete-btn')) {
+                    const id = e.target.dataset.id;
+                    deleteInsumo(id);
+                }
+            });
+        } else console.warn('Insumos: insumosTableBody no encontrado');
+    }
+
+    // Funciones auxiliares (renderTable, renderPagination, etc.) deben estar aquí dentro
+    function renderTable(insumosToRender) {
+        const tableBody = document.getElementById('insumosTableBody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        (insumosToRender || []).forEach(insumo => {
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>${insumo.ID_Insumo}</td>
+                <td>${insumo.Nombre}</td>
+                <td>${insumo.ID_Categoria_Insumo}</td> <!-- Asumiendo que quieres mostrar el ID, o necesitarías un join/lookup para el nombre -->
+                <td>${insumo.Unidad}</td>
+                <td>${insumo.Stock}</td>
+                <td>${insumo.Stock_Minimo}</td>
+                <td>${insumo.Stock_Maximo}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-btn" data-id="${insumo.ID_Insumo}">Editar</button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-id="${insumo.ID_Insumo}">Eliminar</button>
+                </td>
+            `;
+        });
+    }
+
+    function renderPagination(totalPages, currentPage) {
+        const paginationContainer = document.getElementById('paginationInsumos');
+        if (!paginationContainer) return;
+        paginationContainer.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = i;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                fetchInsumos(currentFilters, i, rowsPerPage);
+            });
+            li.appendChild(a);
+            paginationContainer.appendChild(li);
+        }
+    }
+
+    async function addInsumo(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+        // Convertir a números donde sea necesario
+        data.ID_Categoria_Insumo = parseInt(data.ID_Categoria_Insumo);
+        data.Stock = parseFloat(data.Stock);
+        data.Stock_Minimo = parseFloat(data.Stock_Minimo);
+        data.Stock_Maximo = parseFloat(data.Stock_Maximo);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al agregar insumo');
+            fetchInsumos(currentFilters, currentPage, rowsPerPage); // Recargar
+            bootstrap.Modal.getInstance(document.getElementById('addInsumoModal')).hide();
+            event.target.reset();
+        } catch (error) {
+            console.error('Error en addInsumo:', error);
+            alert('No se pudo agregar el insumo.');
+        }
+    }
+    
+    function editInsumo(id) {
+        const insumo = insumos.find(i => i.ID_Insumo == id);
+        if (!insumo) return;
+        editInsumoId = id;
+        document.getElementById('editNombre').value = insumo.Nombre;
+        document.getElementById('editCategoria').value = insumo.ID_Categoria_Insumo;
+        document.getElementById('editUnidad').value = insumo.Unidad;
+        document.getElementById('editStock').value = insumo.Stock;
+        document.getElementById('editStockMinimo').value = insumo.Stock_Minimo;
+        document.getElementById('editStockMaximo').value = insumo.Stock_Maximo;
+        new bootstrap.Modal(document.getElementById('editInsumoModal')).show();
+    }
+
+    async function saveEditInsumo(event) {
+        event.preventDefault();
+        if (!editInsumoId) return;
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+        // Convertir a números
+        data.ID_Categoria_Insumo = parseInt(data.ID_Categoria_Insumo);
+        data.Stock = parseFloat(data.Stock);
+        data.Stock_Minimo = parseFloat(data.Stock_Minimo);
+        data.Stock_Maximo = parseFloat(data.Stock_Maximo);
+
+        try {
+            const response = await fetch(`${API_URL}/${editInsumoId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al actualizar insumo');
+            fetchInsumos(currentFilters, currentPage, rowsPerPage); // Recargar
+            bootstrap.Modal.getInstance(document.getElementById('editInsumoModal')).hide();
+            editInsumoId = null;
+        } catch (error) {
+            console.error('Error en saveEditInsumo:', error);
+            alert('No se pudo actualizar el insumo.');
+        }
+    }
+
+    async function deleteInsumo(id) {
+        if (!confirm('¿Está seguro de eliminar este insumo?')) return;
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            if (!response.ok) throw new Error('Error al eliminar insumo');
+            fetchInsumos(currentFilters, currentPage, rowsPerPage); // Recargar
+        } catch (error) {
+            console.error('Error en deleteInsumo:', error);
+            alert('No se pudo eliminar el insumo.');
+        }
+    }
+
+    window.initInsumos = initInsumos;
+    console.log('insumos.js: window.initInsumos ASIGNADO.', typeof window.initInsumos);
+
+})(); // Fin de la IIFE 

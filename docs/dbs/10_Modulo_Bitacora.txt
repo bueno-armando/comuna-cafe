@@ -1,0 +1,61 @@
+
+Módulo de Bitácora (Versión Final)
+----------------------------------
+
+Este módulo registra automáticamente las acciones importantes realizadas por los usuarios en las tablas críticas del sistema como inserciones en venta y en inventario (o sea, los movmientos_inventario), Y APENAS VOY A PONER GASTOS.
+
+TABLA BITÁCORA ACTUAL:
+------------------------
+- ID_Bitacora (INT, AUTO_INCREMENT, PRIMARY KEY)
+- Tabla_Modificada (VARCHAR): nombre de la tabla afectada
+- Operacion (ENUM): 'INSERT', 'UPDATE', 'DELETE'
+- ID_Registro (INT): ID del registro afectado (ej. ID_Venta, ID_Movimiento)
+- ID_Usuario (INT): usuario que realizó la acción
+- Fecha (DATETIME): momento exacto en que ocurrió la operación
+- Descripcion (VARCHAR): breve detalle de la acción
+
+TRIGGERS:
+----------------------
+
+1. Trigger para registrar ventas:
+
+DELIMITER //
+
+CREATE TRIGGER log_venta
+AFTER INSERT ON ventas
+FOR EACH ROW
+BEGIN
+  INSERT INTO bitacora (
+    Tabla_Modificada, Operacion, ID_Registro, ID_Usuario, Fecha, Descripcion
+  )
+  VALUES (
+    'Ventas', 'Insert', NEW.ID_Venta, NEW.ID_Usuario, NOW(), 'Venta registrada'
+  );
+END //
+
+DELIMITER ;
+
+------------------------------------------------------
+
+2. Trigger para registrar movimientos de inventario:
+
+DELIMITER //
+
+CREATE TRIGGER log_mov_inv
+AFTER INSERT ON movimientos_inventario
+FOR EACH ROW
+BEGIN
+  INSERT INTO bitacora (
+    Tabla_Modificada, Operacion, ID_Registro, ID_Usuario, Fecha, Descripcion
+  )
+  VALUES (
+    'Movimientos_Inventario', 'Insert', NEW.ID_Movimiento, NEW.ID_Usuario, NOW(), NEW.Descripcion
+  );
+END //
+
+DELIMITER ;
+
+
+FIN
+
+pueden mover los botones o el orden, como quieeran, comos e vea mas bonito xoxo

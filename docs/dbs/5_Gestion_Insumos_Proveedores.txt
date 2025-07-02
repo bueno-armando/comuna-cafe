@@ -1,0 +1,74 @@
+
+Módulo de Gestión de Insumos y Proveedores
+------------------------------------------
+
+Este módulo permite al administrador registrar, editar y eliminar insumos utilizados en la producción, así como gestionar la información de los proveedores.
+
+TABLAS INVOLUCRADAS:
+- insumos
+- proveedores
+
+FUNCIONALIDADES Y CONSULTAS:
+
+1. MOSTRAR LISTADO DE INSUMOS
+------------------------------
+Consulta:
+SELECT 
+    i.ID_Insumo,
+    i.Nombre,
+    i.Unidad,
+    i.Costo,
+    p.Nombre AS Proveedor
+FROM insumos i
+JOIN proveedores p ON i.ID_Proveedor = p.ID_Proveedor
+ORDER BY i.ID_Insumo;
+
+2. CARGAR LISTADO DE PROVEEDORES EN FORMULARIOS
+------------------------------------------------
+Consulta:
+SELECT ID_Proveedor, Nombre FROM proveedores; 
+
+3. AGREGAR NUEVO INSUMO
+------------------------
+INSERT INTO insumos (Nombre, Unidad, Costo, ID_Proveedor)
+VALUES ('Huevo', 'Pza', 50, 3);
+
+
+4. EDITAR INSUMO EXISTENTE
+---------------------------
+UPDATE insumos
+SET Nombre = 'Huevo', Unidad = 'Pza', Costo = 50, ID_Proveedor = 3
+WHERE ID_Insumo = 5;
+
+
+5. ELIMINAR INSUMO (RESTRINGIDO)
+--------------------------------
+DELETE FROM insumos
+WHERE ID_Insumo = 5;
+
+*Nota:*  `ON DELETE RESTRICT` en la clave foránea para evitar borrar insumos con registros en otras tablas. 
+
+
+6. AGREGAR NUEVO PROVEEDOR
+---------------------------
+INSERT INTO proveedores (Nombre, Telefono, Direccion)
+VALUES ('Distribuidora Central', '5551234567', 'Calle 20 No. 105');
+
+
+7. EDITAR PROVEEDOR
+--------------------
+UPDATE proveedores
+SET Nombre = 'Alsuper', Telefono = '614259657', Direccion = 'Calle 10'
+WHERE ID_Proveedor = 2;
+
+
+8. ELIMINAR PROVEEDOR (RESTRINGIDO)
+-----------------------------------
+DELETE FROM proveedores
+WHERE ID_Proveedor = 3;
+
+*Nota:* Si el proveedor tiene insumos relacionados, la eliminación se bloqueará gracias a la restricción ON DELETE RESTRICT.
+
+FIN
+>.<
+

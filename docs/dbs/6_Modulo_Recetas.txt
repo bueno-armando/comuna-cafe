@@ -1,0 +1,78 @@
+
+Módulo de Gestión de Recetas
+----------------------------
+
+Este módulo permite definir qué insumos se requieren para preparar cada producto del menú, así como la cantidad necesaria de cada uno. Es clave para el control de inventario automatizado durante las ventas.
+
+TABLAS INVOLUCRADAS:
+- recetas
+- productos_venta
+- insumos
+
+ESTRUCTURA DE LA TABLA 'recetas':
+----------------------------------
+- ID_Receta (INT, AUTO_INCREMENT, PRIMARY KEY)
+- ID_Producto (INT, FOREIGN KEY)
+- ID_Insumo (INT, FOREIGN KEY)
+- Cantidad_Necesaria (DECIMAL): cantidad requerida del insumo
+
+FUNCIONALIDADES Y CONSULTAS:
+
+1. MOSTRAR RECETA DE UN PRODUCTO
+---------------------------------
+SELECT 
+    i.Nombre AS Insumo,
+    r.Cantidad_Necesaria,
+    i.Unidad
+FROM recetas r
+JOIN insumos i ON r.ID_Insumo = i.ID_Insumo
+WHERE r.ID_Producto = ?;
+
+
+2. AGREGAR INSUMO A UNA RECETA
+-------------------------------
+INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria)
+VALUES (1, 2, 150); -- 150 ml de leche para el producto 1
+
+
+3. EDITAR CANTIDAD DE UN INSUMO EN LA RECETA
+---------------------------------------------
+UPDATE recetas
+SET Cantidad_Necesaria = 200
+WHERE ID_Producto = 1 AND ID_Insumo = 2;
+
+
+4. ELIMINAR INSUMO DE UNA RECETA
+---------------------------------
+DELETE FROM recetas
+WHERE ID_Producto = 1 AND ID_Insumo = 2;
+
+
+INTEGRACIÓN CON INVENTARIO DURANTE LA VENTA:
+---------------------------------------------
+Cuando se realiza una venta, el sistema consulta esta tabla para saber cuántos insumos se requieren por producto y descuenta automáticamente del inventario.
+
+
+-------------------------------------------
+LÓGICA DE LA INTERFAZ "AGREGAR INSUMO"
+-------------------------------------------
+
+Consulta inicial para llenar la tabla de insumos:
+
+SELECT ID_Insumo, Nombre, Unidad FROM insumos;
+
+Cuando el usuario selecciona un insumo:
+- Se muestran el nombre y la unidad del insumo en campos de solo lectura.
+- Solo el campo "Cantidad" es editable, y representa la Cantidad_Necesaria.
+
+Luego, al presionar "Agregar", se ejecuta:
+
+INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria)
+VALUES (?, ?, ?);
+
+Donde:
+- ID_Producto: corresponde al producto activo en pantalla.
+- ID_Insumo: es el seleccionado por el usuario.
+- Cantidad_Necesaria: es el valor ingresado manualmente.
+
+FIN ... O NO?

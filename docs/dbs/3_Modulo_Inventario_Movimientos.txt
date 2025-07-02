@@ -1,0 +1,76 @@
+Módulo de Gestión de Inventario y Movimientos
+---------------------------------------------
+
+Este módulo permite visualizar y controlar el stock disponible de cada insumo, así como registrar entradas o salidas que afecten las existencias.
+
+TABLAS INVOLUCRADAS:
+---------------------
+- inventario
+- movimientos_inventario
+- insumos
+- usuarios (solo para mostrar quién realizó el movimiento)
+
+FUNCIONALIDADES:
+-----------------
+
+✅ Visualizar Inventario:
+- Muestra una tabla con los insumos disponibles, su unidad de medida y cantidad actual.
+- Los datos provienen de un JOIN entre `inventario` e `insumos`.
+
+✅ Registrar Movimiento:
+- Se selecciona un insumo, tipo de movimiento ('Entrada' o 'Salida'), cantidad y una descripción.
+- Al guardar, se inserta un registro en `movimientos_inventario`.
+
+✅ Actualización automática de stock:
+- Mediante un TRIGGER, cada vez que se inserta en `movimientos_inventario`:
+  - Si es 'Entrada', se suma al inventario.
+  - Si es 'Salida', se descuenta.
+  - Si el insumo aún no tiene entrada en `inventario`, se crea automáticamente.
+
+✅ Historial de Movimientos:
+- Al hacer clic en "Ver Movimientos" se muestra una tabla con los datos de ese insumo en especifico:
+  - Fecha
+  - Tipo (Entrada / Salida)
+  - Cantidad
+  - Usuario que lo registró
+  - Descripción
+
+TRIGGER UTILIZADO:
+------------------
+
+DELIMITER //
+
+CREATE TRIGGER actualizar_inventario
+AFTER INSERT ON movimientos_inventario
+FOR EACH ROW
+BEGIN
+    IF NEW.Tipo = 'Entrada' THEN
+        IF EXISTS (SELECT 1 FROM inventario WHERE ID_Insumo = NEW.ID_Insumo) THEN
+            UPDATE inventario
+            SET Cantidad_Disponible = Cantidad_Disponible + NEW.Cantidad
+            WHERE ID_Insumo = NEW.ID_Insumo;
+        ELSE
+            INSERT INTO inventario (ID_Insumo, Cantidad_Disponible)
+            VALUES (NEW.ID_Insumo, NEW.Cantidad);
+        END IF;
+    ELSEIF NEW.Tipo = 'Salida' THEN
+        IF EXISTS (SELECT 1 FROM inventario WHERE ID_Insumo = NEW.ID_Insumo) THEN
+            UPDATE inventario
+            SET Cantidad_Disponible = Cantidad_Disponible - NEW.Cantidad
+            WHERE ID_Insumo = NEW.ID_Insumo;
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+BITÁCORA:
+----------
+- Existe un trigger `log_mov_inv` que registra automáticamente el movimiento en la tabla `bitacora`, incluyendo:
+  - Nombre de la tabla afectada
+  - Tipo de operación
+  - Usuario
+  - Fecha
+  - Descripción
+
+FIN :3 xoxo

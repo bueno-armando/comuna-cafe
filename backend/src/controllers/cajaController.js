@@ -2,7 +2,7 @@ const CajaModel = require('../models/cajaModel');
 
 class CajaController {
   // Obtener todos los productos
-  static async getProducts(req, res) {
+  static async getProducts(req, res) {  
     try {
       const products = await CajaModel.getProducts();
       res.json(products);

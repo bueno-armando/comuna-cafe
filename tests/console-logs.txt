@@ -1,0 +1,150 @@
+Uncaught TypeError: searchResults is null
+    toggleSearchResults http://localhost:3000/js/recetas.js:187
+    initRecetas http://localhost:3000/js/recetas.js:441
+6 recetas.js:187:13
+HTML cargado para vista: Recetas main.js:100:17
+=== Inicializando módulo Recetas === main.js:126:21
+main.js: Removiendo script anterior de Recetas main.js:130:25
+recetas.js: window.initRecetas ASIGNADO. function recetas.js:474:13
+main.js: Script de Recetas onload DISPARADO. main.js:138:29
+main.js: Dentro de onload, typeof window.initRecetas: function main.js:139:29
+main.js: Llamando a window.initRecetas... main.js:151:25
+initRecetas ejecutándose... recetas.js:409:17
+Iniciando carga de insumos... recetas.js:108:21
+=== Finalización de carga de vista === main.js:317:17
+Estado final de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:318:17
+Respuesta API productos (detallada): [
+  {
+    "ID_Producto": 1,
+    "Producto": "Frappe de Espresso",
+    "Categoria": "Frappe",
+    "Precio_Venta": "70.00"
+  },
+  {
+    "ID_Producto": 2,
+    "Producto": "Espresso",
+    "Categoria": "Caliente",
+    "Precio_Venta": "60.00"
+  },
+  {
+    "ID_Producto": 3,
+    "Producto": "Frappe de Oreo",
+    "Categoria": "Frappe",
+    "Precio_Venta": "55.00"
+  },
+  {
+    "ID_Producto": 5,
+    "Producto": "Churros",
+    "Categoria": "Comida",
+    "Precio_Venta": "35.00"
+  },
+  {
+    "ID_Producto": 6,
+    "Producto": "PANINI",
+    "Categoria": "Caliente",
+    "Precio_Venta": "20.00"
+  }
+] recetas.js:56:21
+Productos cargados (detallado): [
+  {
+    "ID_Producto": 1,
+    "Producto": "Frappe de Espresso",
+    "Categoria": "Frappe",
+    "Precio_Venta": "70.00"
+  },
+  {
+    "ID_Producto": 2,
+    "Producto": "Espresso",
+    "Categoria": "Caliente",
+    "Precio_Venta": "60.00"
+  },
+  {
+    "ID_Producto": 3,
+    "Producto": "Frappe de Oreo",
+    "Categoria": "Frappe",
+    "Precio_Venta": "55.00"
+  },
+  {
+    "ID_Producto": 5,
+    "Producto": "Churros",
+    "Categoria": "Comida",
+    "Precio_Venta": "35.00"
+  },
+  {
+    "ID_Producto": 6,
+    "Producto": "PANINI",
+    "Categoria": "Caliente",
+    "Precio_Venta": "20.00"
+  }
+] recetas.js:62:21
+Insumos cargados: 
+Array(5) [ {…}, {…}, {…}, {…}, {…} ]
+recetas.js:122:21
+Insumos cargados correctamente desde initRecetas recetas.js:466:21
+=== Iniciando carga de vista === main.js:85:13
+Vista solicitada: Ventas main.js:86:13
+Estado actual de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:87:13
+HTML cargado para vista: Ventas main.js:100:17
+=== Inicializando módulo Ventas === main.js:187:21
+Removiendo script anterior de ventas main.js:191:25
+ventas.js: window.initVentas ASIGNADO. function ventas.js:157:13
+Script de Ventas cargado main.js:199:29
+Llamando a initVentas... main.js:206:25
+=== Inicializando módulo Ventas === ventas.js:125:17
+Ventas: aplicarFiltrosVentas no encontrado. ventas.js:142:24
+Ventas: salesTableBody no encontrado para delegación. ventas.js:153:24
+=== Finalización de carga de vista === main.js:317:17
+Estado final de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:318:17
+Ventas: salesTableBody no encontrado. ventas.js:53:40
+=== Iniciando carga de vista === main.js:85:13
+Vista solicitada: Gastos main.js:86:13
+Estado actual de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:87:13
+HTML cargado para vista: Gastos main.js:100:17
+=== Finalización de carga de vista === main.js:317:17
+Estado final de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:318:17
+=== Iniciando carga de vista === main.js:85:13
+Vista solicitada: Reportes main.js:86:13
+Estado actual de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:87:13
+HTML cargado para vista: Reportes main.js:100:17
+=== Finalización de carga de vista === main.js:317:17
+Estado final de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:318:17
+=== Iniciando carga de vista === main.js:85:13
+Vista solicitada: Bitacora main.js:86:13
+Estado actual de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:87:13
+HTML cargado para vista: Bitacora main.js:100:17
+=== Inicializando módulo Bitácora === main.js:268:21
+Removiendo script anterior de bitácora main.js:272:25
+bitacora.js: window.initBitacora ASIGNADO. function bitacora.js:175:13
+Script de Bitácora cargado main.js:280:29
+Llamando a initBitacora... main.js:287:25
+=== Inicializando módulo Bitácora === bitacora.js:138:17
+Bitacora: searchInput no encontrado bitacora.js:149:22
+Bitacora: filterButton no encontrado bitacora.js:153:22
+=== Finalización de carga de vista === main.js:317:17
+Estado final de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:318:17
+=== Iniciando carga de vista === main.js:85:13
+Vista solicitada: Usuarios main.js:86:13
+Estado actual de los módulos: 
+Object { initCaja: "function", initRecetas: "function", initUsuarios: "function", initVentas: "function", initInventario: "function", initProductos: "function", initBitacora: "function" }
+main.js:87:13
+HTML cargado para vista: Usuarios main.js:100:17
+=== Inicializando módulo Usuarios === main.js:160:21
+Removiendo script anterior de usuarios main.js:164:25

@@ -85,8 +85,8 @@ async function loadView(view) {
     console.log('=== Iniciando carga de vista ===');
     console.log('Vista solicitada:', view);
     console.log('Estado actual de los módulos:', {
-        initCajaSimulacion: typeof window.initCajaSimulacion,
-        initRecetasEvents: typeof window.initRecetasEvents,
+        initCaja: typeof window.initCaja,
+        initRecetas: typeof window.initRecetas,
         initUsuarios: typeof window.initUsuarios,
         initVentas: typeof window.initVentas,
         initInventario: typeof window.initInventario,
@@ -114,32 +114,49 @@ async function loadView(view) {
                 document.head.appendChild(script);
             });
 
-            if (typeof window.initCajaSimulacion === 'function') {
-                console.log('Llamando a initCajaSimulacion...');
-                window.initCajaSimulacion();
+            if (typeof window.initCaja === 'function') {
+                console.log('Llamando a initCaja...');
+                requestAnimationFrame(() => {
+                    window.initCaja();
+                });
             } else {
-                console.error('initCajaSimulacion no está definida!');
+                console.error('initCaja no está definida!');
             }
         }
         // Si la vista es Recetas, inicializa los eventos de Recetas
         else if (view === 'Recetas') {
             console.log('=== Inicializando módulo Recetas ===');
-            // Esperar a que el script de Caja se cargue
+            // Remover script anterior si existe
+            const oldScript = document.querySelector('script[src="js/recetas.js"]');
+            if (oldScript) {
+                console.log('main.js: Removiendo script anterior de Recetas');
+                oldScript.remove();
+            }
+            // Esperar a que el modulo de recetas se cargue
             await new Promise(resolve => {
                 const script = document.createElement('script');
                 script.src = 'js/recetas.js';
                 script.onload = () => {
-                    console.log('Script de Receta cargado');
+                    console.log('main.js: Script de Recetas onload DISPARADO.');
+                    console.log('main.js: Dentro de onload, typeof window.initRecetas:', typeof window.initRecetas);
                     resolve();
-                };
+                }
+                script.onerror = () => {
+                    console.error('main.js: ERROR al cargar script de Recetas.');
+                    resolve(); // Resolvemos igual para no bloquear, pero el error ya se registró
+                }
                 document.head.appendChild(script);
             });
 
-            if (typeof window.initRecetasEvents === 'function') {
-                console.log('Llamando a initRecetasEvents...');
-                window.initRecetasEvents();
+            // Verificar si la función existe ANTES de llamarla
+            if (typeof window.initRecetas === 'function') {
+                console.log('main.js: Llamando a window.initRecetas...');
+                requestAnimationFrame(() => {
+                    window.initRecetas();
+                });
             } else {
-                console.error('initRecetasEvents no está definida!');
+                console.error('main.js: window.initRecetas NO ESTÁ DEFINIDA después de cargar el script.');
+                console.log('main.js: Estado actual de window.initRecetas:', window.initRecetas);
             }
         }
         // Si la vista es Usuarios, inicializa el módulo de usuarios
@@ -164,7 +181,9 @@ async function loadView(view) {
             
             if (typeof window.initUsuarios === 'function') {
                 console.log('Llamando a initUsuarios...');
-                window.initUsuarios();
+                requestAnimationFrame(() => {
+                    window.initUsuarios();
+                });
             } else {
                 console.error('initUsuarios no está definida!');
             }
@@ -191,10 +210,12 @@ async function loadView(view) {
             
             if (typeof window.initVentas === 'function') {
                 console.log('Llamando a initVentas...');
-                window.initVentas();
+                requestAnimationFrame(() => {
+                    window.initVentas();
+                });
             } else {
                 console.error('initVentas no está definida!');
-                }
+            }
         }
         // Si la vista es Inventario, inicializa el módulo de inventario
         else if (view === 'Inventario') {
@@ -218,7 +239,9 @@ async function loadView(view) {
             
             if (typeof window.initInventario === 'function') {
                 console.log('Llamando a initInventario...');
-                window.initInventario();
+                requestAnimationFrame(() => {
+                    window.initInventario();
+                });
             } else {
                 console.error('initInventario no está definida!');
             }
@@ -231,7 +254,7 @@ async function loadView(view) {
             if (oldScript) {
                 console.log('Removiendo script anterior de productos');
                 oldScript.remove();
-                }
+            }
 
             await new Promise(resolve => {
                 const script = document.createElement('script');
@@ -245,26 +268,28 @@ async function loadView(view) {
             
             if (typeof window.initProductos === 'function') {
                 console.log('Llamando a initProductos...');
-                window.initProductos();
+                requestAnimationFrame(() => {
+                    window.initProductos();
+                });
             } else {
                 console.error('initProductos no está definida!');
             }
         }
         // Si la vista es Bitacora, inicializa el módulo de bitácora
         else if (view === 'Bitacora') {
-            console.log('=== Inicializando módulo Bitacora ===');
+            console.log('=== Inicializando módulo Bitácora ===');
             // Remover script anterior si existe
             const oldScript = document.querySelector('script[src="js/bitacora.js"]');
             if (oldScript) {
-                console.log('Removiendo script anterior de bitacora');
+                console.log('Removiendo script anterior de bitácora');
                 oldScript.remove();
-                }
+            }
 
             await new Promise(resolve => {
                 const script = document.createElement('script');
                 script.src = 'js/bitacora.js';
                 script.onload = () => {
-                    console.log('Script de Bitacora cargado');
+                    console.log('Script de Bitácora cargado');
                     resolve();
                 };
                 document.head.appendChild(script);
@@ -272,7 +297,9 @@ async function loadView(view) {
             
             if (typeof window.initBitacora === 'function') {
                 console.log('Llamando a initBitacora...');
-                window.initBitacora();
+                requestAnimationFrame(() => {
+                    window.initBitacora();
+                });
             } else {
                 console.error('initBitacora no está definida!');
             }
@@ -297,14 +324,21 @@ async function loadView(view) {
                 document.head.appendChild(script);
             });
             
-            // Los eventos de insumos se inicializan automáticamente al cargar el script
-            console.log('Módulo de Insumos inicializado');
+            // Si Insumos tuviera una función initInsumos y necesitara el DOM:
+            if (typeof window.initInsumos === 'function') {
+                console.log('Llamando a initInsumos...');
+                requestAnimationFrame(() => {
+                    window.initInsumos();
+                });
+            } else {
+                console.log('Módulo de Insumos cargado (o no tiene init explícita).');
+            }
         }
 
         console.log('=== Finalización de carga de vista ===');
         console.log('Estado final de los módulos:', {
-            initCajaSimulacion: typeof window.initCajaSimulacion,
-            initRecetasEvents: typeof window.initRecetasEvents,
+            initCaja: typeof window.initCaja,
+            initRecetas: typeof window.initRecetas,
             initUsuarios: typeof window.initUsuarios,
             initVentas: typeof window.initVentas,
             initInventario: typeof window.initInventario,

@@ -1,253 +1,182 @@
-// Namespace para el módulo de usuarios
-const UsuariosModule = {
-    // Configuración de la API
-    API_URL: 'http://localhost:3000/api',
+(function() {
+    const API_URL_USUARIOS = '/api/usuarios'; 
+    let usuarios = [];
+    let editUsuarioId = null;
 
-    // Funciones de utilidad
-    getToken() {
+    function getToken() {
         return localStorage.getItem('token');
-    },
+    }
 
-    getCurrentUserId() {
-        return localStorage.getItem('userId');
-    },
-
-    checkAuth() {
-        const token = this.getToken();
-        if (!token) {
-            alert('Por favor, inicie sesión para acceder a esta página');
-            window.location.href = 'Inicio Sesion.html';
-            return false;
-        }
-        return true;
-    },
-
-    apiRequest(endpoint, options = {}) {
-        if (!this.checkAuth()) {
-            return Promise.reject('No hay token');
-        }
-
-        const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            }
+    async function fetchAPI(url, options = {}) {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+            ...options.headers,
         };
-
-        return fetch(`${this.API_URL}${endpoint}`, { ...defaultOptions, ...options })
-            .then(response => {
-                if (response.status === 401 || response.status === 403) {
-                    localStorage.clear();
-                    alert('Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
-                    window.location.href = 'Inicio Sesion.html';
-                    throw new Error('Sesión expirada');
-                }
-                return response.json();
-            });
-    },
-
-    // Funciones para manejar usuarios
-    async cargarUsuarios() {
         try {
-            const usuarios = await this.apiRequest('/usuarios');
-            const tbody = document.querySelector('#usuariosTable tbody');
-            tbody.innerHTML = '';
-            const currentUserId = this.getCurrentUserId();
-
-            if (usuarios.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No hay usuarios registrados.</td></tr>';
-                return;
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(errorData.message || `Error HTTP: ${response.status}`);
             }
-
-            usuarios.forEach(usuario => {
-                const tr = document.createElement('tr');
-                const isCurrentUser = usuario.ID_Usuario.toString() === currentUserId;
-                
-                tr.innerHTML = `
-                    <td>${usuario.Usuario}</td>
-                    <td>${usuario.Nombre}</td>
-                    <td>${usuario.Apellido}</td>
-                    <td>${usuario.Rol_Nombre}</td>
-                    <td>${usuario.Estado}</td>
-                    <td>
-                        ${isCurrentUser ? 
-                            `<button class="btn btn-sm btn-info" onclick="editarMiPerfil(${usuario.ID_Usuario})">
-                                <i class="fas fa-user-edit"></i> Mi Perfil
-                            </button>` :
-                            `<button class="btn btn-sm btn-warning" onclick="editarUsuario(${usuario.ID_Usuario})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarUsuario(${usuario.ID_Usuario})">
-                                <i class="fas fa-trash"></i>
-                            </button>`
-                        }
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            return response.json();
         } catch (error) {
-            console.error('Error al cargar usuarios:', error);
-            alert('Error al cargar usuarios');
-        }
-    },
-
-    async editarMiPerfil(id) {
-        try {
-            const usuario = await this.apiRequest(`/usuarios/${id}`);
-            const form = document.getElementById('editUserForm');
-            
-            // Llenar el formulario con los datos del usuario
-            form.elements.nombre.value = usuario.Nombre;
-            form.elements.apellido.value = usuario.Apellido;
-            
-            // Deshabilitar campos que no puede modificar
-            form.elements.rol.disabled = true;
-            form.elements.estado.disabled = true;
-            
-            // Ocultar campos que no debe ver
-            form.elements.rol.parentElement.style.display = 'none';
-            form.elements.estado.parentElement.style.display = 'none';
-            
-            // Cambiar el título del modal
-            document.querySelector('#editUserModal .modal-title').textContent = 'Editar Mi Perfil';
-            
-            // Guardar el ID para usarlo en la actualización
-            form.dataset.userId = id;
-            
-            // Mostrar el modal
-            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
-            modal.show();
-        } catch (error) {
-            console.error('Error al cargar datos del usuario:', error);
-            alert('Error al cargar datos del usuario');
-        }
-    },
-
-    async editarUsuario(id) {
-        try {
-            const usuario = await this.apiRequest(`/usuarios/${id}`);
-            const form = document.getElementById('editUserForm');
-            
-            // Llenar el formulario con los datos del usuario
-            form.elements.nombre.value = usuario.Nombre;
-            form.elements.apellido.value = usuario.Apellido;
-            form.elements.rol.value = usuario.ID_Rol;
-            form.elements.estado.value = usuario.Estado;
-            
-            // Habilitar todos los campos
-            form.elements.rol.disabled = false;
-            form.elements.estado.disabled = false;
-            
-            // Mostrar todos los campos
-            form.elements.rol.parentElement.style.display = '';
-            form.elements.estado.parentElement.style.display = '';
-            
-            // Restaurar el título del modal
-            document.querySelector('#editUserModal .modal-title').textContent = 'Editar Usuario';
-            
-            // Guardar el ID para usarlo en la actualización
-            form.dataset.userId = id;
-            
-            // Mostrar el modal
-            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
-            modal.show();
-        } catch (error) {
-            console.error('Error al cargar datos del usuario:', error);
-            alert('Error al cargar datos del usuario');
-        }
-    },
-
-    async actualizarUsuario(event) {
-        event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        const userId = form.dataset.userId;
-        const isCurrentUser = userId === this.getCurrentUserId();
-
-        try {
-            const data = {
-                Nombre: formData.get('nombre'),
-                Apellido: formData.get('apellido')
-            };
-
-            // Solo incluir campos adicionales si no es el usuario actual
-            if (!isCurrentUser) {
-                data.ID_Rol = parseInt(formData.get('rol'));
-                data.Estado = formData.get('estado');
-            }
-
-            // Solo incluir contraseña si se proporcionó una nueva
-            const contraseña = formData.get('contraseña');
-            if (contraseña) {
-                data.Contraseña = contraseña;
-            }
-
-            await this.apiRequest(`/usuarios/${userId}`, {
-                method: 'PUT',
-                body: JSON.stringify(data)
-            });
-
-            // Cerrar modal y recargar usuarios
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
-            modal.hide();
-            form.reset();
-            this.cargarUsuarios();
-            alert(isCurrentUser ? 'Perfil actualizado exitosamente' : 'Usuario actualizado exitosamente');
-        } catch (error) {
-            console.error('Error al actualizar usuario:', error);
-            alert('Error al actualizar usuario');
-        }
-    },
-
-    async eliminarUsuario(id) {
-        const currentUserId = this.getCurrentUserId();
-        
-        if (id.toString() === currentUserId) {
-            alert('No puedes eliminar tu propia cuenta. Por favor, contacta a un administrador si necesitas eliminar tu cuenta.');
-            return;
-        }
-
-        if (!confirm('¿Está seguro de eliminar este usuario?')) {
-            return;
-        }
-
-        try {
-            await this.apiRequest(`/usuarios/${id}`, {
-                method: 'DELETE'
-            });
-
-            this.cargarUsuarios();
-            alert('Usuario eliminado exitosamente');
-        } catch (error) {
-            console.error('Error al eliminar usuario:', error);
-            alert('Error al eliminar usuario');
-        }
-    },
-
-    // Función de inicialización
-    init() {
-        console.log('Inicializando módulo de usuarios...');
-        if (this.checkAuth()) {
-            // Cargar usuarios al iniciar
-            this.cargarUsuarios();
-
-            // Configurar eventos de formularios
-            const addUserForm = document.getElementById('addUserForm');
-            const editUserForm = document.getElementById('editUserForm');
-
-            if (addUserForm) {
-                addUserForm.addEventListener('submit', this.crearUsuario);
-            }
-            if (editUserForm) {
-                editUserForm.addEventListener('submit', this.actualizarUsuario);
-            }
-
-            // Hacer las funciones disponibles globalmente
-            window.editarUsuario = this.editarUsuario;
-            window.eliminarUsuario = this.eliminarUsuario;
+            console.error('Fetch API Error:', error.message, 'URL:', url, 'Options:', options);
+            throw error; 
         }
     }
-};
 
-// Exportar la función de inicialización
-window.initUsuarios = () => UsuariosModule.init(); 
+    async function fetchUsuarios() {
+        try {
+            const data = await fetchAPI(API_URL_USUARIOS);
+            usuarios = data.usuarios || data; 
+            renderTableUsuarios(usuarios);
+        } catch (error) {
+            alert('No se pudieron cargar los usuarios: ' + error.message);
+        }
+    }
+
+    function renderTableUsuarios(usersToRender) {
+        const tableBody = document.getElementById('usersTableBody');
+        if (!tableBody) return console.warn('Usuarios: usersTableBody no encontrado.');
+        tableBody.innerHTML = '';
+        (usersToRender || []).forEach(user => {
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>${user.ID_Usuario}</td>
+                <td>${user.Nombre || ''}</td>
+                <td>${user.Apellido_Paterno || ''}</td> 
+                <td>${user.Apellido_Materno || ''}</td>
+                <td>${user.Email || ''}</td>
+                <td>${user.Rol || ''}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-user-btn" data-id="${user.ID_Usuario}">Editar</button>
+                    <button class="btn btn-sm btn-danger delete-user-btn" data-id="${user.ID_Usuario}">Eliminar</button>
+                </td>
+            `;
+        });
+    }
+
+    async function addUsuario(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = {
+            Nombre: formData.get('addNombre'),
+            Apellido_Paterno: formData.get('addApellidoPaterno'),
+            Apellido_Materno: formData.get('addApellidoMaterno'),
+            Email: formData.get('addEmail'),
+            Contrasena: formData.get('addContrasena'),
+            Rol: formData.get('addRol')
+        };
+        if (!data.Nombre || !data.Apellido_Paterno || !data.Email || !data.Contrasena || !data.Rol) {
+            return alert('Todos los campos son requeridos.');
+        }
+        try {
+            await fetchAPI(API_URL_USUARIOS, { method: 'POST', body: JSON.stringify(data) });
+            fetchUsuarios();
+            const modalEl = document.getElementById('addUserModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                if (modal) modal.hide();
+            }
+            event.target.reset();
+        } catch (error) {
+            alert('No se pudo agregar el usuario: ' + error.message);
+        }
+    }
+    
+    function editUsuario(id) {
+        const usuario = usuarios.find(u => u.ID_Usuario == id);
+        if (!usuario) return console.warn('Usuario no encontrado para editar:', id);
+        editUsuarioId = id;
+        
+        const editForm = document.getElementById('editUserForm');
+        if(editForm){
+            editForm.querySelector('#editUserId').value = usuario.ID_Usuario;
+            editForm.querySelector('#editNombre').value = usuario.Nombre || '';
+            editForm.querySelector('#editApellidoPaterno').value = usuario.Apellido_Paterno || '';
+            editForm.querySelector('#editApellidoMaterno').value = usuario.Apellido_Materno || '';
+            editForm.querySelector('#editEmail').value = usuario.Email || '';
+            editForm.querySelector('#editRol').value = usuario.Rol || '';
+            editForm.querySelector('#editContrasena').value = ''; 
+        }
+        const modalEl = document.getElementById('editUserModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            if (modal) modal.show();
+        }
+    }
+
+    async function saveEditUsuario(event) {
+        event.preventDefault();
+        if (!editUsuarioId) return;
+        const formData = new FormData(event.target);
+        const data = {
+            Nombre: formData.get('editNombre'),
+            Apellido_Paterno: formData.get('editApellidoPaterno'),
+            Apellido_Materno: formData.get('editApellidoMaterno'),
+            Email: formData.get('editEmail'),
+            Rol: formData.get('editRol')
+        };
+        const contrasena = formData.get('editContrasena');
+        if (contrasena && contrasena.trim() !== '') { 
+            data.Contrasena = contrasena;
+        }
+        if (!data.Nombre || !data.Apellido_Paterno || !data.Email || !data.Rol) {
+            return alert('Los campos Nombre, Apellido Paterno, Email y Rol son requeridos.');
+        }
+        try {
+            await fetchAPI(`${API_URL_USUARIOS}/${editUsuarioId}`, { method: 'PUT', body: JSON.stringify(data) });
+            fetchUsuarios();
+            const modalEl = document.getElementById('editUserModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                if (modal) modal.hide();
+            }
+            editUsuarioId = null;
+        } catch (error) {
+            alert('No se pudo actualizar el usuario: ' + error.message);
+        }
+    }
+
+    async function deleteUsuario(id) {
+        if (!confirm('¿Está seguro de eliminar este usuario?')) return;
+        try {
+            await fetchAPI(`${API_URL_USUARIOS}/${id}`, { method: 'DELETE' });
+            fetchUsuarios();
+        } catch (error) {
+            alert('No se pudo eliminar el usuario: ' + error.message);
+        }
+    }
+
+    function initUsuarios() {
+        console.log('=== Inicializando módulo Usuarios ===');
+        fetchUsuarios();
+
+        const addForm = document.getElementById('addUserForm');
+        if (addForm) addForm.addEventListener('submit', addUsuario);
+        else console.warn('Usuarios: addUserForm no encontrado');
+
+        const editForm = document.getElementById('editUserForm');
+        if (editForm) editForm.addEventListener('submit', saveEditUsuario);
+        else console.warn('Usuarios: editUserForm no encontrado');
+
+        const tableBody = document.getElementById('usersTableBody');
+        if (tableBody) {
+            tableBody.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.edit-user-btn');
+                if (editBtn && editBtn.dataset.id) {
+                    editUsuario(editBtn.dataset.id);
+                }
+                const deleteBtn = e.target.closest('.delete-user-btn');
+                if (deleteBtn && deleteBtn.dataset.id) {
+                    deleteUsuario(deleteBtn.dataset.id);
+                }
+            });
+        } else console.warn('Usuarios: usersTableBody no encontrado para delegación de eventos.');
+    }
+
+    window.initUsuarios = initUsuarios;
+    console.log('usuarios.js: window.initUsuarios ASIGNADO.', typeof window.initUsuarios);
+
+})(); // Fin de la IIFE

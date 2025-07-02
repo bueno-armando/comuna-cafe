@@ -1,0 +1,63 @@
+
+Módulo de Caja y Ventas
+-------------------------
+
+Este módulo permite seleccionar productos, calcular el total de la venta, registrar la transacción y actualizar automáticamente el inventario de insumos usados.
+
+CÁLCULOS QUE DEBE REALIZAR LA APLICACIÓN (ARMANDITO y LUISITO en):
+------------------------------------------------------
+
+1. Subtotal por producto:
+   - Fórmula: precio_unitario × cantidad
+   - Ejemplo: 55 × 2 = 110
+
+2. Total de la venta:
+   - Fórmula: sumatoria de todos los subtotales
+   - Ejemplo: 45 + 110 + 60 = $215
+
+3. (Opcional... o no?) IVA:
+   - Fórmula si se implementa: total × 0.16
+
+AL PRESIONAR “PAGAR”:
+----------------------
+
+4. Registrar la venta (tabla 'ventas'):
+   - ID_Usuario
+   - Fecha
+   - Total
+   - Método de pago
+
+5. Registrar detalle de la venta (tabla 'detalle_venta'):
+   - Una fila por producto vendido:
+     - ID_Venta
+     - ID_Producto
+     - Cantidad
+     - Precio
+     - Subtotal
+
+ACTUALIZACIÓN AUTOMÁTICA DE INVENTARIO:
+----------------------------------------
+
+6. Consultar recetas:
+   - Buscar en la tabla 'recetas' los insumos utilizados por cada producto vendido.
+
+7. Calcular consumo de insumos:
+   - Multiplicar la cantidad de producto por la cantidad necesaria de cada insumo.
+   - Ejemplo: Latte usa 150ml leche, si se venden 2: 150 × 2 = 300ml
+
+8. Registrar salidas de insumos (tabla 'movimientos_inventario'):
+   - Una salida por insumo afectado:
+     - Tipo: 'Salida'
+     - Cantidad
+     - ID_Usuario
+     - Descripción: 'Venta'
+
+9. El trigger en 'movimientos_inventario' se encarga de actualizar el inventario restando la cantidad correspondiente. Creo, no recuerdo bien :3
+
+BITÁCORA:
+----------
+
+  - Se registrará automáticamente la inserción en la tabla 'ventas'.
+  - Y también cada salida registrada en 'movimientos_inventario'.
+
+FIN, pueden cambiar lo que consideren xoxo

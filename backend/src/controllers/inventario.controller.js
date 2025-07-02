@@ -5,11 +5,18 @@ const inventarioController = {
     async getAll(req, res) {
         try {
             const [inventario] = await pool.query(`
-                SELECT i.*, ins.Nombre, ins.Unidad, ins.Costo, p.Nombre as Nombre_Proveedor
-                FROM inventario i
-                JOIN insumos ins ON i.ID_Insumo = ins.ID_Insumo
-                JOIN proveedores p ON ins.ID_Proveedor = p.ID_Proveedor
-                ORDER BY ins.Nombre
+                SELECT 
+                    COALESCE(i.ID_Inventario, 0) as ID_Inventario,
+                    ins.ID_Insumo,
+                    ins.Nombre,
+                    ins.Unidad,
+                    ins.Costo,
+                    p.Nombre as Nombre_Proveedor,
+                    COALESCE(i.Cantidad_Disponible, 0) as Cantidad_Disponible
+                FROM insumos ins
+                LEFT JOIN inventario i ON ins.ID_Insumo = i.ID_Insumo
+                LEFT JOIN proveedores p ON ins.ID_Proveedor = p.ID_Proveedor
+                ORDER BY i.ID_Inventario
             `);
             res.json(inventario);
         } catch (error) {
@@ -105,7 +112,7 @@ const inventarioController = {
                 SELECT i.*, p.Nombre as Nombre_Proveedor
                 FROM insumos i
                 JOIN proveedores p ON i.ID_Proveedor = p.ID_Proveedor
-                ORDER BY i.Nombre
+                ORDER BY i.ID_Insumo
             `);
             res.json(insumos);
         } catch (error) {

@@ -1,0 +1,12 @@
+- Caja:
+- Inventario
+
+- Productos
+    * 
+- Insumos
+- Recetas
+- Ventas
+- Gastos
+- Reportes
+- Bitácora
+- Usuarios
