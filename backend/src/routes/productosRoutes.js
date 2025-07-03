@@ -24,4 +24,10 @@ router.delete('/:id', productosController.delete);
 // Agregar nueva categoría
 router.post('/categorias', productosController.createCategoria);
 
+// Actualizar categoría existente
+router.put('/categorias/:id', productosController.updateCategoria);
+
+// Eliminar categoría
+router.delete('/categorias/:id', productosController.deleteCategoria);
+
 module.exports = router; 

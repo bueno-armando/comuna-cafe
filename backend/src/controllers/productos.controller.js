@@ -8,6 +8,7 @@ const productosController = {
                 SELECT 
                     p.ID_Producto,
                     p.Nombre AS Producto,
+                    p.ID_Categoria,
                     c.Nombre AS Categoria,
                     p.Precio_Venta
                 FROM productos_venta p
@@ -178,6 +179,79 @@ const productosController = {
             console.error('Error al registrar categoría:', error);
             res.status(500).json({ 
                 message: 'Error al registrar categoría',
+                details: error.message
+            });
+        }
+    },
+
+    // Actualizar categoría existente
+    async updateCategoria(req, res) {
+        try {
+            const { id } = req.params;
+            const { Nombre } = req.body;
+
+            if (!Nombre) {
+                return res.status(400).json({ message: 'El nombre de la categoría es requerido' });
+            }
+
+            // Actualizar la categoría
+            const [result] = await pool.query(
+                'UPDATE categorias SET Nombre = ? WHERE ID_Categoria = ?',
+                [Nombre, id]
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Categoría no encontrada' });
+            }
+
+            res.json({
+                message: 'Categoría actualizada exitosamente',
+                id: id
+            });
+        } catch (error) {
+            console.error('Error al actualizar categoría:', error);
+            res.status(500).json({ 
+                message: 'Error al actualizar categoría',
+                details: error.message
+            });
+        }
+    },
+
+    // Eliminar categoría
+    async deleteCategoria(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Verificar si la categoría tiene productos asociados
+            const [productos] = await pool.query(
+                'SELECT 1 FROM productos_venta WHERE ID_Categoria = ? LIMIT 1',
+                [id]
+            );
+
+            if (productos.length > 0) {
+                return res.status(400).json({ 
+                    message: 'No se puede eliminar la categoría porque tiene productos asociados'
+                });
+            }
+
+            // Eliminar la categoría
+            const [result] = await pool.query(
+                'DELETE FROM categorias WHERE ID_Categoria = ?',
+                [id]
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Categoría no encontrada' });
+            }
+
+            res.json({
+                message: 'Categoría eliminada exitosamente',
+                id: id
+            });
+        } catch (error) {
+            console.error('Error al eliminar categoría:', error);
+            res.status(500).json({ 
+                message: 'Error al eliminar categoría',
                 details: error.message
             });
         }
