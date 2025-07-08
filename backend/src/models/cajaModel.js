@@ -7,6 +7,7 @@ class CajaModel {
       SELECT pv.*, c.Nombre as categoria_nombre 
       FROM productos_venta pv 
       JOIN categorias c ON pv.ID_Categoria = c.ID_Categoria
+      WHERE pv.Estado = 1
     `);
     return rows;
   }

@@ -1,8 +1,14 @@
+- MISC:
+  * Implementar activado/desactivado de productos
+
 - Caja:
-- Inventario
+
+- Inventario:
+  * Lockear la unidad de los productos obtenida de la BD
 
 - Productos
-    * 
+    * Revisar el asunto de que no se pueden eliminar artículos si tienen
+      ventas registradas
 - Insumos
 - Recetas
 - Ventas

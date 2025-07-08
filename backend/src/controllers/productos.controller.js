@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 
 const productosController = {
-    // Obtener todos los productos con sus categorías
+    // Obtener todos los productos activos con sus categorías
     async getAll(req, res) {
         try {
             const [productos] = await pool.query(`
@@ -10,15 +10,76 @@ const productosController = {
                     p.Nombre AS Producto,
                     p.ID_Categoria,
                     c.Nombre AS Categoria,
-                    p.Precio_Venta
+                    p.Precio_Venta,
+                    p.Estado
                 FROM productos_venta p
                 JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+                WHERE p.Estado = 1
                 ORDER BY p.ID_Producto
             `);
             res.json(productos);
         } catch (error) {
             console.error('Error al obtener productos:', error);
             res.status(500).json({ message: 'Error al obtener productos' });
+        }
+    },
+
+    // Obtener todos los productos inactivos
+    async getInactivos(req, res) {
+        try {
+            const [productos] = await pool.query(`
+                SELECT 
+                    p.ID_Producto,
+                    p.Nombre AS Producto,
+                    p.ID_Categoria,
+                    c.Nombre AS Categoria,
+                    p.Precio_Venta,
+                    p.Estado
+                FROM productos_venta p
+                JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
+                WHERE p.Estado = 0
+                ORDER BY p.ID_Producto
+            `);
+            res.json(productos);
+        } catch (error) {
+            console.error('Error al obtener productos inactivos:', error);
+            res.status(500).json({ message: 'Error al obtener productos inactivos' });
+        }
+    },
+
+    // Desactivar producto (soft delete)
+    async desactivar(req, res) {
+        try {
+            const { id } = req.params;
+            const [result] = await pool.query(
+                'UPDATE productos_venta SET Estado = 0 WHERE ID_Producto = ?',
+                [id]
+            );
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+            res.json({ message: 'Producto desactivado exitosamente', id });
+        } catch (error) {
+            console.error('Error al desactivar producto:', error);
+            res.status(500).json({ message: 'Error al desactivar producto', details: error.message });
+        }
+    },
+
+    // Activar producto
+    async activar(req, res) {
+        try {
+            const { id } = req.params;
+            const [result] = await pool.query(
+                'UPDATE productos_venta SET Estado = 1 WHERE ID_Producto = ?',
+                [id]
+            );
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+            res.json({ message: 'Producto activado exitosamente', id });
+        } catch (error) {
+            console.error('Error al activar producto:', error);
+            res.status(500).json({ message: 'Error al activar producto', details: error.message });
         }
     },
 

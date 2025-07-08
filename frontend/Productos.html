@@ -1,16 +1,22 @@
 <!-- Vista de Gestión de Productos -->
-<div class="main-content container bg-white rounded-3 p-4">
+<div class="container bg-white rounded-3 p-4">
     <!-- Título principal -->
     <h1 class="page-title mb-4">Gestión de Productos</h1>
+    
     <!-- Barra de búsqueda y botones principales -->
     <div class="d-flex flex-column flex-md-row gap-3 mb-4">
         <div class="search-container flex-grow-1 position-relative">
             <i class="bi bi-search search-icon position-absolute"></i>
             <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar Producto...">
         </div>
-        <button id="addProductBtn" class="btn btn-cafe" data-bs-toggle="modal" data-bs-target="#addProductModal">Agregar Producto</button>
-        <button id="addCategoryBtn" class="btn btn-cafe" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Agregar Categoría</button>
+        <button id="addProductBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="bi bi-plus-circle me-2"></i>Agregar Producto
+        </button>
+        <button id="addCategoryBtn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+            <i class="bi bi-tags me-2"></i>Categorías
+        </button>
     </div>
+    
     <!-- Tabla de productos -->
     <div class="table-responsive">
         <table class="table table-hover">
@@ -20,10 +26,10 @@
                     <th>Producto</th>
                     <th>Categoría</th>
                     <th>Precio Venta</th>
-                    <th>Editar</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="productsTableBody">
+            <tbody id="productosTableBody">
                 <!-- Los productos se cargarán dinámicamente -->
             </tbody>
         </table>
@@ -34,31 +40,31 @@
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header border-0">
+            <div class="modal-header">
                 <h5 class="modal-title fw-bold">Agregar Producto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="addProductForm">
+                <form id="addProductoForm">
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="addProductName" required>
+                            <input type="text" class="form-control" name="addNombreProducto" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Categoría</label>
-                            <select class="form-select" id="addProductCategory" required>
+                            <select class="form-select" name="addCategoriaProducto" required>
                                 <option value="">Seleccione una categoría</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Precio Venta</label>
-                            <input type="number" class="form-control" id="addProductPrice" min="0" step="0.01" required>
+                            <input type="number" class="form-control" name="addPrecioVentaProducto" min="0" step="5" required>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center gap-3 mt-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -67,37 +73,37 @@
 </div>
 
 <!-- Modal: Editar Producto -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="editProductoModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header border-0">
+            <div class="modal-header">
                 <h5 class="modal-title fw-bold">Editar Producto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="editProductForm">
-                    <input type="hidden" id="editProductId">
+                <form id="editProductoForm">
+                    <input type="hidden" id="editProductoId">
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="editProductName" required>
+                            <input type="text" class="form-control" name="editNombreProducto" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Categoría</label>
-                            <select class="form-select" id="editProductCategory" required>
+                            <select class="form-select" name="editCategoriaProducto" required>
                                 <option value="">Seleccione una categoría</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Precio Venta</label>
-                            <input type="number" class="form-control" id="editProductPrice" min="0" step="0.01" required>
+                            <input type="number" class="form-control" name="editPrecioVentaProducto" min="0" step="5" required>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between gap-3 mt-4">
-                        <button type="button" class="btn btn-danger" id="deleteProductBtn">Eliminar</button>
+                        <button type="button" class="btn btn-danger" id="deleteProductoBtn">Eliminar</button>
                         <div>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-cafe">Guardar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
                         </div>
                     </div>
                 </form>
@@ -110,8 +116,8 @@
 <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Agregar Categoría</h5>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Categorías</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
@@ -122,7 +128,7 @@
                             <input type="text" class="form-control" id="newCategoryName" required>
                         </div>
                         <div class="col-md-4">
-                            <button type="submit" class="btn btn-cafe w-100">Guardar</button>
+                            <button type="submit" class="btn btn-info w-100">Guardar</button>
                         </div>
                     </div>
                 </form>
@@ -133,7 +139,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Categoría</th>
-                                <th>Editar</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="categoriesTableBody">
@@ -144,15 +150,4 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Bootstrap 5 Bundle con Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Script del módulo de productos -->
-<script src="js/productos.js"></script>
-<script>
-    // Inicializar el módulo cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-        initProductos();
-});
-</script> 
+</div> 

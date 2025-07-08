@@ -9,6 +9,9 @@ router.use(verifyToken);
 // Obtener todos los productos
 router.get('/', productosController.getAll);
 
+// Obtener todos los productos inactivos
+router.get('/inactivos', productosController.getInactivos);
+
 // Obtener todas las categorías
 router.get('/categorias', productosController.getCategorias);
 
@@ -20,6 +23,12 @@ router.put('/:id', productosController.update);
 
 // Eliminar producto
 router.delete('/:id', productosController.delete);
+
+// Desactivar producto
+router.patch('/:id/desactivar', productosController.desactivar);
+
+// Activar producto
+router.patch('/:id/activar', productosController.activar);
 
 // Agregar nueva categoría
 router.post('/categorias', productosController.createCategoria);
