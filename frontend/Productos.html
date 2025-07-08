@@ -34,6 +34,30 @@
             </tbody>
         </table>
     </div>
+    <div class="d-flex justify-content-end mt-2">
+        <button id="toggleInactivosBtn" class="btn btn-secondary">
+            <i class="bi bi-eye-slash me-2"></i>Ver productos inactivos
+        </button>
+    </div>
+    <div id="inactivosSection" class="mt-4" style="display: none;">
+        <h4>Productos Inactivos</h4>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio Venta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="inactivosTableBody">
+                    <!-- Los productos inactivos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal: Agregar Producto -->

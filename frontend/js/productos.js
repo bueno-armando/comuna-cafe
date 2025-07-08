@@ -5,6 +5,8 @@
     let categorias = [];
     let editProductoId = null;
     let filteredProductos = [];
+    let productosInactivos = [];
+    let inactivosLoaded = false;
 
     function getToken() {
         return localStorage.getItem('token');
@@ -29,6 +31,11 @@
                 console.log('Poblando selects después del delay...');
                 populateCategoriasSelects();
             }, 100);
+            
+            // Configurar event listeners para productos inactivos
+            console.log('[initProductos] Llamando a setupInactivosEventListeners...');
+            setupInactivosEventListeners();
+            console.log('[initProductos] setupInactivosEventListeners completado.');
             
         } catch (error) {
             console.error('Error inicializando productos:', error);
@@ -87,6 +94,129 @@
         }
     }
 
+    async function fetchProductosInactivos() {
+        try {
+            const url = `${API_URL}/inactivos`;
+            console.log('[fetchProductosInactivos] Fetch URL:', url);
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            console.log('[fetchProductosInactivos] Respuesta:', response.status);
+            if (!response.ok) throw new Error('Error al obtener productos inactivos');
+            productosInactivos = await response.json();
+            console.log('[fetchProductosInactivos] Productos inactivos:', productosInactivos);
+            renderInactivosTable();
+            inactivosLoaded = true;
+        } catch (error) {
+            console.error('[fetchProductosInactivos] Error:', error);
+            const tableBody = document.getElementById('inactivosTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar los productos inactivos</td></tr>';
+            }
+        }
+    }
+
+    function renderInactivosTable() {
+        const tableBody = document.getElementById('inactivosTableBody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        // Mostrar siempre la tabla, aunque esté vacía
+        if (!productosInactivos || productosInactivos.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos inactivos</td></tr>';
+            return;
+        }
+        productosInactivos.forEach(producto => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${producto.ID_Producto}</td>
+                <td>${producto.Producto}</td>
+                <td>${producto.Categoria}</td>
+                <td>$${parseFloat(producto.Precio_Venta || 0).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-success" data-id="${producto.ID_Producto}" data-action="reactivar">
+                        <i class="bi bi-arrow-repeat"></i> Reactivar
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    async function reactivarProducto(id) {
+        try {
+            const url = `${API_URL}/${id}/activar`;
+            console.log('[reactivarProducto] Fetch URL:', url);
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            let result;
+            let text = await response.text();
+            console.log('[reactivarProducto] Respuesta status:', response.status, 'Texto recibido:', text);
+            try {
+                result = text ? JSON.parse(text) : {};
+            } catch (e) {
+                console.warn('[reactivarProducto] No se pudo parsear como JSON:', e);
+                result = { message: text };
+            }
+            if (response.ok) {
+                // Actualizar ambas tablas
+                await fetchProductos();
+                await fetchProductosInactivos();
+            } else {
+                alert('Error: ' + (result.message || 'Error al reactivar producto'));
+            }
+        } catch (error) {
+            console.error('[reactivarProducto] Error:', error);
+            alert('No se pudo reactivar el producto.');
+        }
+    }
+
+    function setupInactivosEventListeners() {
+        console.log('[setupInactivosEventListeners] Ejecutando...');
+        const btn = document.getElementById('toggleInactivosBtn');
+        if (btn) {
+            console.log('[setupInactivosEventListeners] Botón toggleInactivosBtn encontrado:', btn);
+            btn.addEventListener('click', async function() {
+                console.log('[toggleInactivosBtn] Click detectado');
+                const section = document.getElementById('inactivosSection');
+                if (!section) {
+                    console.warn('[setupInactivosEventListeners] No se encontró el elemento inactivosSection');
+                    return;
+                }
+                if (section.style.display === 'none') {
+                    section.style.display = '';
+                    btn.innerHTML = '<i class="bi bi-eye me-2"></i>Ocultar productos inactivos';
+                    if (!inactivosLoaded) {
+                        console.log('[toggleInactivosBtn] Llamando a fetchProductosInactivos()');
+                        await fetchProductosInactivos();
+                    } else {
+                        console.log('[toggleInactivosBtn] Llamando a renderInactivosTable()');
+                        renderInactivosTable(); // Asegura que la tabla se muestre aunque esté vacía
+                    }
+                } else {
+                    section.style.display = 'none';
+                    btn.innerHTML = '<i class="bi bi-eye-slash me-2"></i>Ver productos inactivos';
+                }
+            });
+        } else {
+            console.warn('[setupInactivosEventListeners] No se encontró el botón toggleInactivosBtn');
+        }
+        // Delegar clicks en la tabla de inactivos
+        const inactivosTable = document.getElementById('inactivosTableBody');
+        if (inactivosTable) {
+            console.log('[setupInactivosEventListeners] inactivosTableBody encontrado:', inactivosTable);
+            inactivosTable.addEventListener('click', function(e) {
+                if (e.target.closest('button[data-action="reactivar"]')) {
+                    const id = e.target.closest('button').getAttribute('data-id');
+                    reactivarProducto(id);
+                }
+            });
+        } else {
+            console.warn('[setupInactivosEventListeners] No se encontró el elemento inactivosTableBody');
+        }
+    }
+
     // Poblar los selects de categorías
     function populateCategoriasSelects() {
         console.log('Poblando selects de categorías...');
@@ -142,8 +272,8 @@
                     <button class="btn btn-sm btn-warning me-2" onclick="editProducto(${producto.ID_Producto})">
                         <i class="bi bi-pencil"></i> Editar
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProducto(${producto.ID_Producto})">
-                        <i class="bi bi-trash"></i> Eliminar
+                    <button class="btn btn-sm btn-danger" onclick="desactivarProducto(${producto.ID_Producto})">
+                        <i class="bi bi-eye-slash"></i> Desactivar
                     </button>
                 </td>
             `;
@@ -400,39 +530,48 @@
         }
     };
 
-    // Función global para eliminar producto
-    window.deleteProducto = async function(id) {
-        if (!confirm('¿Está seguro de eliminar este producto?\n¡ADVERTENCIA! Eliminar un producto puede afectar recetas, ventas registradas e inventario.')) {
+    // Función global para desactivar producto
+    window.desactivarProducto = async function(id) {
+        console.log('[desactivarProducto] Intentando desactivar producto con id:', id);
+        if (!confirm('¿Está seguro de desactivar este producto?')) {
+            console.log('[desactivarProducto] Cancelado por el usuario.');
             return;
         }
-
         try {
-            const response = await fetch(`${API_URL}/${id}`, {
-                method: 'DELETE',
+            const url = `${API_URL}/${id}/desactivar`;
+            console.log('[desactivarProducto] Fetch URL:', url);
+            const response = await fetch(url, {
+                method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${getToken()}` }
             });
-
-            const result = await response.json();
-
+            let result;
+            let text = await response.text();
+            console.log('[desactivarProducto] Respuesta status:', response.status, 'Texto recibido:', text);
+            try {
+                result = text ? JSON.parse(text) : {};
+            } catch (e) {
+                console.warn('[desactivarProducto] No se pudo parsear como JSON:', e);
+                result = { message: text };
+            }
             if (response.ok) {
-                alert('Producto eliminado exitosamente');
-                
+                alert('Producto desactivado exitosamente');
                 // Cerrar modal si está abierto
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editProductoModal'));
                 if (modal) modal.hide();
-                
                 editProductoId = null;
-                
-                // Recargar productos
+                // Recargar productos y tabla de inactivos
                 await fetchProductos();
-                
+                inactivosLoaded = false; // Forzar recarga la próxima vez
+                const section = document.getElementById('inactivosSection');
+                if (section && section.style.display !== 'none') {
+                    await fetchProductosInactivos();
+                }
             } else {
-                alert('Error: ' + (result.message || 'Error al eliminar producto'));
+                alert('Error: ' + (result.message || 'Error al desactivar producto'));
             }
-            
         } catch (error) {
-            console.error('Error en deleteProducto:', error);
-            alert('Error al eliminar producto');
+            console.error('[desactivarProducto] Error:', error);
+            alert('Error al desactivar producto');
         }
     };
 
