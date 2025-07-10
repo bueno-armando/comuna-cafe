@@ -92,11 +92,9 @@
             row.innerHTML = `
                 <td>${insumo.ID_Insumo}</td>
                 <td>${insumo.Nombre}</td>
-                <td>${insumo.ID_Categoria_Insumo}</td> <!-- Asumiendo que quieres mostrar el ID, o necesitarías un join/lookup para el nombre -->
                 <td>${insumo.Unidad}</td>
-                <td>${insumo.Stock}</td>
-                <td>${insumo.Stock_Minimo}</td>
-                <td>${insumo.Stock_Maximo}</td>
+                <td>${insumo.Costo}</td>
+                <td>${insumo.Proveedor_Nombre || insumo.Proveedor || ''}</td>
                 <td>
                     <button class="btn btn-sm btn-warning edit-btn" data-id="${insumo.ID_Insumo}">Editar</button>
                     <button class="btn btn-sm btn-danger delete-btn" data-id="${insumo.ID_Insumo}">Eliminar</button>
