@@ -2,17 +2,22 @@ const db = require('../config/database');
 
 class Insumo {
     // Obtener todos los insumos con información del proveedor
-    static async getAll() {
+    static async getAll(nombre = null) {
         try {
             console.log('Intentando obtener todos los insumos...');
-            const query = `
+            let query = `
                 SELECT i.*, p.Nombre as Proveedor_Nombre 
                 FROM insumos i 
                 LEFT JOIN proveedores p ON i.ID_Proveedor = p.ID_Proveedor
-                ORDER BY i.ID_Insumo
             `;
-            console.log('Query a ejecutar:', query);
-            const [rows] = await db.query(query);
+            let params = [];
+            if (nombre) {
+                query += ' WHERE i.Nombre LIKE ?';
+                params.push(`%${nombre}%`);
+            }
+            query += '\nORDER BY i.ID_Insumo';
+            console.log('Query a ejecutar:', query, params);
+            const [rows] = await db.query(query, params);
             console.log('Insumos obtenidos:', rows);
             return rows;
         } catch (error) {

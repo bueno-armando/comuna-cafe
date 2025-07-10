@@ -5,7 +5,8 @@ class InsumosController {
     static async getAll(req, res) {
         try {
             console.log('Controlador: Iniciando obtención de insumos');
-            const insumos = await Insumo.getAll();
+            const nombre = req.query.nombre || null;
+            const insumos = await Insumo.getAll(nombre);
             console.log('Controlador: Insumos obtenidos exitosamente');
             res.json(insumos);
         } catch (error) {

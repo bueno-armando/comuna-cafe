@@ -12,6 +12,7 @@
 
     async function fetchInsumos(filters = {}, page = 1, limit = 10) {
         try {
+            console.log('fetchInsumos: filtros =', filters, 'page =', page, 'limit =', limit);
             // Construir query params para filtros y paginación
             const params = new URLSearchParams();
             if (filters.nombre) params.append('nombre', filters.nombre);
@@ -19,11 +20,15 @@
             params.append('page', page);
             params.append('limit', limit);
 
-            const response = await fetch(`${API_URL}?${params.toString()}`, {
+            const url = `${API_URL}?${params.toString()}`;
+            console.log('fetchInsumos: URL solicitada =', url);
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${getToken()}` }
             });
+            console.log('fetchInsumos: status respuesta =', response.status);
             if (!response.ok) throw new Error('Error al obtener insumos');
             const data = await response.json();
+            console.log('fetchInsumos: datos recibidos =', data);
             insumos = data.insumos || data; // Ajustar según la estructura de respuesta del backend
             renderTable(insumos);
             if (data.totalPages) {
@@ -50,22 +55,19 @@
         if (editInsumoForm) editInsumoForm.addEventListener('submit', saveEditInsumo);
         else console.warn('Insumos: editInsumoForm no encontrado');
         
-        const searchNombreInput = document.getElementById('searchNombre');
-        if (searchNombreInput) searchNombreInput.addEventListener('input', (e) => {
-            currentFilters.nombre = e.target.value;
-            currentPage = 1; // Reset page on new search
-            fetchInsumos(currentFilters, currentPage, rowsPerPage);
-        });
-        else console.warn('Insumos: searchNombreInput no encontrado');
+        // Enlazar correctamente la barra de búsqueda por nombre
+        const insumoSearchInput = document.getElementById('insumoSearch');
+        if (insumoSearchInput) {
+            console.log('Insumos: input de búsqueda encontrado');
+            insumoSearchInput.addEventListener('input', (e) => {
+                console.log('Insumos: input de búsqueda cambiado:', e.target.value);
+                currentFilters.nombre = e.target.value;
+                currentPage = 1; // Reset page on new search
+                fetchInsumos(currentFilters, currentPage, rowsPerPage);
+            });
+        } else console.warn('Insumos: insumoSearchInput no encontrado');
 
-        const searchCategoriaSelect = document.getElementById('searchCategoria');
-        if (searchCategoriaSelect) searchCategoriaSelect.addEventListener('change', (e) => {
-            currentFilters.categoria = e.target.value;
-            currentPage = 1; // Reset page on new search
-            fetchInsumos(currentFilters, currentPage, rowsPerPage);
-        });
-        else console.warn('Insumos: searchCategoriaSelect no encontrado');
-
+        // Eliminar búsqueda por categoría (no existe en el HTML)
         // Delegación de eventos para botones de editar/eliminar en la tabla
         const insumosTableBody = document.getElementById('insumosTableBody');
         if (insumosTableBody) {
