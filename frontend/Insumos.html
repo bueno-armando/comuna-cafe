@@ -61,7 +61,11 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Costo</label>
-                            <input type="number" class="form-control" id="addInsumoCosto" min="0" required>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="addInsumoCosto" min="0" step="0.01" required>
+                                <span class="input-group-text">MXN</span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Proveedor</label>
@@ -107,7 +111,11 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Costo</label>
-                            <input type="number" class="form-control" id="editInsumoCosto" min="0" required>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="editInsumoCosto" min="0" step="0.01" required>
+                                <span class="input-group-text">MXN</span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Proveedor</label>

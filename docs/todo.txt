@@ -1,6 +1,4 @@
 - Insumos:
-  * estilizar botones de "agregar nuevo insumo" y "proveedores"
-  * hacer funcional añadido de Insumos
   * hacer funcional formulario proveedores
   * hacer funcionales editar/eliminar
   * implementar el bloqueo de eliminación de proveedores cuando tienen insumos

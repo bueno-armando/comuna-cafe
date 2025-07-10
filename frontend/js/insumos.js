@@ -43,9 +43,85 @@
     // ... (Resto de las funciones: renderTable, renderPagination, addInsumo, editInsumo, saveEditInsumo, deleteInsumo, etc.)
     // Todas deben estar definidas dentro de la IIFE
 
+    // Función para cargar proveedores y poblar el select
+    async function cargarProveedores() {
+        const select = document.getElementById('addInsumoProveedor');
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione un proveedor</option>';
+        try {
+            const response = await fetch('/api/insumos/proveedores', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            if (!response.ok) throw new Error('Error al obtener proveedores');
+            const proveedores = await response.json();
+            proveedores.forEach(prov => {
+                const option = document.createElement('option');
+                option.value = prov.ID_Proveedor;
+                option.textContent = prov.Nombre;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar proveedores:', error);
+            select.innerHTML = '<option value="">Error al cargar proveedores</option>';
+        }
+    }
+
+    // Asegurar saltos de 1.00 y punto decimal en el input de costo
+    function setupCostoInputStep() {
+        const addCosto = document.getElementById('addInsumoCosto');
+        if (addCosto) {
+            addCosto.step = '1.00';
+            addCosto.inputMode = 'decimal';
+            addCosto.pattern = '[0-9]+(\\.[0-9]{1,2})?';
+            addCosto.addEventListener('keypress', function(e) {
+                // Solo permitir números y punto
+                if (!/[0-9.]/.test(e.key)) {
+                    e.preventDefault();
+                }
+                // Solo un punto decimal
+                if (e.key === '.' && this.value.includes('.')) {
+                    e.preventDefault();
+                }
+            });
+            addCosto.addEventListener('change', function() {
+                if (typeof this.value === 'string') {
+                    this.value = this.value.replace(',', '.');
+                }
+                if (this.value) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+            });
+        }
+        const editCosto = document.getElementById('editInsumoCosto');
+        if (editCosto) {
+            editCosto.step = '1.00';
+            editCosto.inputMode = 'decimal';
+            editCosto.pattern = '[0-9]+(\\.[0-9]{1,2})?';
+            editCosto.addEventListener('keypress', function(e) {
+                if (!/[0-9.]/.test(e.key)) {
+                    e.preventDefault();
+                }
+                if (e.key === '.' && this.value.includes('.')) {
+                    e.preventDefault();
+                }
+            });
+            editCosto.addEventListener('change', function() {
+                if (typeof this.value === 'string') {
+                    this.value = this.value.replace(',', '.');
+                }
+                if (this.value) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+            });
+        }
+    }
+
+    // Llamar esta función al inicializar el módulo y al mostrar los modales
     function initInsumos() {
         console.log('=== Inicializando módulo Insumos ===');
         fetchInsumos(currentFilters, currentPage, rowsPerPage);
+        cargarProveedores();
+        setupCostoInputStep();
 
         const addInsumoForm = document.getElementById('addInsumoForm');
         if (addInsumoForm) addInsumoForm.addEventListener('submit', addInsumo);
@@ -67,7 +143,15 @@
             });
         } else console.warn('Insumos: insumoSearchInput no encontrado');
 
-        // Eliminar búsqueda por categoría (no existe en el HTML)
+        // Recargar proveedores cada vez que se abre el modal de agregar insumo
+        const addInsumoModal = document.getElementById('addInsumoModal');
+        if (addInsumoModal) {
+            addInsumoModal.addEventListener('show.bs.modal', function() {
+                cargarProveedores();
+                setupCostoInputStep();
+            });
+        }
+
         // Delegación de eventos para botones de editar/eliminar en la tabla
         const insumosTableBody = document.getElementById('insumosTableBody');
         if (insumosTableBody) {
@@ -82,6 +166,12 @@
                 }
             });
         } else console.warn('Insumos: insumosTableBody no encontrado');
+
+        // Enlazar correctamente la barra de búsqueda por nombre
+        const editInsumoModal = document.getElementById('editInsumoModal');
+        if (editInsumoModal) {
+            editInsumoModal.addEventListener('show.bs.modal', setupCostoInputStep);
+        }
     }
 
     // Funciones auxiliares (renderTable, renderPagination, etc.) deben estar aquí dentro
@@ -127,13 +217,14 @@
 
     async function addInsumo(event) {
         event.preventDefault();
-        const formData = new FormData(event.target);
-        const data = Object.fromEntries(formData.entries());
-        // Convertir a números donde sea necesario
-        data.ID_Categoria_Insumo = parseInt(data.ID_Categoria_Insumo);
-        data.Stock = parseFloat(data.Stock);
-        data.Stock_Minimo = parseFloat(data.Stock_Minimo);
-        data.Stock_Maximo = parseFloat(data.Stock_Maximo);
+        const form = event.target;
+        // Mapear los nombres del formulario a los que espera el backend
+        const data = {
+            Nombre: form.querySelector('#addInsumoNombre').value,
+            Unidad: form.querySelector('#addInsumoUnidad').value,
+            Costo: form.querySelector('#addInsumoCosto').value,
+            ID_Proveedor: form.querySelector('#addInsumoProveedor').value
+        };
 
         try {
             const response = await fetch(API_URL, {
