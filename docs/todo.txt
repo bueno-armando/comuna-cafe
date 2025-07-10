@@ -1,7 +1,7 @@
 - Insumos:
-  * hacer funcional formulario proveedores
-  * hacer funcionales editar/eliminar
-  * implementar el bloqueo de eliminación de proveedores cuando tienen insumos
+  * ✅ hacer funcional formulario proveedores
+  * ✅ hacer funcional eliminar/editar
+  * ✅ implementar el bloqueo de eliminación de proveedores cuando tienen insumos
 
 - Bitácora:
   * Paginar los resultados

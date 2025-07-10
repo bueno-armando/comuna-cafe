@@ -156,6 +156,112 @@ class InsumosController {
             });
         }
     }
+
+    // Obtener todos los proveedores con información completa
+    static async getAllProviders(req, res) {
+        try {
+            console.log('Controlador: Iniciando obtención de proveedores completos');
+            const proveedores = await Insumo.getAllProviders();
+            console.log('Controlador: Proveedores completos obtenidos exitosamente');
+            res.json(proveedores);
+        } catch (error) {
+            console.error('Error al obtener proveedores completos:', error);
+            res.status(500).json({ 
+                message: 'Error al obtener los proveedores',
+                error: error.message 
+            });
+        }
+    }
+
+    // Obtener un proveedor por ID
+    static async getProviderById(req, res) {
+        try {
+            const proveedor = await Insumo.getProviderById(req.params.id);
+            if (!proveedor) {
+                return res.status(404).json({ message: 'Proveedor no encontrado' });
+            }
+            res.json(proveedor);
+        } catch (error) {
+            console.error('Error al obtener proveedor:', error);
+            res.status(500).json({ message: 'Error al obtener el proveedor' });
+        }
+    }
+
+    // Crear un nuevo proveedor
+    static async createProvider(req, res) {
+        try {
+            const { Nombre, Telefono, Direccion } = req.body;
+
+            // Validaciones básicas
+            if (!Nombre || !Telefono) {
+                return res.status(400).json({ 
+                    message: 'Nombre y teléfono son campos requeridos' 
+                });
+            }
+
+            const proveedorId = await Insumo.createProvider({
+                Nombre,
+                Telefono,
+                Direccion: Direccion || null
+            });
+
+            res.status(201).json({ 
+                message: 'Proveedor creado exitosamente',
+                id: proveedorId
+            });
+        } catch (error) {
+            console.error('Error al crear proveedor:', error);
+            res.status(500).json({ message: 'Error al crear el proveedor' });
+        }
+    }
+
+    // Actualizar un proveedor
+    static async updateProvider(req, res) {
+        try {
+            const { Nombre, Telefono, Direccion } = req.body;
+
+            // Validaciones básicas
+            if (!Nombre || !Telefono) {
+                return res.status(400).json({ 
+                    message: 'Nombre y teléfono son campos requeridos' 
+                });
+            }
+
+            const success = await Insumo.updateProvider(req.params.id, {
+                Nombre,
+                Telefono,
+                Direccion: Direccion || null
+            });
+
+            if (!success) {
+                return res.status(404).json({ message: 'Proveedor no encontrado' });
+            }
+
+            res.json({ message: 'Proveedor actualizado exitosamente' });
+        } catch (error) {
+            console.error('Error al actualizar proveedor:', error);
+            res.status(500).json({ message: 'Error al actualizar el proveedor' });
+        }
+    }
+
+    // Eliminar un proveedor
+    static async deleteProvider(req, res) {
+        try {
+            const success = await Insumo.deleteProvider(req.params.id);
+            if (!success) {
+                return res.status(404).json({ message: 'Proveedor no encontrado' });
+            }
+            res.json({ message: 'Proveedor eliminado exitosamente' });
+        } catch (error) {
+            console.error('Error al eliminar proveedor:', error);
+            if (error.message.includes('insumos asociados')) {
+                return res.status(400).json({ 
+                    message: 'No se puede eliminar el proveedor porque tiene insumos asociados' 
+                });
+            }
+            res.status(500).json({ message: 'Error al eliminar el proveedor' });
+        }
+    }
 }
 
 module.exports = InsumosController; 

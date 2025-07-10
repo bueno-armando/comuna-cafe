@@ -12,6 +12,21 @@ router.get('/', InsumosController.getAll);
 // Obtener todos los proveedores
 router.get('/proveedores', InsumosController.getProviders);
 
+// Obtener todos los proveedores con información completa
+router.get('/proveedores/completos', InsumosController.getAllProviders);
+
+// Obtener un proveedor por ID
+router.get('/proveedores/:id', InsumosController.getProviderById);
+
+// Crear un nuevo proveedor
+router.post('/proveedores', InsumosController.createProvider);
+
+// Actualizar un proveedor
+router.put('/proveedores/:id', InsumosController.updateProvider);
+
+// Eliminar un proveedor
+router.delete('/proveedores/:id', InsumosController.deleteProvider);
+
 // Buscar insumos por nombre
 router.get('/buscar', InsumosController.searchByName);
 

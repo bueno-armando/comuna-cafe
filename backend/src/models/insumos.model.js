@@ -141,6 +141,95 @@ class Insumo {
             throw error;
         }
     }
+
+    // Obtener todos los proveedores con información completa
+    static async getAllProviders() {
+        try {
+            const query = 'SELECT ID_Proveedor, Nombre, Telefono, Direccion FROM proveedores ORDER BY Nombre';
+            const [rows] = await db.query(query);
+            return rows;
+        } catch (error) {
+            console.error('Error en getAllProviders:', error);
+            throw error;
+        }
+    }
+
+    // Obtener un proveedor por ID
+    static async getProviderById(id) {
+        try {
+            const query = 'SELECT ID_Proveedor, Nombre, Telefono, Direccion FROM proveedores WHERE ID_Proveedor = ?';
+            const [rows] = await db.query(query, [id]);
+            return rows[0];
+        } catch (error) {
+            console.error('Error en getProviderById:', error);
+            throw error;
+        }
+    }
+
+    // Crear un nuevo proveedor
+    static async createProvider(providerData) {
+        try {
+            const { Nombre, Telefono, Direccion } = providerData;
+            const query = `
+                INSERT INTO proveedores (Nombre, Telefono, Direccion)
+                VALUES (?, ?, ?)
+            `;
+            const [result] = await db.query(query, [Nombre, Telefono, Direccion]);
+            return result.insertId;
+        } catch (error) {
+            console.error('Error en createProvider:', error);
+            throw error;
+        }
+    }
+
+    // Actualizar un proveedor
+    static async updateProvider(id, providerData) {
+        try {
+            const { Nombre, Telefono, Direccion } = providerData;
+            const query = `
+                UPDATE proveedores 
+                SET Nombre = ?, Telefono = ?, Direccion = ?
+                WHERE ID_Proveedor = ?
+            `;
+            const [result] = await db.query(query, [Nombre, Telefono, Direccion, id]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error en updateProvider:', error);
+            throw error;
+        }
+    }
+
+    // Eliminar un proveedor (solo si no tiene insumos asociados)
+    static async deleteProvider(id) {
+        try {
+            // Verificar si el proveedor tiene insumos asociados
+            const checkQuery = 'SELECT COUNT(*) as count FROM insumos WHERE ID_Proveedor = ?';
+            const [checkResult] = await db.query(checkQuery, [id]);
+            
+            if (checkResult[0].count > 0) {
+                throw new Error('No se puede eliminar el proveedor porque tiene insumos asociados');
+            }
+
+            const query = 'DELETE FROM proveedores WHERE ID_Proveedor = ?';
+            const [result] = await db.query(query, [id]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error en deleteProvider:', error);
+            throw error;
+        }
+    }
+
+    // Verificar si un proveedor tiene insumos asociados
+    static async hasInsumos(providerId) {
+        try {
+            const query = 'SELECT COUNT(*) as count FROM insumos WHERE ID_Proveedor = ?';
+            const [result] = await db.query(query, [providerId]);
+            return result[0].count > 0;
+        } catch (error) {
+            console.error('Error en hasInsumos:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = Insumo; 
