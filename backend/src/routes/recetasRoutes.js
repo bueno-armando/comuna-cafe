@@ -6,6 +6,9 @@ const verifyToken = require('../middleware/auth');
 // Aplicar middleware de autenticación a todas las rutas
 router.use(verifyToken);
 
+// Obtener todos los productos (para búsqueda)
+router.get('/productos/todos', RecetasController.getAllProductos);
+
 // Obtener todos los productos que tienen recetas
 router.get('/productos', RecetasController.getProductosConRecetas);
 

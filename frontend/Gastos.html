@@ -1,7 +1,9 @@
 <!-- Vista de Gestión de Gastos -->
 <div class="main-container container bg-white rounded-3 p-4">
     <!-- Título principal de la vista -->
-    <h1 class="page-title mb-4">Gestión de Gastos</h1>
+    <h1 class="page-title mb-4">
+        <i class="bi bi-cash-stack me-2"></i>Gestión de Gastos
+    </h1>
     <!-- Formulario para agregar un nuevo gasto -->
     <div class="row g-3 mb-4">
         <div class="col-md-5">
@@ -45,10 +47,10 @@
         <table class="table table-hover table-striped">
             <thead class="table-dark">
                 <tr>
-                    <th>Descripción</th>
-                    <th class="text-end">Monto</th>
-                    <th>Fecha</th>
-                    <th class="text-center">Acciones</th>
+                    <th><i class="bi bi-chat-text me-2"></i>Descripción</th>
+                    <th class="text-end"><i class="bi bi-currency-dollar me-2"></i>Monto</th>
+                    <th><i class="bi bi-calendar me-2"></i>Fecha</th>
+                    <th class="text-center"><i class="bi bi-gear me-2"></i>Acciones</th>
                 </tr>
             </thead>
             <tbody id="gastosTable">
@@ -68,16 +70,22 @@
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     ¿Está seguro que desea eliminar este gasto?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
                 </div>
             </div>
         </div>

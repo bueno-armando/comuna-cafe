@@ -1,7 +1,9 @@
 <!-- recetas.html -->
 <div class="container bg-white rounded-3 p-4">
     <!-- Título principal -->
-    <h1 class="page-title mb-4">Gestión de Recetas</h1>
+    <h1 class="page-title mb-4">
+        <i class="bi bi-journal-text me-2"></i>Gestión de Recetas
+    </h1>
     
     <!-- Barra de búsqueda de productos -->
     <div class="d-flex flex-column flex-md-row gap-3 mb-4">
@@ -11,8 +13,8 @@
             <div id="searchResults" class="search-results position-absolute w-100 bg-white shadow-sm rounded mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
         </div>
         <!-- Botón para agregar insumo -->
-        <button id="addIngredientBtn" class="btn btn-cafe" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal">
-            <i class="bi bi-plus-lg me-2"></i>Agregar Insumo
+        <button id="addIngredientBtn" class="btn btn-cafe" type="button">
+            <i class="bi bi-plus-circle me-2"></i>Agregar Insumo
         </button>
     </div>
 
@@ -21,10 +23,10 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>Insumo</th>
-                    <th>Cantidad Necesaria</th>
-                    <th>Unidad</th>
-                    <th>Acciones</th>
+                    <th><i class="bi bi-box me-2"></i>Insumo</th>
+                    <th><i class="bi bi-123 me-2"></i>Cantidad Necesaria</th>
+                    <th><i class="bi bi-rulers me-2"></i>Unidad</th>
+                    <th><i class="bi bi-gear me-2"></i>Acciones</th>
                 </tr>
             </thead>
             <tbody id="recipeTableBody">
@@ -39,26 +41,45 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="addIngredientModalLabel">Agregar Insumo</h5>
+                <h5 class="modal-title fw-bold" id="addIngredientModalLabel">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar Insumo
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="ingredientForm">
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label for="ingredientName" class="form-label">Insumo</label>
+                            <label for="ingredientName" class="form-label">
+                                <i class="bi bi-box me-2"></i>Insumo
+                            </label>
                             <select class="form-select" id="ingredientName" required>
                                 <option value="">Seleccione un insumo</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="ingredientQuantity" class="form-label">Cantidad</label>
-                            <input type="number" class="form-control" id="ingredientQuantity" placeholder="Cantidad necesaria" min="0" step="0.01" required>
+                            <label for="ingredientQuantity" class="form-label">
+                                <i class="bi bi-123 me-2"></i>Cantidad
+                            </label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" id="decrementBtn">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <input type="text" class="form-control" id="ingredientQuantity" placeholder="0.00" required>
+                                <button class="btn btn-outline-secondary" type="button" id="incrementBtn">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <span class="input-group-text" id="ingredientUnit">ml</span>
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-cafe">Guardar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-cafe">
+                            <i class="bi bi-check-circle me-2"></i>Guardar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -71,7 +92,9 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Editar Insumo</h5>
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Insumo
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -80,19 +103,38 @@
                     <input type="hidden" id="editProductoId">
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label">
+                                <i class="bi bi-box me-2"></i>Nombre
+                            </label>
                             <input type="text" class="form-control" id="editIngredientName" readonly>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Cantidad</label>
-                            <input type="number" class="form-control" id="editIngredientQuantity" min="0" step="0.01" required>
+                            <label class="form-label">
+                                <i class="bi bi-123 me-2"></i>Cantidad
+                            </label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" id="editDecrementBtn">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <input type="text" class="form-control" id="editIngredientQuantity" placeholder="0.00" required>
+                                <button class="btn btn-outline-secondary" type="button" id="editIncrementBtn">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <span class="input-group-text" id="editIngredientUnit">ml</span>
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between gap-3 mt-4">
-                        <button type="button" class="btn btn-danger" id="deleteIngredientBtn">Eliminar Insumo</button>
+                        <button type="button" class="btn btn-danger" id="deleteIngredientBtn">
+                            <i class="bi bi-trash me-2"></i>Eliminar Insumo
+                        </button>
                         <div>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-cafe">Guardar Cambios</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-cafe">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -125,6 +167,3 @@
     border-bottom: none;
 }
 </style>
-
-<!-- Incluir el archivo JavaScript de recetas -->
-<script src="js/recetas.js"></script>

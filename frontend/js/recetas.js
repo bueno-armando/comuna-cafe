@@ -2,7 +2,7 @@
     // Configuración de la API
     var API = {
         URL: '/api/recetas',
-        PRODUCTOS_URL: '/api/productos',
+        PRODUCTOS_URL: '/api/recetas/productos/todos', // Usar el nuevo endpoint
         INSUMOS_URL: '/api/insumos',
         getToken: () => localStorage.getItem('token')
     };
@@ -23,6 +23,86 @@
         return true;
     }
 
+    // Función para configurar el formato de decimales en inputs
+    function setupQuantityInputFormat() {
+        const quantityInputs = ['ingredientQuantity', 'editIngredientQuantity'];
+        
+        quantityInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.step = '1.00';
+                input.inputMode = 'text';
+                input.pattern = '[0-9]+(\\.[0-9]{1,2})?';
+                
+                // Solo mantener el evento blur para formateo
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = this.value.replace(',', '.');
+                        const numValue = parseFloat(this.value);
+                        if (!isNaN(numValue)) {
+                            this.value = numValue.toFixed(2);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para configurar botones de incremento/decremento
+    function setupIncrementDecrementButtons() {
+        // Botones para el modal de agregar
+        const incrementBtn = document.getElementById('incrementBtn');
+        const decrementBtn = document.getElementById('decrementBtn');
+        const quantityInput = document.getElementById('ingredientQuantity');
+        
+        if (incrementBtn && decrementBtn && quantityInput) {
+            incrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(quantityInput.value) || 0;
+                const newValue = currentValue + 1;
+                quantityInput.value = newValue.toFixed(2);
+                quantityInput.dispatchEvent(new Event('blur'));
+            });
+            
+            decrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(quantityInput.value) || 0;
+                const newValue = Math.max(0, currentValue - 1);
+                quantityInput.value = newValue.toFixed(2);
+                quantityInput.dispatchEvent(new Event('blur'));
+            });
+        }
+        
+        // Botones para el modal de editar
+        const editIncrementBtn = document.getElementById('editIncrementBtn');
+        const editDecrementBtn = document.getElementById('editDecrementBtn');
+        const editQuantityInput = document.getElementById('editIngredientQuantity');
+        
+        if (editIncrementBtn && editDecrementBtn && editQuantityInput) {
+            editIncrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(editQuantityInput.value) || 0;
+                const newValue = currentValue + 1;
+                editQuantityInput.value = newValue.toFixed(2);
+                editQuantityInput.dispatchEvent(new Event('blur'));
+            });
+            
+            editDecrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(editQuantityInput.value) || 0;
+                const newValue = Math.max(0, currentValue - 1);
+                editQuantityInput.value = newValue.toFixed(2);
+                editQuantityInput.dispatchEvent(new Event('blur'));
+            });
+        }
+    }
+
+    // Función para actualizar la unidad cuando se selecciona un insumo
+    function updateUnitForIngredient(insumoId, unitElementId) {
+        const insumo = insumosList.find(i => i.ID_Insumo === parseInt(insumoId));
+        const unitElement = document.getElementById(unitElementId);
+        
+        if (insumo && unitElement) {
+            unitElement.textContent = insumo.Unidad;
+        }
+    }
+
     // Función para actualizar el estilo de la barra de búsqueda
     function updateSearchInputStyle(isSearching = false) {
         const searchInput = document.getElementById('productSearch');
@@ -39,7 +119,7 @@
         if (!checkAuth()) return;
 
         try {
-            // Obtener todos los productos, no solo los que tienen recetas
+            console.log('Cargando productos desde:', API.PRODUCTOS_URL);
             const response = await fetch(`${API.PRODUCTOS_URL}`, {
                 headers: {
                     'Authorization': `Bearer ${API.getToken()}`
@@ -47,24 +127,23 @@
             });
 
             if (!response.ok) {
-                throw new Error('Error al cargar los productos');
+                throw new Error(`Error al cargar los productos: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
             
-            // Debug: mostrar la respuesta completa con todos los detalles
-            console.log('Respuesta API productos (detallada):', JSON.stringify(data, null, 2));
+            // Debug: mostrar la respuesta completa
+            console.log('Respuesta API productos:', data);
             
             // Asegurarnos de que productosList sea un array
             productosList = Array.isArray(data) ? data : [];
             
-            // Debug: mostrar información de los productos cargados con todos los detalles
-            console.log('Productos cargados (detallado):', JSON.stringify(productosList, null, 2));
+            console.log('Productos cargados:', productosList.length);
             
             return productosList;
         } catch (error) {
             console.error('Error al cargar productos:', error);
-            alert('Error al cargar los productos');
+            alert('Error al cargar los productos: ' + error.message);
             return [];
         }
     }
@@ -72,6 +151,8 @@
     // Función para cargar las recetas de un producto
     async function loadRecetas(productId, productName) {
         if (!checkAuth()) return;
+        
+        console.log('Cargando recetas para producto:', productId, productName);
         currentProductId = productId;
         selectedProductName = productName;
         updateSearchInputStyle();
@@ -89,14 +170,15 @@
                     displayRecetas([]);
                     return;
                 }
-                throw new Error('Error al cargar las recetas');
+                throw new Error(`Error al cargar las recetas: ${response.status} ${response.statusText}`);
             }
 
             const recetas = await response.json();
+            console.log('Recetas cargadas:', recetas);
             displayRecetas(recetas);
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al cargar las recetas');
+            alert('Error al cargar las recetas: ' + error.message);
         }
     }
 
@@ -118,28 +200,34 @@
 
             insumosList = await response.json();
             
-            // Debug: mostrar los insumos cargados
-            console.log('Insumos cargados:', insumosList);
+            console.log('Insumos cargados:', insumosList.length);
             
             // Actualizar el select de insumos
             const select = document.getElementById('ingredientName');
-            select.innerHTML = '<option value="">Seleccione un insumo</option>';
-            
-            insumosList.forEach(insumo => {
-                const option = document.createElement('option');
-                option.value = insumo.ID_Insumo;
-                option.textContent = `${insumo.Nombre} (${insumo.Unidad})`;
-                select.appendChild(option);
-            });
+            if (select) {
+                select.innerHTML = '<option value="">Seleccione un insumo</option>';
+                
+                insumosList.forEach(insumo => {
+                    const option = document.createElement('option');
+                    option.value = insumo.ID_Insumo;
+                    option.textContent = `${insumo.Nombre} (${insumo.Unidad})`;
+                    select.appendChild(option);
+                });
+            }
         } catch (error) {
             console.error('Error al cargar insumos:', error);
-            alert('Error al cargar los insumos disponibles');
+            alert('Error al cargar los insumos disponibles: ' + error.message);
         }
     }
 
     // Función para mostrar las recetas en la tabla
     function displayRecetas(recetas) {
         const tbody = document.getElementById('recipeTableBody');
+        if (!tbody) {
+            console.error('No se encontró el elemento recipeTableBody');
+            return;
+        }
+        
         tbody.innerHTML = '';
 
         if (recetas.length === 0) {
@@ -147,9 +235,9 @@
                 <tr>
                     <td colspan="4" class="text-center py-4">
                         <div class="alert alert-info mb-0">
-                            Este producto no tiene recetas registradas.
+                            <i class="bi bi-info-circle me-2"></i>Este producto no tiene recetas registradas.
                             <button class="btn btn-primary btn-sm ms-3" onclick="openAddIngredientModal()">
-                                Agregar primera receta
+                                <i class="bi bi-plus-circle me-1"></i>Agregar primera receta
                             </button>
                         </div>
                     </td>
@@ -166,11 +254,11 @@
                 <td>
                     <button class="btn btn-sm btn-outline-primary me-2" 
                             onclick="editIngredient(${receta.ID_Producto}, ${receta.ID_Insumo}, '${receta.Insumo}', ${receta.Cantidad_Necesaria}, '${receta.Unidad}')">
-                        Editar
+                        <i class="bi bi-pencil-square me-1"></i>Editar
                     </button>
                     <button class="btn btn-sm btn-outline-danger"
                             onclick="deleteIngredient(${receta.ID_Producto}, ${receta.ID_Insumo})">
-                        Eliminar
+                        <i class="bi bi-trash me-1"></i>Eliminar
                     </button>
                 </td>
             `;
@@ -181,10 +269,8 @@
     // Función para mostrar/ocultar resultados de búsqueda
     function toggleSearchResults(show) {
         const searchResults = document.getElementById('searchResults');
-        if (show) {
-            searchResults.style.display = 'block';
-        } else {
-            searchResults.style.display = 'none';
+        if (searchResults) {
+            searchResults.style.display = show ? 'block' : 'none';
         }
     }
 
@@ -198,45 +284,44 @@
                 await loadAllProductos();
             }
 
-            // Debug: mostrar la lista completa antes de filtrar con todos los detalles
-            console.log('Lista completa de productos (detallada):', JSON.stringify(productosList, null, 2));
+            console.log('Buscando productos con query:', query);
+            console.log('Total productos disponibles:', productosList.length);
 
-            // Filtrar productos por nombre (usando el campo Producto en lugar de Nombre)
+            // Filtrar productos por nombre
             const filteredProductos = productosList.filter(p => 
-                p.Producto && p.Producto.toLowerCase().includes(query.toLowerCase())
+                p.Nombre && p.Nombre.toLowerCase().includes(query.toLowerCase())
             );
+
+            console.log('Productos filtrados:', filteredProductos.length);
 
             // Mostrar resultados en un dropdown
             const searchResults = document.getElementById('searchResults');
+            if (!searchResults) {
+                console.error('No se encontró el elemento searchResults');
+                return;
+            }
+            
             searchResults.innerHTML = '';
 
             if (filteredProductos.length > 0) {
                 filteredProductos.forEach(producto => {
                     const div = document.createElement('div');
                     div.className = 'search-result-item';
-                    div.textContent = producto.Producto; // Usar Producto en lugar de Nombre
+                    div.innerHTML = `<i class="bi bi-cup-hot me-2"></i>${producto.Nombre}`;
                     div.onclick = () => {
-                        loadRecetas(producto.ID_Producto, producto.Producto); // Usar Producto en lugar de Nombre
+                        loadRecetas(producto.ID_Producto, producto.Nombre);
                         toggleSearchResults(false);
                     };
                     searchResults.appendChild(div);
                 });
                 toggleSearchResults(true);
             } else {
-                searchResults.innerHTML = '<div class="search-result-item">No se encontraron productos</div>';
+                searchResults.innerHTML = '<div class="search-result-item"><i class="bi bi-exclamation-triangle me-2"></i>No se encontraron productos</div>';
                 toggleSearchResults(true);
             }
-
-            // Debug: mostrar información de la búsqueda con todos los detalles
-            console.log('Búsqueda (detallada):', {
-                query,
-                totalProductos: productosList.length,
-                productosFiltrados: filteredProductos.length,
-                productos: JSON.stringify(filteredProductos, null, 2)
-            });
         } catch (error) {
             console.error('Error en búsqueda:', error);
-            alert('Error al buscar productos');
+            alert('Error al buscar productos: ' + error.message);
         }
     }
 
@@ -257,6 +342,11 @@
             return;
         }
 
+        if (parseFloat(cantidad) <= 0) {
+            alert('La cantidad debe ser mayor a 0');
+            return;
+        }
+
         try {
             // Obtener el insumo seleccionado para obtener su unidad
             const insumoSeleccionado = insumosList.find(i => i.ID_Insumo === parseInt(insumoId));
@@ -264,7 +354,6 @@
                 throw new Error('No se encontró el insumo seleccionado');
             }
 
-            // Debug: mostrar los datos que se enviarán
             console.log('Enviando datos para agregar ingrediente:', {
                 ID_Producto: currentProductId,
                 ID_Insumo: parseInt(insumoId),
@@ -286,7 +375,6 @@
                 })
             });
 
-            // Debug: mostrar la respuesta del servidor
             console.log('Respuesta del servidor:', {
                 status: response.status,
                 statusText: response.statusText
@@ -298,12 +386,35 @@
                 throw new Error(errorData?.message || 'Error al agregar el ingrediente');
             }
 
-            // Cerrar el modal y recargar las recetas
-            const addModal = bootstrap.Modal.getInstance(document.getElementById('addIngredientModal'));
-            addModal.hide();
+            // Cerrar el modal correctamente
+            const modalElement = document.getElementById('addIngredientModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    // Si no hay instancia, crear una nueva y ocultarla
+                    const newModal = new bootstrap.Modal(modalElement);
+                    newModal.hide();
+                }
+            }
+            
+            // Limpiar el backdrop manualmente si es necesario
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            
+            // Remover la clase modal-open del body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
             
             // Limpiar el formulario
-            document.getElementById('ingredientForm').reset();
+            const form = document.getElementById('ingredientForm');
+            if (form) {
+                form.reset();
+            }
             
             // Recargar las recetas
             loadRecetas(currentProductId, selectedProductName);
@@ -321,6 +432,7 @@
         document.getElementById('editProductoId').value = productoId;
         document.getElementById('editIngredientName').value = nombre;
         document.getElementById('editIngredientQuantity').value = cantidad;
+        document.getElementById('editIngredientUnit').textContent = unidad;
         
         const editModal = new bootstrap.Modal(document.getElementById('editIngredientModal'));
         editModal.show();
@@ -345,8 +457,29 @@
                 throw new Error(errorData?.message || 'Error al eliminar el ingrediente');
             }
 
+            // Si se eliminó desde el modal de editar, cerrar el modal
+            const editModal = document.getElementById('editIngredientModal');
+            if (editModal && editModal.classList.contains('show')) {
+                const modal = bootstrap.Modal.getInstance(editModal);
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Limpiar el backdrop manualmente
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                // Remover la clase modal-open del body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+
             // Recargar las recetas después de eliminar
             loadRecetas(productoId, selectedProductName);
+            alert('Ingrediente eliminado exitosamente');
         } catch (error) {
             console.error('Error:', error);
             alert(error.message || 'Error al eliminar el ingrediente');
@@ -360,6 +493,12 @@
         const productoId = document.getElementById('editProductoId').value;
         const insumoId = document.getElementById('editIngredientId').value;
         const cantidad = document.getElementById('editIngredientQuantity').value;
+        const unidad = document.getElementById('editIngredientUnit').textContent;
+
+        if (parseFloat(cantidad) <= 0) {
+            alert('La cantidad debe ser mayor a 0');
+            return;
+        }
 
         try {
             const response = await fetch(`${API.URL}/${productoId}/${insumoId}`, {
@@ -369,7 +508,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    Cantidad_Necesaria: parseFloat(cantidad)
+                    Cantidad_Necesaria: parseFloat(cantidad),
+                    Unidad: unidad
                 })
             });
 
@@ -378,10 +518,32 @@
                 throw new Error(errorData?.message || 'Error al actualizar el ingrediente');
             }
 
-            // Cerrar el modal y recargar las recetas
-            const editModal = bootstrap.Modal.getInstance(document.getElementById('editIngredientModal'));
-            editModal.hide();
+            // Cerrar el modal correctamente
+            const modalElement = document.getElementById('editIngredientModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    // Si no hay instancia, crear una nueva y ocultarla
+                    const newModal = new bootstrap.Modal(modalElement);
+                    newModal.hide();
+                }
+            }
+            
+            // Limpiar el backdrop manualmente si es necesario
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            
+            // Remover la clase modal-open del body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
             loadRecetas(productoId, selectedProductName);
+            alert('Ingrediente actualizado exitosamente');
         } catch (error) {
             console.error('Error:', error);
             alert(error.message || 'Error al actualizar el ingrediente');
@@ -406,10 +568,17 @@
 
     // Inicializar eventos cuando se carga la página
     function initRecetas() {
-        console.log('initRecetas ejecutándose...');
+        console.log('Inicializando módulo de recetas...');
+        
+        // Configurar formato de inputs
+        setupQuantityInputFormat();
+        
+        // Configurar botones de incremento/decremento
+        setupIncrementDecrementButtons();
+        
         // Búsqueda de productos
         const searchInput = document.getElementById('productSearch');
-        if (searchInput) { // Verificar que el elemento exista
+        if (searchInput) {
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.trim();
                 if (searchTerm.length < selectedProductName.length) {
@@ -429,14 +598,13 @@
                 }
             });
         } else {
-            console.warn('Elemento productSearch no encontrado en initRecetas');
+            console.warn('Elemento productSearch no encontrado');
         }
 
         // Cerrar resultados de búsqueda al hacer clic fuera
         document.addEventListener('click', function(event) {
             const searchContainer = document.querySelector('.search-container');
             const searchResults = document.getElementById('searchResults');
-            // Asegurarse que searchContainer y searchInput existen antes de usarlos
             if (searchContainer && searchInput && !searchContainer.contains(event.target)) {
                 toggleSearchResults(false);
                 if (!searchInput.value.trim() && selectedProductName) {
@@ -445,39 +613,61 @@
             }
         });
 
+        // Configurar formularios
         const editForm = document.getElementById('editIngredientForm');
-        if (editForm) editForm.addEventListener('submit', saveIngredientChanges);
+        if (editForm) {
+            editForm.addEventListener('submit', saveIngredientChanges);
+        }
         
         const ingredientForm = document.getElementById('ingredientForm');
-        if (ingredientForm) ingredientForm.addEventListener('submit', addIngredient);
+        if (ingredientForm) {
+            ingredientForm.addEventListener('submit', addIngredient);
+        }
 
         const deleteBtn = document.getElementById('deleteIngredientBtn');
-        if (deleteBtn) deleteBtn.addEventListener('click', function() {
-            const productoId = document.getElementById('editProductoId').value;
-            const insumoId = document.getElementById('editIngredientId').value;
-            deleteIngredient(productoId, insumoId);
-        });
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                const productoId = document.getElementById('editProductoId').value;
+                const insumoId = document.getElementById('editIngredientId').value;
+                deleteIngredient(productoId, insumoId);
+            });
+        }
 
         const addBtn = document.getElementById('addIngredientBtn');
-        if (addBtn) addBtn.addEventListener('click', openAddIngredientModal);
+        if (addBtn) {
+            addBtn.addEventListener('click', openAddIngredientModal);
+        }
 
-        loadAllProductos();
-        loadInsumos().then(() => {
-            console.log('Insumos cargados correctamente desde initRecetas');
+        // Configurar eventos para actualizar unidades
+        const ingredientSelect = document.getElementById('ingredientName');
+        if (ingredientSelect) {
+            ingredientSelect.addEventListener('change', function() {
+                updateUnitForIngredient(this.value, 'ingredientUnit');
+            });
+        }
+
+        // Cargar datos iniciales
+        loadAllProductos().then(() => {
+            console.log('Productos cargados correctamente');
         }).catch(error => {
-            console.error('Error al cargar insumos desde initRecetas:', error);
+            console.error('Error al cargar productos:', error);
+        });
+        
+        loadInsumos().then(() => {
+            console.log('Insumos cargados correctamente');
+        }).catch(error => {
+            console.error('Error al cargar insumos:', error);
         });
     }
 
     // Exportar función de inicialización
     window.initRecetas = initRecetas;
-    console.log('recetas.js: window.initRecetas ASIGNADO.', typeof window.initRecetas);
+    console.log('recetas.js: window.initRecetas asignado');
 
-    // Exportar funciones necesarias para el HTML (si son llamadas directamente desde onclick en HTML)
+    // Exportar funciones necesarias para el HTML
     window.openAddIngredientModal = openAddIngredientModal;
-    window.addIngredient = addIngredient; // Considerar si esto es realmente necesario globalmente o solo para el form submit
     window.editIngredient = editIngredient;
     window.deleteIngredient = deleteIngredient;
-    window.saveIngredientChanges = saveIngredientChanges; // Considerar si esto es realmente necesario globalmente
+    window.saveIngredientChanges = saveIngredientChanges;
 
 })(); // Fin de la IIFE 

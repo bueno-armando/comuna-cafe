@@ -11,34 +11,39 @@ TABLAS INVOLUCRADAS:
 
 ESTRUCTURA DE LA TABLA 'recetas':
 ----------------------------------
-- ID_Receta (INT, AUTO_INCREMENT, PRIMARY KEY)
-- ID_Producto (INT, FOREIGN KEY)
-- ID_Insumo (INT, FOREIGN KEY)
-- Cantidad_Necesaria (DECIMAL): cantidad requerida del insumo
+- ID_Producto (INT, FOREIGN KEY, parte de PRIMARY KEY compuesta)
+- ID_Insumo (INT, FOREIGN KEY, parte de PRIMARY KEY compuesta)
+- Cantidad_Necesaria (DECIMAL(10,2)): cantidad requerida del insumo
+- Unidad (ENUM): unidad de medida del insumo
+
+NOTA: La tabla usa una clave primaria compuesta (ID_Producto, ID_Insumo) en lugar de un ID_Receta separado.
 
 FUNCIONALIDADES Y CONSULTAS:
 
 1. MOSTRAR RECETA DE UN PRODUCTO
 ---------------------------------
 SELECT 
+    r.ID_Producto,
+    r.ID_Insumo,
     i.Nombre AS Insumo,
     r.Cantidad_Necesaria,
-    i.Unidad
+    r.Unidad
 FROM recetas r
 JOIN insumos i ON r.ID_Insumo = i.ID_Insumo
-WHERE r.ID_Producto = ?;
+WHERE r.ID_Producto = ?
+ORDER BY i.Nombre;
 
 
 2. AGREGAR INSUMO A UNA RECETA
 -------------------------------
-INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria)
-VALUES (1, 2, 150); -- 150 ml de leche para el producto 1
+INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad)
+VALUES (1, 2, 150.00, 'ml'); -- 150 ml de leche para el producto 1
 
 
 3. EDITAR CANTIDAD DE UN INSUMO EN LA RECETA
 ---------------------------------------------
 UPDATE recetas
-SET Cantidad_Necesaria = 200
+SET Cantidad_Necesaria = 200.00, Unidad = 'ml'
 WHERE ID_Producto = 1 AND ID_Insumo = 2;
 
 
@@ -59,7 +64,7 @@ LÓGICA DE LA INTERFAZ "AGREGAR INSUMO"
 
 Consulta inicial para llenar la tabla de insumos:
 
-SELECT ID_Insumo, Nombre, Unidad FROM insumos;
+SELECT ID_Insumo, Nombre, Unidad FROM insumos ORDER BY Nombre;
 
 Cuando el usuario selecciona un insumo:
 - Se muestran el nombre y la unidad del insumo en campos de solo lectura.
@@ -67,12 +72,21 @@ Cuando el usuario selecciona un insumo:
 
 Luego, al presionar "Agregar", se ejecuta:
 
-INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria)
-VALUES (?, ?, ?);
+INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad)
+VALUES (?, ?, ?, ?);
 
 Donde:
 - ID_Producto: corresponde al producto activo en pantalla.
 - ID_Insumo: es el seleccionado por el usuario.
 - Cantidad_Necesaria: es el valor ingresado manualmente.
+- Unidad: se obtiene del insumo seleccionado.
 
-FIN ... O NO?
+VALIDACIONES IMPLEMENTADAS:
+---------------------------
+1. Verificar que el producto existe antes de agregar receta
+2. Verificar que el insumo existe antes de agregar receta
+3. Verificar que no se duplique el mismo insumo en una receta
+4. Validar que la cantidad sea mayor a 0
+5. Validar que todos los campos requeridos estén presentes
+
+FIN

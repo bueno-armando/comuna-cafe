@@ -3,5 +3,8 @@
   * ✅ hacer funcional eliminar/editar
   * ✅ implementar el bloqueo de eliminación de proveedores cuando tienen insumos
 
+- Recetas:
+  * Ajustar tabla y botones mostrados a las especificaciones de la documentación
+
 - Bitácora:
   * Paginar los resultados
