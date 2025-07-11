@@ -1,38 +1,75 @@
 <!-- recetas.html -->
 <div class="container bg-white rounded-3 p-4">
-    <!-- Título principal -->
-    <h1 class="page-title mb-4">
-        <i class="bi bi-journal-text me-2"></i>Gestión de Recetas
-    </h1>
-    
-    <!-- Barra de búsqueda de productos -->
-    <div class="d-flex flex-column flex-md-row gap-3 mb-4">
-        <div class="search-container flex-grow-1 position-relative">
-            <i class="bi bi-search search-icon position-absolute"></i>
-            <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
-            <div id="searchResults" class="search-results position-absolute w-100 bg-white shadow-sm rounded mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
-        </div>
-        <!-- Botón para agregar insumo -->
-        <button id="addIngredientBtn" class="btn btn-cafe" type="button">
-            <i class="bi bi-plus-circle me-2"></i>Agregar Insumo
+    <!-- Breadcrumb de navegación -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="#" onclick="showAllProducts()">
+                    <i class="bi bi-grid me-1"></i>Recetas
+                </a>
+            </li>
+            <li class="breadcrumb-item active" id="currentProduct">Seleccione un producto</li>
+        </ol>
+    </nav>
+
+    <!-- Navegación y título dinámico -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-outline-secondary" id="backBtn" onclick="showAllProducts()" style="display: none;">
+            <i class="bi bi-arrow-left me-2"></i>Volver a Productos
         </button>
+        <h1 class="page-title mb-0" id="recipeTitle">
+            <i class="bi bi-journal-text me-2"></i>Gestión de Recetas
+        </h1>
+    </div>
+    
+    <!-- Vista de productos (inicial) -->
+    <div id="productsView">
+        <!-- Barra de búsqueda de productos -->
+        <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+            <div class="search-container flex-grow-1 position-relative">
+                <i class="bi bi-search search-icon position-absolute"></i>
+                <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
+                <div id="searchResults" class="search-results position-absolute w-100 bg-white shadow-sm rounded mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4" id="productGrid">
+            <!-- Los productos se cargarán dinámicamente -->
+        </div>
     </div>
 
-    <!-- Tabla de insumos -->
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th><i class="bi bi-box me-2"></i>Insumo</th>
-                    <th><i class="bi bi-123 me-2"></i>Cantidad Necesaria</th>
-                    <th><i class="bi bi-rulers me-2"></i>Unidad</th>
-                    <th><i class="bi bi-gear me-2"></i>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="recipeTableBody">
-                <!-- Contenido dinámico -->
-            </tbody>
-        </table>
+    <!-- Vista de receta específica (inicialmente oculta) -->
+    <div id="recipeView" style="display: none;">
+        <!-- Barra de búsqueda de productos -->
+        <div class="d-flex flex-column flex-md-row gap-3 mb-4">
+            <div class="search-container flex-grow-1 position-relative">
+                <i class="bi bi-search search-icon position-absolute"></i>
+                <input type="text" id="productSearchRecipe" class="form-control ps-5" placeholder="Buscar producto...">
+                <div id="searchResultsRecipe" class="search-results position-absolute w-100 bg-white shadow-sm rounded mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+            <!-- Botón para agregar insumo -->
+            <button id="addIngredientBtn" class="btn btn-cafe" type="button">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Insumo
+            </button>
+        </div>
+
+        <!-- Tabla de insumos -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-box me-2"></i>Insumo</th>
+                        <th><i class="bi bi-123 me-2"></i>Cantidad Necesaria</th>
+                        <th><i class="bi bi-rulers me-2"></i>Unidad</th>
+                        <th><i class="bi bi-gear me-2"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="recipeTableBody">
+                    <!-- Contenido dinámico -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

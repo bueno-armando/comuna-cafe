@@ -1,10 +1,11 @@
-- Insumos:
-  * ✅ hacer funcional formulario proveedores
-  * ✅ hacer funcional eliminar/editar
-  * ✅ implementar el bloqueo de eliminación de proveedores cuando tienen insumos
+- MISC:
+  - Añadir botón de esconder/mostrar contraseña al inicio de sesión
+  - Investigar sobre mecanismos de recuperación del sistema
+  - Retoques (después de finalizar la base de todos los módulos):
+    * Paginar productos en modulos productos y Recetas
+    * Hacer consistente el estilo de los productos (usar misma clase)
+    * Añadir a clase productos la capacidad de poner una imagen de fondo
 
-- Recetas:
-  * Ajustar tabla y botones mostrados a las especificaciones de la documentación
 
 - Bitácora:
   * Paginar los resultados

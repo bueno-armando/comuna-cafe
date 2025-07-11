@@ -155,7 +155,6 @@
         console.log('Cargando recetas para producto:', productId, productName);
         currentProductId = productId;
         selectedProductName = productName;
-        updateSearchInputStyle();
 
         try {
             const response = await fetch(`${API.URL}/producto/${productId}`, {
@@ -264,6 +263,131 @@
             `;
             tbody.appendChild(row);
         });
+    }
+
+    // Función para mostrar todos los productos en grid
+    function displayProductGrid(productos) {
+        const productGrid = document.getElementById('productGrid');
+        if (!productGrid) {
+            console.error('No se encontró el elemento productGrid');
+            return;
+        }
+        
+        productGrid.innerHTML = '';
+
+        if (productos.length === 0) {
+            productGrid.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>No hay productos disponibles.
+                    </div>
+                </div>`;
+            return;
+        }
+
+        productos.forEach(producto => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            col.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h4 class="card-title fw-bold mb-3">${producto.Nombre}</h4>
+                        <p class="card-text text-muted">${producto.Categoria || 'Sin categoría'}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="bi bi-journal-text me-1"></i>
+                                <span id="ingredientCount-${producto.ID_Producto}">Cargando...</span> ingredientes
+                            </small>
+                        </p>
+                        <button class="btn btn-success btn-sm px-3 py-1" onclick="viewRecipe(${producto.ID_Producto}, '${producto.Nombre}')">
+                            <i class="bi bi-journal-text me-1"></i>Ver Receta
+                        </button>
+                    </div>
+                </div>
+            `;
+            productGrid.appendChild(col);
+            
+            // Cargar el conteo de ingredientes para este producto
+            loadIngredientCount(producto.ID_Producto);
+        });
+    }
+
+    // Función para cargar el conteo de ingredientes de un producto
+    async function loadIngredientCount(productId) {
+        try {
+            const response = await fetch(`${API.URL}/producto/${productId}`, {
+                headers: {
+                    'Authorization': `Bearer ${API.getToken()}`
+                }
+            });
+            
+            let count = 0;
+            if (response.ok) {
+                const recetas = await response.json();
+                count = recetas.length;
+            }
+            
+            const countElement = document.getElementById(`ingredientCount-${productId}`);
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        } catch (error) {
+            console.error('Error al cargar conteo de ingredientes:', error);
+            const countElement = document.getElementById(`ingredientCount-${productId}`);
+            if (countElement) {
+                countElement.textContent = '0';
+            }
+        }
+    }
+
+    // Función para mostrar la vista de productos
+    function showAllProducts() {
+        const productsView = document.getElementById('productsView');
+        const recipeView = document.getElementById('recipeView');
+        const backBtn = document.getElementById('backBtn');
+        const recipeTitle = document.getElementById('recipeTitle');
+        const currentProduct = document.getElementById('currentProduct');
+        
+        if (productsView) productsView.style.display = 'block';
+        if (recipeView) recipeView.style.display = 'none';
+        if (backBtn) backBtn.style.display = 'none';
+        if (recipeTitle) {
+            recipeTitle.innerHTML = '<i class="bi bi-journal-text me-2"></i>Gestión de Recetas';
+        }
+        if (currentProduct) {
+            currentProduct.textContent = 'Seleccione un producto';
+        }
+        
+        // Limpiar selección actual
+        currentProductId = null;
+        selectedProductName = '';
+        
+        // Mostrar grid de productos
+        if (productosList.length > 0) {
+            displayProductGrid(productosList);
+        }
+    }
+
+    // Función para mostrar la vista de receta específica
+    function viewRecipe(productId, productName) {
+        const productsView = document.getElementById('productsView');
+        const recipeView = document.getElementById('recipeView');
+        const backBtn = document.getElementById('backBtn');
+        const recipeTitle = document.getElementById('recipeTitle');
+        const currentProduct = document.getElementById('currentProduct');
+        
+        if (productsView) productsView.style.display = 'none';
+        if (recipeView) recipeView.style.display = 'block';
+        if (backBtn) backBtn.style.display = 'block';
+        if (recipeTitle) {
+            recipeTitle.innerHTML = `<i class="bi bi-journal-text me-2"></i>Receta: ${productName}`;
+        }
+        if (currentProduct) {
+            currentProduct.textContent = productName;
+        }
+        
+        // Cargar las recetas del producto seleccionado
+        loadRecetas(productId, productName);
     }
 
     // Función para mostrar/ocultar resultados de búsqueda
@@ -649,6 +773,8 @@
         // Cargar datos iniciales
         loadAllProductos().then(() => {
             console.log('Productos cargados correctamente');
+            // Mostrar la vista de productos por defecto
+            showAllProducts();
         }).catch(error => {
             console.error('Error al cargar productos:', error);
         });
@@ -669,5 +795,7 @@
     window.editIngredient = editIngredient;
     window.deleteIngredient = deleteIngredient;
     window.saveIngredientChanges = saveIngredientChanges;
+    window.showAllProducts = showAllProducts;
+    window.viewRecipe = viewRecipe;
 
 })(); // Fin de la IIFE 
