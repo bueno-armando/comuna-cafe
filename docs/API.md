@@ -93,6 +93,76 @@ Authorization: Bearer <token>
 
 ---
 
+### Recetas
+
+| Método | Ruta                                    | Descripción                                    |
+|--------|-----------------------------------------|------------------------------------------------|
+| GET    | /api/recetas/productos/todos            | Obtener todos los productos para búsqueda      |
+| GET    | /api/recetas/producto/:id               | Obtener recetas de un producto específico      |
+| POST   | /api/recetas                            | Crear nueva receta                             |
+| PUT    | /api/recetas/:productoId/:insumoId     | Actualizar cantidad de ingrediente             |
+| DELETE | /api/recetas/:productoId/:insumoId     | Eliminar ingrediente de receta                 |
+
+#### Ejemplo de respuesta para GET /api/recetas/productos/todos
+
+```json
+[
+  {
+    "ID_Producto": 1,
+    "Nombre": "Latte",
+    "Categoria": "Bebidas"
+  },
+  {
+    "ID_Producto": 2,
+    "Nombre": "Cappuccino",
+    "Categoria": "Bebidas"
+  }
+]
+```
+
+#### Ejemplo de respuesta para GET /api/recetas/producto/1
+
+```json
+[
+  {
+    "ID_Producto": 1,
+    "ID_Insumo": 1,
+    "Insumo": "Leche",
+    "Cantidad_Necesaria": "200.00",
+    "Unidad": "ml"
+  },
+  {
+    "ID_Producto": 1,
+    "ID_Insumo": 2,
+    "Insumo": "Café",
+    "Cantidad_Necesaria": "30.00",
+    "Unidad": "ml"
+  }
+]
+```
+
+#### Ejemplo de request para POST /api/recetas
+
+```json
+{
+  "ID_Producto": 1,
+  "ID_Insumo": 1,
+  "Cantidad_Necesaria": "200.00",
+  "Unidad": "ml"
+}
+```
+
+#### Ejemplo de request para PUT /api/recetas/1/1
+
+```json
+{
+  "Cantidad_Necesaria": "250.00",
+  "Unidad": "ml"
+}
+```
+
+---
+
 ### Productos
 (Completar con los endpoints de productos...)
 
@@ -104,9 +174,6 @@ Authorization: Bearer <token>
 
 ### Inventario
 (Completar con los endpoints de inventario...)
-
-### Recetas
-(Completar con los endpoints de recetas...)
 
 ### Caja
 (Completar con los endpoints de caja...)
