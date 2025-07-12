@@ -12,6 +12,7 @@ const productosRoutes = require('./routes/productosRoutes');
 const bitacoraRoutes = require('./routes/bitacoraRoutes');
 const insumosRoutes = require('./routes/insumosRoutes');
 const recetasRoutes = require('./routes/recetasRoutes');
+const gastosRoutes = require('./routes/gastosRoutes');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/productos', productosRoutes);
 app.use('/api/bitacora', bitacoraRoutes);
 app.use('/api/insumos', insumosRoutes);
 app.use('/api/recetas', recetasRoutes);
+app.use('/api/gastos', gastosRoutes);
 
 // Ruta para el frontend
 app.get('*', (req, res) => {

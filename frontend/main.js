@@ -91,7 +91,8 @@ async function loadView(view) {
         initVentas: typeof window.initVentas,
         initInventario: typeof window.initInventario,
         initProductos: typeof window.initProductos,
-        initBitacora: typeof window.initBitacora
+        initBitacora: typeof window.initBitacora,
+        initGastos: typeof window.initGastos
     });
 
     try {
@@ -334,6 +335,35 @@ async function loadView(view) {
                 console.log('Módulo de Insumos cargado (o no tiene init explícita).');
             }
         }
+        // Si la vista es Gastos, inicializa el módulo de gastos
+        else if (view === 'Gastos') {
+            console.log('=== Inicializando módulo Gastos ===');
+            // Remover script anterior si existe
+            const oldScript = document.querySelector('script[src="js/gastos.js"]');
+            if (oldScript) {
+                console.log('Removiendo script anterior de gastos');
+                oldScript.remove();
+            }
+
+            await new Promise(resolve => {
+                const script = document.createElement('script');
+                script.src = 'js/gastos.js';
+                script.onload = () => {
+                    console.log('Script de Gastos cargado');
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+            
+            if (typeof window.initGastos === 'function') {
+                console.log('Llamando a initGastos...');
+                requestAnimationFrame(() => {
+                    window.initGastos();
+                });
+            } else {
+                console.error('initGastos no está definida!');
+            }
+        }
 
         console.log('=== Finalización de carga de vista ===');
         console.log('Estado final de los módulos:', {
@@ -343,7 +373,8 @@ async function loadView(view) {
             initVentas: typeof window.initVentas,
             initInventario: typeof window.initInventario,
             initProductos: typeof window.initProductos,
-            initBitacora: typeof window.initBitacora
+            initBitacora: typeof window.initBitacora,
+            initGastos: typeof window.initGastos
         });
     } catch (error) {
         console.error('Error cargando vista:', error);

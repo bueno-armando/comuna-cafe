@@ -1,3 +1,15 @@
+- Ventas:
+  * Poner "buscar desde" y "hasta" a la misma altura
+  * quitar lupa de busqueda
+  * cambiar formato de las fechas de busqeuda a DD/MM/YY
+  * añadir botón para resetear filtro de fechas
+  * añadir filtrado por cada atributo
+
+- Gastos:
+  * Añadir botón para remover filtro de fecha al lado de la notificación de filtro aplicado
+  * Ver si es correcto que no se puede editar el monto de un gasto ya registrado
+  * Hacer un modal apropiado para la edición de gastos
+
 - MISC:
   - Añadir botón de esconder/mostrar contraseña al inicio de sesión
   - Investigar sobre mecanismos de recuperación del sistema
