@@ -242,6 +242,92 @@ GET /api/ventas?page=1&limit=9&fechaInicio=2024-01-01&fechaFin=2024-01-31
 
 ---
 
+### Gastos
+
+| Método | Ruta                                    | Descripción                                    |
+|--------|-----------------------------------------|------------------------------------------------|
+| GET    | /api/gastos                              | Obtener gastos con paginación y filtros       |
+| GET    | /api/gastos/:id                          | Obtener detalles de un gasto específico       |
+| POST   | /api/gastos                              | Crear nuevo gasto                              |
+| PUT    | /api/gastos/:id                          | Actualizar gasto                               |
+| DELETE | /api/gastos/:id                          | Eliminar gasto                                 |
+
+#### Parámetros para GET /api/gastos
+
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Gastos por página (default: 9)
+- `fechaInicio` (opcional): Fecha de inicio para filtrar (YYYY-MM-DD)
+- `fechaFin` (opcional): Fecha de fin para filtrar (YYYY-MM-DD)
+- `descripcion` (opcional): Buscar por descripción (LIKE)
+
+#### Ejemplo de respuesta para GET /api/gastos
+
+```json
+{
+  "gastos": [
+    {
+      "ID_Gasto": 1,
+      "Fecha": "2024-01-15",
+      "Descripcion": "Compra de leche",
+      "Monto": "150.00",
+      "Categoria": "Insumos",
+      "Nombre_Usuario": "admin"
+    },
+    {
+      "ID_Gasto": 2,
+      "Fecha": "2024-01-15",
+      "Descripcion": "Mantenimiento cafetera",
+      "Monto": "75.50",
+      "Categoria": "Mantenimiento",
+      "Nombre_Usuario": "vendedor1"
+    }
+  ],
+  "totalGastos": 25,
+  "totalPages": 3,
+  "currentPage": 1,
+  "limit": 9
+}
+```
+
+#### Ejemplo de request para POST /api/gastos
+
+```json
+{
+  "Fecha": "2024-01-15",
+  "Descripcion": "Compra de insumos",
+  "Monto": "150.00",
+  "Categoria": "Insumos"
+}
+```
+
+#### Ejemplo de response para POST /api/gastos
+
+```json
+{
+  "message": "Gasto creado exitosamente",
+  "id": 3
+}
+```
+
+#### Ejemplo de request para PUT /api/gastos/1
+
+```json
+{
+  "Fecha": "2024-01-15",
+  "Descripcion": "Compra de leche actualizada",
+  "Monto": "160.00",
+  "Categoria": "Insumos"
+}
+```
+
+#### Ejemplo de request para GET /api/gastos con filtros
+
+```
+GET /api/gastos?page=1&limit=9&fechaInicio=2024-01-01&fechaFin=2024-01-31&descripcion=leche
+```
+
+---
+
 ### Productos
 (Completar con los endpoints de productos...)
 

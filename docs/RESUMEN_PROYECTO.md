@@ -10,6 +10,8 @@
   - `src/controllers/recetas.controller.js`: lógica de recetas
   - `src/routes/ventasRoutes.js`: rutas de ventas (`/api/ventas`, `/api/ventas/:id`, etc.)
   - `src/controllers/ventasController.js`: lógica de ventas
+  - `src/routes/gastosRoutes.js`: rutas de gastos (`/api/gastos`, `/api/gastos/:id`, etc.)
+  - `src/controllers/gastosController.js`: lógica de gastos
 - **frontend/**: HTML + JS vanilla
   - `Insumos.html`: vista de gestión de insumos
   - `js/insumos.js`: lógica de frontend para insumos
@@ -17,6 +19,8 @@
   - `js/recetas.js`: lógica de frontend para recetas
   - `Ventas.html`: vista de gestión de ventas
   - `js/ventas.js`: lógica de frontend para ventas
+  - `Gastos.html`: vista de gestión de gastos
+  - `js/gastos.js`: lógica de frontend para gastos
 - **docs/**: documentación y especificaciones
 
 ## Tablas principales (DB)
@@ -55,6 +59,16 @@
 | Cantidad     | int(11)             | Cantidad vendida                        |
 | Subtotal     | decimal(10,2)       | Subtotal del producto (cantidad × precio) |
 
+### Tabla `gastos`
+| Campo        | Tipo                | Notas                                    |
+|--------------|---------------------|------------------------------------------|
+| ID_Gasto     | int(11), PK, auto_increment | ID único del gasto                  |
+| Fecha        | date, NOT NULL      | Fecha del gasto (sin hora)             |
+| Descripcion  | varchar(255), NOT NULL | Descripción del gasto                |
+| Monto        | decimal(10,2), NOT NULL | Monto del gasto                     |
+| Categoria    | varchar(100)        | Categoría del gasto                    |
+| ID_Usuario   | int(11), FK         | Usuario que registró el gasto          |
+
 ## Endpoints clave (API)
 
 ### Insumos
@@ -78,6 +92,13 @@
 - `GET /api/ventas/:id` — obtener detalles completos de una venta específica
 - `GET /api/ventas/exportar/pdf` — exportar ventas a PDF (pendiente)
 - `GET /api/ventas/exportar/excel` — exportar ventas a Excel (pendiente)
+
+### Gastos
+- `GET /api/gastos` — lista gastos con paginación y filtros (page, limit, fechaInicio, fechaFin, descripcion)
+- `GET /api/gastos/:id` — obtener detalles de un gasto específico
+- `POST /api/gastos` — crear nuevo gasto (Fecha, Descripcion, Monto, Categoria)
+- `PUT /api/gastos/:id` — actualizar gasto
+- `DELETE /api/gastos/:id` — eliminar gasto
 
 ## Decisiones de UX y validación
 
@@ -113,6 +134,15 @@
 - ✅ **UX consistente**: Iconos Bootstrap, colores unificados, diseño responsive
 - ✅ **Exportación preparada**: Botones para PDF y Excel (pendientes de implementar)
 
+### Gastos
+- ✅ **Filtros avanzados**: Fecha inicio/fin (rangos abiertos), descripción (LIKE)
+- ✅ **Filtros rápidos**: Hoy, Semana, Mes, Personalizado
+- ✅ **Modal unificado**: Crear/editar gastos en un solo modal dinámico
+- ✅ **Botones incremento/decremento**: Para montos con paso de 1.00
+- ✅ **Formato decimal consistente**: Punto decimal, formateo automático
+- ✅ **UX profesional**: Filtros flexibles, búsqueda por descripción
+- ✅ **Validación robusta**: Backend maneja filtros individuales y combinados
+
 ## Estado actual de los módulos
 
 ### ✅ **Módulo de Insumos - COMPLETADO**
@@ -142,6 +172,16 @@
 - **UX consistente**: Iconos Bootstrap, colores unificados, diseño responsive
 - **Exportación preparada**: Botones para PDF y Excel (pendientes de implementar)
 
+### ✅ **Módulo de Gastos - COMPLETADO**
+- **CRUD completo de gastos**: Crear, leer, actualizar, eliminar
+- **Filtros avanzados**: Fecha inicio/fin (rangos abiertos), descripción (LIKE)
+- **Filtros rápidos**: Hoy, Semana, Mes, Personalizado
+- **Modal unificado**: Crear/editar gastos en un solo modal dinámico
+- **Botones incremento/decremento**: Para montos con paso de 1.00
+- **Formato decimal consistente**: Punto decimal, formateo automático
+- **UX profesional**: Filtros flexibles, búsqueda por descripción
+- **Validación robusta**: Backend maneja filtros individuales y combinados
+
 ### 🔧 **Detalles técnicos importantes:**
 
 #### Insumos
@@ -165,6 +205,14 @@
 - **Formato de fechas**: Solo fecha sin hora para consistencia con BD
 - **Precio histórico**: Cálculo desde subtotal para precisión histórica
 - **UX responsive**: Tabla responsive, modales adaptables
+
+#### Gastos
+- **Filtros flexibles**: Backend maneja filtros individuales (solo inicio o solo fin)
+- **Búsqueda por descripción**: LIKE con otros filtros combinados
+- **Modal dinámico**: Un solo modal para crear/editar con título dinámico
+- **Formato decimal**: Punto decimal, paso de 1.00, botones +/- 1
+- **Filtros rápidos**: Hoy, Semana, Mes, Personalizado con UX intuitiva
+- **Validación robusta**: Backend valida y maneja todos los casos de filtrado
 
 ## Puntos pendientes o a revisar
 
@@ -197,6 +245,16 @@
 - Implementar exportación a PDF y Excel
 - Agregar filtros adicionales (por usuario, método de pago)
 
+### Gastos
+- ✅ CRUD completo de gastos funcional
+- ✅ Filtros avanzados con rangos abiertos
+- ✅ Búsqueda por descripción combinada con otros filtros
+- ✅ Modal unificado para crear/editar gastos
+- ✅ Botones incremento/decremento para montos
+- ✅ Formato decimal consistente con punto
+- ✅ Filtros rápidos con UX intuitiva
+- ✅ Validación robusta en backend
+
 ---
 
-> **Módulos de Insumos, Recetas y Ventas COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción.
+> **Módulos de Insumos, Recetas, Ventas y Gastos COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción.
