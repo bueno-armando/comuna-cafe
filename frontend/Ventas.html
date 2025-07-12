@@ -8,13 +8,13 @@
     <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-end">
         <div class="d-flex align-items-center gap-2">
             <label class="form-label mb-0">Buscar Desde</label>
-            <input type="date" id="fechaInicio" class="form-control">
+            <input type="date" id="filtroFechaInicio" class="form-control">
         </div>
         <div class="d-flex align-items-center gap-2">
             <label class="form-label mb-0">Hasta</label>
-            <input type="date" id="fechaFin" class="form-control">
+            <input type="date" id="filtroFechaFin" class="form-control">
         </div>
-        <button id="buscarVentasBtn" class="btn btn-cafe"><i class="bi bi-search"></i></button>
+        <button id="aplicarFiltrosVentas" class="btn btn-cafe"><i class="bi bi-search"></i></button>
     </div>
     <!-- Tabla de ventas -->
     <div class="table-responsive">
@@ -29,38 +29,14 @@
                     <th><i class="bi bi-eye me-2"></i>Ver detalles</th>
                 </tr>
             </thead>
-            <tbody id="ventasTableBody">
-                <!-- Ejemplo de fila de venta (debe llenarse dinámicamente por el backend) -->
-                <tr>
-                    <td>01.</td>
-                    <td>21/03/25</td>
-                    <td>300</td>
-                    <td>Tarjeta</td>
-                    <td>AlanaRivas</td>
-                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="1">Ver detalles</button></td>
-                </tr>
-                <tr>
-                    <td>02.</td>
-                    <td>22/03/25</td>
-                    <td>150</td>
-                    <td>Efectivo</td>
-                    <td>GaboMtz</td>
-                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="2">Ver detalles</button></td>
-                </tr>
-                <tr>
-                    <td>03.</td>
-                    <td>23/03/25</td>
-                    <td>70</td>
-                    <td>Efectivo</td>
-                    <td>GaboMtz</td>
-                    <td><button class="btn btn-sm btn-outline-success ver-detalle-btn" data-bs-toggle="modal" data-bs-target="#detalleVentaModal" data-venta-id="3">Ver detalles</button></td>
-                </tr>
-                <tr>
-                    <td colspan="6" class="text-center py-4">No hay ventas registradas.</td>
-                </tr>
+            <tbody id="salesTableBody">
+                <!-- Las filas de ventas se llenarán dinámicamente por JS -->
             </tbody>
         </table>
     </div>
+    <nav aria-label="Paginación de ventas">
+        <ul class="pagination justify-content-center mt-3" id="paginationVentas"></ul>
+    </nav>
 </div>
 
 <!-- Modal: Detalles de Venta -->
@@ -78,23 +54,23 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
                             <label class="form-label">ID Venta</label>
-                            <input type="text" class="form-control" id="detalleVentaId" readonly>
+                            <input type="text" class="form-control" id="saleDetailId" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Usuario</label>
-                            <input type="text" class="form-control" id="detalleVentaUsuario" readonly>
+                            <input type="text" class="form-control" id="saleDetailUser" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Fecha</label>
-                            <input type="text" class="form-control" id="detalleVentaFecha" readonly>
+                            <input type="text" class="form-control" id="saleDetailDate" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Método de Pago</label>
-                            <input type="text" class="form-control" id="detalleVentaMetodo" readonly>
+                            <input type="text" class="form-control" id="saleDetailMethod" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Total de Venta</label>
-                            <input type="text" class="form-control" id="detalleVentaTotal" readonly>
+                            <input type="text" class="form-control" id="saleDetailTotal" readonly>
                         </div>
                     </div>
                 </form>
@@ -108,26 +84,8 @@
                                 <th><i class="bi bi-calculator me-2"></i>Subtotal</th>
                             </tr>
                         </thead>
-                        <tbody id="detalleVentaProductos">
-                            <!-- Ejemplo de productos vendidos (debe llenarse dinámicamente por el backend) -->
-                            <tr>
-                                <td>Latte</td>
-                                <td>1</td>
-                                <td>45.00</td>
-                                <td>45.00</td>
-                            </tr>
-                            <tr>
-                                <td>Frappe de Oreo</td>
-                                <td>2</td>
-                                <td>55.00</td>
-                                <td>110.00</td>
-                            </tr>
-                            <tr>
-                                <td>Sandwich Clásico</td>
-                                <td>1</td>
-                                <td>60.00</td>
-                                <td>60.00</td>
-                            </tr>
+                        <tbody id="saleDetailProducts">
+                            <!-- Productos vendidos se llenarán dinámicamente -->
                         </tbody>
                     </table>
                 </div>

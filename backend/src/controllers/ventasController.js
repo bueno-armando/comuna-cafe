@@ -4,7 +4,11 @@ const { validationResult } = require('express-validator');
 // Obtener todas las ventas
 const getVentas = async (req, res) => {
     try {
-        const [ventas] = await pool.query(`
+        const { page = 1, limit = 9, fechaInicio, fechaFin } = req.query;
+        const offset = (page - 1) * limit;
+        
+        // Construir la consulta base
+        let query = `
             SELECT 
                 v.ID_Venta,
                 v.Fecha,
@@ -13,9 +17,42 @@ const getVentas = async (req, res) => {
                 u.Usuario AS Nombre_Usuario
             FROM ventas v
             JOIN usuarios u ON v.ID_Usuario = u.ID_Usuario
-            ORDER BY v.Fecha DESC
-        `);
-        res.json(ventas);
+        `;
+        
+        let countQuery = `
+            SELECT COUNT(*) as total
+            FROM ventas v
+            JOIN usuarios u ON v.ID_Usuario = u.ID_Usuario
+        `;
+        
+        const params = [];
+        const countParams = [];
+        
+        // Agregar filtros si se proporcionan
+        if (fechaInicio && fechaFin) {
+            query += ` WHERE v.Fecha BETWEEN ? AND ?`;
+            countQuery += ` WHERE v.Fecha BETWEEN ? AND ?`;
+            params.push(fechaInicio, fechaFin);
+            countParams.push(fechaInicio, fechaFin);
+        }
+        
+        query += ` ORDER BY v.Fecha DESC LIMIT ? OFFSET ?`;
+        params.push(parseInt(limit), offset);
+        
+        // Ejecutar consultas
+        const [ventas] = await pool.query(query, params);
+        const [countResult] = await pool.query(countQuery, countParams);
+        
+        const totalVentas = countResult[0].total;
+        const totalPages = Math.ceil(totalVentas / limit);
+        
+        res.json({
+            ventas: ventas,
+            totalVentas: totalVentas,
+            totalPages: totalPages,
+            currentPage: parseInt(page),
+            limit: parseInt(limit)
+        });
     } catch (error) {
         console.error('Error al obtener ventas:', error);
         res.status(500).json({ message: 'Error al obtener ventas' });

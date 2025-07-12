@@ -163,14 +163,90 @@ Authorization: Bearer <token>
 
 ---
 
+### Ventas
+
+| Método | Ruta                                    | Descripción                                    |
+|--------|-----------------------------------------|------------------------------------------------|
+| GET    | /api/ventas                             | Obtener ventas con paginación y filtros       |
+| GET    | /api/ventas/:id                         | Obtener detalles de una venta específica      |
+| GET    | /api/ventas/exportar/pdf                | Exportar ventas a PDF (pendiente)             |
+| GET    | /api/ventas/exportar/excel              | Exportar ventas a Excel (pendiente)           |
+
+#### Parámetros para GET /api/ventas
+
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Ventas por página (default: 9)
+- `fechaInicio` (opcional): Fecha de inicio para filtrar (YYYY-MM-DD)
+- `fechaFin` (opcional): Fecha de fin para filtrar (YYYY-MM-DD)
+
+#### Ejemplo de respuesta para GET /api/ventas
+
+```json
+{
+  "ventas": [
+    {
+      "ID_Venta": 1,
+      "Fecha": "2024-01-15",
+      "Total": "150.00",
+      "Metodo_Pago": "Efectivo",
+      "Nombre_Usuario": "admin"
+    },
+    {
+      "ID_Venta": 2,
+      "Fecha": "2024-01-15",
+      "Total": "75.50",
+      "Metodo_Pago": "Tarjeta",
+      "Nombre_Usuario": "vendedor1"
+    }
+  ],
+  "totalVentas": 25,
+  "totalPages": 3,
+  "currentPage": 1,
+  "limit": 9
+}
+```
+
+#### Ejemplo de respuesta para GET /api/ventas/1
+
+```json
+{
+  "venta": {
+    "ID_Venta": 1,
+    "Fecha": "2024-01-15",
+    "Total": "150.00",
+    "Metodo_Pago": "Efectivo",
+    "Nombre_Usuario": "admin"
+  },
+  "detalles": [
+    {
+      "Producto": "Latte",
+      "Cantidad": 2,
+      "Subtotal": "90.00",
+      "Precio_Unitario": "45.00"
+    },
+    {
+      "Producto": "Cappuccino",
+      "Cantidad": 1,
+      "Subtotal": "60.00",
+      "Precio_Unitario": "60.00"
+    }
+  ]
+}
+```
+
+#### Ejemplo de request para GET /api/ventas con filtros
+
+```
+GET /api/ventas?page=1&limit=9&fechaInicio=2024-01-01&fechaFin=2024-01-31
+```
+
+---
+
 ### Productos
 (Completar con los endpoints de productos...)
 
 ### Usuarios
 (Completar con los endpoints de usuarios...)
-
-### Ventas
-(Completar con los endpoints de ventas...)
 
 ### Inventario
 (Completar con los endpoints de inventario...)

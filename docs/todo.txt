@@ -5,7 +5,13 @@
     * Paginar productos en modulos productos y Recetas
     * Hacer consistente el estilo de los productos (usar misma clase)
     * Añadir a clase productos la capacidad de poner una imagen de fondo
+    * Añadir paginación a todos los módulos
+    * Que en todos los modulos el scroll solo sea sobre los contenidos
 
+- ERRORES:
+  * Al seleccionar el módulo de usuarios los íconos en el sidebar cambian;
+  investigar la causa de esto (probablemente hay que corregir la manera en 
+  que se carga la vista usuarios para que sea consistente con las demás)
 
 - Bitácora:
   * Paginar los resultados

@@ -8,11 +8,15 @@
   - `src/models/insumos.model.js`: consultas SQL para insumos y proveedores
   - `src/routes/recetasRoutes.js`: rutas de recetas (`/api/recetas`, `/api/recetas/productos/todos`, etc.)
   - `src/controllers/recetas.controller.js`: lógica de recetas
+  - `src/routes/ventasRoutes.js`: rutas de ventas (`/api/ventas`, `/api/ventas/:id`, etc.)
+  - `src/controllers/ventasController.js`: lógica de ventas
 - **frontend/**: HTML + JS vanilla
   - `Insumos.html`: vista de gestión de insumos
   - `js/insumos.js`: lógica de frontend para insumos
   - `Recetas.html`: vista de gestión de recetas
   - `js/recetas.js`: lógica de frontend para recetas
+  - `Ventas.html`: vista de gestión de ventas
+  - `js/ventas.js`: lógica de frontend para ventas
 - **docs/**: documentación y especificaciones
 
 ## Tablas principales (DB)
@@ -34,6 +38,23 @@
 | Cantidad_Necesaria | decimal(10,2)       | Cantidad requerida del insumo            |
 | Unidad             | varchar(10)         | Unidad de medida (ml, g, Pza, etc.)     |
 
+### Tabla `ventas`
+| Campo        | Tipo                | Notas                                    |
+|--------------|---------------------|------------------------------------------|
+| ID_Venta     | int(11), PK, auto_increment | ID único de la venta                |
+| Fecha        | date, NOT NULL      | Fecha de la venta (sin hora)           |
+| Total        | decimal(10,2)       | Total de la venta                      |
+| Metodo_Pago  | varchar(50)         | Método de pago (Efectivo, Tarjeta, etc.) |
+| ID_Usuario   | int(11), FK         | Usuario que realizó la venta           |
+
+### Tabla `detalle_venta`
+| Campo        | Tipo                | Notas                                    |
+|--------------|---------------------|------------------------------------------|
+| ID_Venta     | int(11), PK, FK     | Referencia a ventas                     |
+| ID_Producto  | int(11), PK, FK     | Referencia a productos_venta            |
+| Cantidad     | int(11)             | Cantidad vendida                        |
+| Subtotal     | decimal(10,2)       | Subtotal del producto (cantidad × precio) |
+
 ## Endpoints clave (API)
 
 ### Insumos
@@ -51,6 +72,12 @@
 - `POST /api/recetas` — crear nueva receta (ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad)
 - `PUT /api/recetas/:productoId/:insumoId` — actualizar cantidad de ingrediente
 - `DELETE /api/recetas/:productoId/:insumoId` — eliminar ingrediente de receta
+
+### Ventas
+- `GET /api/ventas` — lista ventas con paginación (page, limit, fechaInicio, fechaFin)
+- `GET /api/ventas/:id` — obtener detalles completos de una venta específica
+- `GET /api/ventas/exportar/pdf` — exportar ventas a PDF (pendiente)
+- `GET /api/ventas/exportar/excel` — exportar ventas a Excel (pendiente)
 
 ## Decisiones de UX y validación
 
@@ -77,6 +104,15 @@
 - ✅ **Búsqueda de productos**: Con resultados en dropdown
 - ✅ **Modales consistentes**: Con íconos Bootstrap y colores unificados
 
+### Ventas
+- ✅ **Paginación completa**: 9 ventas por página con navegación intuitiva
+- ✅ **Filtros por fecha**: Rango de fechas con campos "Desde" y "Hasta"
+- ✅ **Modal de detalles**: Información completa de venta y productos vendidos
+- ✅ **Formato de fechas**: Solo fecha sin hora (dd/mm/yyyy)
+- ✅ **Precio unitario calculado**: Subtotal ÷ Cantidad para precisión histórica
+- ✅ **UX consistente**: Iconos Bootstrap, colores unificados, diseño responsive
+- ✅ **Exportación preparada**: Botones para PDF y Excel (pendientes de implementar)
+
 ## Estado actual de los módulos
 
 ### ✅ **Módulo de Insumos - COMPLETADO**
@@ -97,6 +133,15 @@
 - **Modales consistentes**: Con íconos Bootstrap y colores unificados
 - **UX profesional**: Nunca muestra página vacía, siempre hay contenido útil
 
+### ✅ **Módulo de Ventas - COMPLETADO**
+- **Paginación completa**: 9 ventas por página con navegación intuitiva
+- **Filtros por fecha**: Rango de fechas con campos "Desde" y "Hasta"
+- **Modal de detalles**: Información completa de venta y productos vendidos
+- **Formato de fechas**: Solo fecha sin hora (dd/mm/yyyy)
+- **Precio unitario calculado**: Subtotal ÷ Cantidad para precisión histórica
+- **UX consistente**: Iconos Bootstrap, colores unificados, diseño responsive
+- **Exportación preparada**: Botones para PDF y Excel (pendientes de implementar)
+
 ### 🔧 **Detalles técnicos importantes:**
 
 #### Insumos
@@ -112,6 +157,14 @@
 - **Formato decimal**: Punto decimal, paso de 1.00, botones +/- 1
 - **Navegación**: Breadcrumb y botón volver para contexto
 - **Jerarquía visual**: Nombres prominentes, botones secundarios
+
+#### Ventas
+- **Paginación inteligente**: Máximo 5 páginas visibles, botones anterior/siguiente
+- **Filtros dinámicos**: Fecha inicio/fin con validación automática
+- **Modal de detalles**: Carga asíncrona de venta y productos vendidos
+- **Formato de fechas**: Solo fecha sin hora para consistencia con BD
+- **Precio histórico**: Cálculo desde subtotal para precisión histórica
+- **UX responsive**: Tabla responsive, modales adaptables
 
 ## Puntos pendientes o a revisar
 
@@ -134,6 +187,16 @@
 - ✅ Modales con diseño Bootstrap consistente
 - ✅ UX profesional sin páginas vacías
 
+### Ventas
+- ✅ Paginación completa con navegación intuitiva
+- ✅ Filtros por rango de fechas funcionales
+- ✅ Modal de detalles con información completa
+- ✅ Formato de fechas consistente (sin hora)
+- ✅ Cálculo preciso de precios unitarios históricos
+- ✅ UX consistente con otros módulos
+- Implementar exportación a PDF y Excel
+- Agregar filtros adicionales (por usuario, método de pago)
+
 ---
 
-> **Módulos de Insumos y Recetas COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción. 
+> **Módulos de Insumos, Recetas y Ventas COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción.
