@@ -4,7 +4,7 @@ const gastosController = {
     // Obtener todos los gastos con información del usuario
     async getAll(req, res) {
         try {
-            const { fechaInicio, fechaFin } = req.query;
+            const { fechaInicio, fechaFin, descripcion } = req.query;
             
             let query = `
                 SELECT g.*, u.Usuario as Nombre_Usuario
@@ -12,14 +12,38 @@ const gastosController = {
                 JOIN usuarios u ON g.ID_Usuario = u.ID_Usuario
             `;
             let params = [];
+            let whereConditions = [];
             
-            // Aplicar filtros de fecha si se proporcionan
+            // Aplicar filtros de fecha
             if (fechaInicio && fechaFin) {
-                query += ` WHERE g.Fecha BETWEEN ? AND ?`;
+                // Ambas fechas: rango completo
+                whereConditions.push(`g.Fecha BETWEEN ? AND ?`);
                 params.push(fechaInicio, fechaFin);
+            } else if (fechaInicio) {
+                // Solo fecha inicio: desde X hasta cualquier fecha
+                whereConditions.push(`g.Fecha >= ?`);
+                params.push(fechaInicio);
+            } else if (fechaFin) {
+                // Solo fecha fin: desde cualquier fecha hasta Y
+                whereConditions.push(`g.Fecha <= ?`);
+                params.push(fechaFin);
+            }
+            
+            // Aplicar filtro de descripción
+            if (descripcion) {
+                whereConditions.push(`g.Descripcion LIKE ?`);
+                params.push(`%${descripcion}%`);
+            }
+            
+            // Construir WHERE si hay condiciones
+            if (whereConditions.length > 0) {
+                query += ` WHERE ${whereConditions.join(' AND ')}`;
             }
             
             query += ` ORDER BY g.Fecha DESC`;
+            
+            console.log('Query SQL:', query);
+            console.log('Parámetros:', params);
             
             const [gastos] = await pool.query(query, params);
             res.json(gastos);

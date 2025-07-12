@@ -1,20 +1,21 @@
-- Ventas:
-  * Poner "buscar desde" y "hasta" a la misma altura
-  * quitar lupa de busqueda
-  * cambiar formato de las fechas de busqeuda a DD/MM/YY
-  * añadir botón para resetear filtro de fechas
-  * añadir filtrado por cada atributo
+- Recetas:
+  * Que la guía de navegación este abajo del título "Gestión de Recetas"
 
-- Gastos:
-  * Añadir botón para remover filtro de fecha al lado de la notificación de filtro aplicado
-  * Ver si es correcto que no se puede editar el monto de un gasto ya registrado
-  * Hacer un modal apropiado para la edición de gastos
+- Bitácora:
+  * Paginar los resultados
+  * Usar código de colores en la columna de operación
+  * Mejorar la sección de filtros para:
+    * quitar el texto "Filtrar" del mismo botón
+    * que los campos de fecha ocupen una unidad
+    * que la busqueda por fecha sea flexible
+    * que el campo para buscar por usuario este con los demás
+    * que también se pueda buscar por operación
+    * mostrar notificaciónd descriptiva cuando se aplican filtros
 
 - MISC:
   - Añadir botón de esconder/mostrar contraseña al inicio de sesión
   - Investigar sobre mecanismos de recuperación del sistema
   - Retoques (después de finalizar la base de todos los módulos):
-    * Paginar productos en modulos productos y Recetas
     * Hacer consistente el estilo de los productos (usar misma clase)
     * Añadir a clase productos la capacidad de poner una imagen de fondo
     * Añadir paginación a todos los módulos
@@ -24,6 +25,3 @@
   * Al seleccionar el módulo de usuarios los íconos en el sidebar cambian;
   investigar la causa de esto (probablemente hay que corregir la manera en 
   que se carga la vista usuarios para que sea consistente con las demás)
-
-- Bitácora:
-  * Paginar los resultados

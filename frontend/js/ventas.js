@@ -1,7 +1,12 @@
 (function() {
     const API_URL_VENTAS = '/api/ventas'; 
     let ventas = [];
-    let currentFiltersVentas = { fechaInicio: '', fechaFin: '', usuario: '' }; // Renombrar
+    let currentFiltersVentas = { 
+        fechaInicio: '', 
+        fechaFin: '', 
+        usuario: '', 
+        metodoPago: '' 
+    };
     let currentPageVentas = 1; // Renombrar
     const rowsPerPageVentas = 9; // Renombrar
 
@@ -34,6 +39,7 @@
             if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
             if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
             if (filters.usuario) params.append('usuario', filters.usuario);
+            if (filters.metodoPago) params.append('metodoPago', filters.metodoPago);
             params.append('page', page);
             params.append('limit', limit);
 
@@ -69,22 +75,45 @@
     }
 
     function renderTableVentas(ventasToRender) {
-        const tableBody = document.getElementById('salesTableBody'); // ID de la tabla en Ventas.html
+        const tableBody = document.getElementById('salesTableBody');
         if (!tableBody) return console.warn('Ventas: salesTableBody no encontrado.');
         tableBody.innerHTML = '';
-        (ventasToRender || []).forEach(venta => {
+        
+        if (!ventasToRender || ventasToRender.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="bi bi-inbox me-2"></i>No hay ventas registradas
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        ventasToRender.forEach(venta => {
             const row = tableBody.insertRow();
             row.innerHTML = `
-                    <td>${venta.ID_Venta}</td>
-                <td>${new Date(venta.Fecha).toLocaleDateString('es-MX')}</td>
+                <td>${venta.ID_Venta}</td>
+                <td>${formatDate(venta.Fecha)}</td>
                 <td>$${parseFloat(venta.Total).toFixed(2)}</td>
                 <td>${venta.Metodo_Pago}</td>
                 <td>${venta.Nombre_Usuario || 'N/A'}</td>
                 <td>
-                    <button class="btn btn-sm btn-info ver-detalle-btn" data-venta-id="${venta.ID_Venta}">Ver Detalles</button>
-                    </td>
-                `;
+                    <button class="btn btn-sm btn-info ver-detalle-btn" data-venta-id="${venta.ID_Venta}">
+                        <i class="bi bi-eye me-1"></i>Ver Detalles
+                    </button>
+                </td>
+            `;
         });
+    }
+
+    // Función para formatear fechas en formato DD/MM/YY
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        return `${day}/${month}/${year}`;
     }
 
     function renderPaginationVentas(totalPages, currentPage) {
@@ -165,7 +194,7 @@
             // Llenar campos del modal
             document.getElementById('saleDetailId').value = res.venta.ID_Venta;
             document.getElementById('saleDetailUser').value = res.venta.Nombre_Usuario;
-            document.getElementById('saleDetailDate').value = new Date(res.venta.Fecha).toLocaleDateString('es-MX');
+            document.getElementById('saleDetailDate').value = formatDate(res.venta.Fecha);
             document.getElementById('saleDetailMethod').value = res.venta.Metodo_Pago;
             document.getElementById('saleDetailTotal').value = `$${parseFloat(res.venta.Total).toFixed(2)}`;
             // Llenar tabla de productos vendidos
@@ -193,6 +222,49 @@
         }
     }
 
+    // Función para mostrar indicador de filtros aplicados
+    function mostrarFiltrosAplicados() {
+        const filtrosAplicados = [];
+        if (currentFiltersVentas.fechaInicio) filtrosAplicados.push(`Desde: ${formatDate(currentFiltersVentas.fechaInicio)}`);
+        if (currentFiltersVentas.fechaFin) filtrosAplicados.push(`Hasta: ${formatDate(currentFiltersVentas.fechaFin)}`);
+        if (currentFiltersVentas.usuario) filtrosAplicados.push(`Usuario: ${currentFiltersVentas.usuario}`);
+        if (currentFiltersVentas.metodoPago) filtrosAplicados.push(`Método: ${currentFiltersVentas.metodoPago}`);
+
+        const alertElement = document.getElementById('filtrosAplicados');
+        const textoElement = document.getElementById('textoFiltrosAplicados');
+        
+        if (filtrosAplicados.length > 0) {
+            textoElement.textContent = `Filtros aplicados: ${filtrosAplicados.join(', ')}`;
+            alertElement.classList.remove('d-none');
+        } else {
+            alertElement.classList.add('d-none');
+        }
+    }
+
+    // Función para limpiar filtros
+    function limpiarFiltros() {
+        currentFiltersVentas = { fechaInicio: '', fechaFin: '', usuario: '', metodoPago: '' };
+        
+        // Limpiar campos del formulario
+        const fechaInicioInput = document.getElementById('filtroFechaInicio');
+        const fechaFinInput = document.getElementById('filtroFechaFin');
+        const usuarioInput = document.getElementById('filtroUsuario');
+        const metodoPagoInput = document.getElementById('filtroMetodoPago');
+        
+        if (fechaInicioInput) fechaInicioInput.value = '';
+        if (fechaFinInput) fechaFinInput.value = '';
+        if (usuarioInput) usuarioInput.value = '';
+        if (metodoPagoInput) metodoPagoInput.value = '';
+        
+        // Ocultar indicador de filtros
+        const alertElement = document.getElementById('filtrosAplicados');
+        alertElement.classList.add('d-none');
+        
+        // Recargar ventas sin filtros
+        currentPageVentas = 1;
+        fetchVentas(currentFiltersVentas, currentPageVentas, rowsPerPageVentas);
+    }
+
     function initVentas() {
         console.log('=== Inicializando módulo Ventas ===');
         fetchVentas(currentFiltersVentas, currentPageVentas, rowsPerPageVentas);
@@ -200,18 +272,49 @@
         // Event listeners para filtros
         const fechaInicioInput = document.getElementById('filtroFechaInicio');
         const fechaFinInput = document.getElementById('filtroFechaFin');
-        // const usuarioInput = document.getElementById('filtroUsuario'); // No hay filtro de usuario en la plantilla
+        const usuarioInput = document.getElementById('filtroUsuario');
+        const metodoPagoInput = document.getElementById('filtroMetodoPago');
         const aplicarFiltrosBtn = document.getElementById('aplicarFiltrosVentas');
+        const cerrarFiltrosBtn = document.getElementById('cerrarFiltros');
 
         if (aplicarFiltrosBtn) {
             aplicarFiltrosBtn.addEventListener('click', () => {
-                if (fechaInicioInput) currentFiltersVentas.fechaInicio = fechaInicioInput.value;
-                if (fechaFinInput) currentFiltersVentas.fechaFin = fechaFinInput.value;
-                // if (usuarioInput) currentFiltersVentas.usuario = usuarioInput.value;
+                currentFiltersVentas.fechaInicio = fechaInicioInput ? fechaInicioInput.value : '';
+                currentFiltersVentas.fechaFin = fechaFinInput ? fechaFinInput.value : '';
+                currentFiltersVentas.usuario = usuarioInput ? usuarioInput.value.trim() : '';
+                currentFiltersVentas.metodoPago = metodoPagoInput ? metodoPagoInput.value : '';
+                
                 currentPageVentas = 1;
                 fetchVentas(currentFiltersVentas, currentPageVentas, rowsPerPageVentas);
+                mostrarFiltrosAplicados();
             });
         } else console.warn('Ventas: aplicarFiltrosVentas no encontrado.');
+
+
+
+        if (cerrarFiltrosBtn) {
+            cerrarFiltrosBtn.addEventListener('click', limpiarFiltros);
+        }
+
+        // Búsqueda en tiempo real para usuario
+        if (usuarioInput) {
+            usuarioInput.addEventListener('input', debounce(() => {
+                currentFiltersVentas.usuario = usuarioInput.value.trim();
+                currentPageVentas = 1;
+                fetchVentas(currentFiltersVentas, currentPageVentas, rowsPerPageVentas);
+                mostrarFiltrosAplicados();
+            }, 500));
+        }
+
+        // Filtro automático para método de pago
+        if (metodoPagoInput) {
+            metodoPagoInput.addEventListener('change', () => {
+                currentFiltersVentas.metodoPago = metodoPagoInput.value;
+                currentPageVentas = 1;
+                fetchVentas(currentFiltersVentas, currentPageVentas, rowsPerPageVentas);
+                mostrarFiltrosAplicados();
+            });
+        }
 
         // Delegación de eventos para botones "Ver Detalles"
         const tableBody = document.getElementById('salesTableBody');
@@ -224,6 +327,19 @@
                 }
             });
         } else console.warn('Ventas: salesTableBody no encontrado para delegación.');
+    }
+
+    // Función debounce para búsqueda en tiempo real
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     window.initVentas = initVentas;

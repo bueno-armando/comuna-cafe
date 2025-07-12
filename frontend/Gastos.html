@@ -4,44 +4,53 @@
     <h1 class="page-title mb-4">
         <i class="bi bi-cash-stack me-2"></i>Gestión de Gastos
     </h1>
-    <!-- Formulario para agregar un nuevo gasto -->
+    
+    <!-- Botón para agregar nuevo gasto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button id="agregarGastoBtn" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Gasto
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros para buscar gastos -->
     <div class="row g-3 mb-4">
-        <div class="col-md-5">
-            <label for="descripcion" class="form-label">Descripción del gasto:</label>
-            <input type="text" id="descripcion" class="form-control" placeholder="Ej. Renta, Reparación, etc.">
+        <div class="col-md-4">
+            <label class="form-label">Filtros rápidos:</label>
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="hoy">Hoy</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="semana">Semana</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="mes">Mes</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="personalizado">Personalizado</button>
+            </div>
         </div>
-        <div class="col-md-3">
-            <label for="monto" class="form-label">Monto:</label>
-            <input type="number" id="monto" class="form-control" placeholder="Ej. 3000" step="0.01" min="0">
+        <div class="col-md-5" id="datePickerContainer" style="display: none;">
+            <label class="form-label">Rango de fechas:</label>
+            <div class="input-group">
+                <input type="date" id="fechaInicio" class="form-control" placeholder="Desde">
+                <span class="input-group-text">hasta</span>
+                <input type="date" id="fechaFin" class="form-control" placeholder="Hasta">
+            </div>
         </div>
-        <div class="col-md-3">
-            <label for="fecha" class="form-label">Fecha:</label>
-            <input type="date" id="fecha" class="form-control">
+        <div class="col-md-2">
+            <label class="form-label">Descripción:</label>
+            <input type="text" id="buscarDescripcion" class="form-control">
         </div>
         <div class="col-md-1 d-flex align-items-end">
-            <!-- Botón para registrar el gasto -->
-            <button id="registrarBtn" class="btn btn-cafe w-100">
-                <i class="bi bi-plus-lg"></i>
+            <button id="aplicarFiltrosBtn" class="btn btn-primary w-100" title="Aplicar filtros">
+                <i class="bi bi-funnel"></i>
             </button>
         </div>
     </div>
-    <!-- Filtros para buscar gastos por fecha -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <label for="fechaInicio" class="form-label">Desde:</label>
-            <input type="date" id="fechaInicio" class="form-control">
-        </div>
-        <div class="col-md-4">
-            <label for="fechaFin" class="form-label">Hasta:</label>
-            <input type="date" id="fechaFin" class="form-control">
-        </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <!-- Botón para filtrar gastos -->
-            <button id="filtrarBtn" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Filtrar
-            </button>
-        </div>
+
+    <!-- Indicador de filtros aplicados -->
+    <div id="filtrosAplicados" class="alert alert-info d-none mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+        <span id="textoFiltrosAplicados"></span>
+        <button type="button" class="btn-close float-end" id="cerrarFiltros"></button>
     </div>
+
     <!-- Tabla de gastos registrados -->
     <div class="table-responsive">
         <table class="table table-hover table-striped">
@@ -61,11 +70,13 @@
             </tbody>
         </table>
     </div>
+
     <!-- Total de gastos del periodo filtrado -->
     <div class="total-section rounded p-3 mt-3 text-end">
         <span class="me-2">Total Gastos del Periodo:</span>
         <span id="totalGastos" class="fw-bold">S/ 0.00</span>
     </div>
+
     <!-- Modal de confirmación para eliminar un gasto -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -85,6 +96,54 @@
                     </button>
                     <button type="button" class="btn btn-danger" id="confirmDelete">
                         <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar gasto -->
+    <div class="modal fade" id="gastoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="modalTitle">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Gasto
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="gastoForm">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="modalDescripcion" class="form-label">Descripción:</label>
+                                <input type="text" id="modalDescripcion" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalMonto" class="form-label">Monto:</label>
+                                <div class="input-group">
+                                    <button type="button" class="btn btn-outline-secondary" id="modalDecrementMonto">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <input type="number" id="modalMonto" class="form-control text-center" step="1.00" min="0" required style="-webkit-appearance: none; -moz-appearance: textfield;">
+                                    <button type="button" class="btn btn-outline-secondary" id="modalIncrementMonto">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalFecha" class="form-label">Fecha:</label>
+                                <input type="date" id="modalFecha" class="form-control" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="guardarGasto">
+                        <i class="bi bi-check-circle me-2"></i>Guardar
                     </button>
                 </div>
             </div>

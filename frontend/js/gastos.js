@@ -19,6 +19,133 @@
         return true;
     }
 
+    // Función para configurar el formato de decimales en inputs
+    function setupMontoInputFormat() {
+        const montoInputs = ['modalMonto'];
+        
+        montoInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.step = '1.00';
+                input.inputMode = 'text';
+                input.pattern = '[0-9]+(\\.[0-9]{1,2})?';
+                
+                // Solo mantener el evento blur para formateo
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = this.value.replace(',', '.');
+                        const numValue = parseFloat(this.value);
+                        if (!isNaN(numValue)) {
+                            this.value = numValue.toFixed(2);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para configurar botones de incremento/decremento
+    function setupIncrementDecrementButtons() {
+        // Botones para el modal
+        const incrementBtn = document.getElementById('modalIncrementMonto');
+        const decrementBtn = document.getElementById('modalDecrementMonto');
+        const montoInput = document.getElementById('modalMonto');
+        
+        if (incrementBtn && decrementBtn && montoInput) {
+            incrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(montoInput.value) || 0;
+                const newValue = currentValue + 1;
+                montoInput.value = newValue.toFixed(2);
+                montoInput.dispatchEvent(new Event('blur'));
+            });
+            
+            decrementBtn.addEventListener('click', function() {
+                const currentValue = parseFloat(montoInput.value) || 0;
+                const newValue = Math.max(0, currentValue - 1);
+                montoInput.value = newValue.toFixed(2);
+                montoInput.dispatchEvent(new Event('blur'));
+            });
+        }
+    }
+
+    // Función para configurar filtros rápidos
+    function setupQuickFilters() {
+        const quickFilterButtons = document.querySelectorAll('[data-period]');
+        const datePickerContainer = document.getElementById('datePickerContainer');
+        const fechaInicio = document.getElementById('fechaInicio');
+        const fechaFin = document.getElementById('fechaFin');
+        
+        quickFilterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remover clase activa de todos los botones
+                quickFilterButtons.forEach(btn => btn.classList.remove('active'));
+                // Agregar clase activa al botón clickeado
+                this.classList.add('active');
+                
+                const period = this.getAttribute('data-period');
+                const today = new Date();
+                
+                switch(period) {
+                    case 'hoy':
+                        // Mostrar solo gastos de hoy
+                        const todayStr = today.toISOString().split('T')[0];
+                        currentFilters = { fechaInicio: todayStr, fechaFin: todayStr };
+                        datePickerContainer.style.display = 'none';
+                        break;
+                        
+                    case 'semana':
+                        // Mostrar gastos de los últimos 7 días
+                        const weekAgo = new Date(today);
+                        weekAgo.setDate(today.getDate() - 7);
+                        const weekAgoStr = weekAgo.toISOString().split('T')[0];
+                        const todayStr2 = today.toISOString().split('T')[0];
+                        currentFilters = { fechaInicio: weekAgoStr, fechaFin: todayStr2 };
+                        datePickerContainer.style.display = 'none';
+                        break;
+                        
+                    case 'mes':
+                        // Mostrar gastos del mes actual
+                        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                        const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
+                        const lastDayStr = lastDayOfMonth.toISOString().split('T')[0];
+                        currentFilters = { fechaInicio: firstDayStr, fechaFin: lastDayStr };
+                        datePickerContainer.style.display = 'none';
+                        break;
+                        
+                    case 'personalizado':
+                        // Mostrar campos de fecha personalizada
+                        datePickerContainer.style.display = 'block';
+                        currentFilters = {};
+                        return; // No aplicar filtro automáticamente
+                }
+                
+                // No aplicar automáticamente, esperar al botón "Aplicar"
+                // loadGastos();
+                // mostrarFiltrosAplicados();
+            });
+        });
+        
+        // Configurar campos de fecha personalizada
+        if (fechaInicio && fechaFin) {
+            fechaInicio.addEventListener('change', function() {
+                if (fechaFin.value && this.value > fechaFin.value) {
+                    showAlert('La fecha de inicio no puede ser mayor a la fecha de fin', 'warning');
+                    this.value = '';
+                    return;
+                }
+            });
+            
+            fechaFin.addEventListener('change', function() {
+                if (fechaInicio.value && this.value < fechaInicio.value) {
+                    showAlert('La fecha de fin no puede ser menor a la fecha de inicio', 'warning');
+                    this.value = '';
+                    return;
+                }
+            });
+        }
+    }
+
     // Función para hacer peticiones a la API
     async function fetchAPI(endpoint, options = {}) {
         try {
@@ -135,13 +262,177 @@
         }
     }
 
-    // Función para registrar un nuevo gasto
-    async function registerGasto(event) {
-        event.preventDefault();
+    // Variable para controlar si estamos agregando o editando
+    let isEditing = false;
+    let gastoEditandoId = null;
+
+    // Función para abrir modal de agregar gasto
+    function openAddGastoModal() {
+        isEditing = false;
+        gastoEditandoId = null;
         
-        const descripcion = document.getElementById('descripcion').value.trim();
-        const monto = parseFloat(document.getElementById('monto').value);
-        const fecha = document.getElementById('fecha').value;
+        // Limpiar formulario
+        document.getElementById('modalDescripcion').value = '';
+        document.getElementById('modalMonto').value = '';
+        document.getElementById('modalFecha').value = '';
+        
+        // Configurar fecha por defecto
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('modalFecha').value = today;
+        
+        // Actualizar título del modal
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Gasto';
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('gastoModal'));
+        modal.show();
+    }
+
+    // Función para abrir modal de editar gasto
+    window.editGasto = async function(id) {
+        try {
+            const gasto = await fetchAPI(`/${id}`);
+            isEditing = true;
+            gastoEditandoId = id;
+            
+            // Llenar el modal con los datos del gasto
+            document.getElementById('modalDescripcion').value = gasto.Descripcion;
+            document.getElementById('modalMonto').value = gasto.Monto;
+            
+            // Asegurar que la fecha se formatee correctamente para el input date
+            const fechaGasto = new Date(gasto.Fecha);
+            const fechaFormateada = fechaGasto.toISOString().split('T')[0];
+            document.getElementById('modalFecha').value = fechaFormateada;
+            
+            // Actualizar título del modal
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.innerHTML = '<i class="bi bi-pencil me-2"></i>Editar Gasto';
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('gastoModal'));
+            modal.show();
+        } catch (error) {
+            console.error('Error al cargar gasto para editar:', error);
+            showAlert('Error al cargar los datos del gasto', 'danger');
+        }
+    };
+
+    // Función para mostrar indicador de filtros aplicados
+    function mostrarFiltrosAplicados() {
+        const alertElement = document.getElementById('filtrosAplicados');
+        const textoElement = document.getElementById('textoFiltrosAplicados');
+        
+        // Determinar qué tipo de filtro está activo
+        const activeButton = document.querySelector('[data-period].active');
+        let filtroTexto = '';
+        let filtrosAplicados = [];
+        
+        // Agregar filtro de descripción si existe
+        if (currentFilters.descripcion) {
+            filtrosAplicados.push(`Descripción: "${currentFilters.descripcion}"`);
+        }
+        
+        if (activeButton) {
+            const period = activeButton.getAttribute('data-period');
+            switch(period) {
+                case 'hoy':
+                    filtroTexto = 'Mostrando gastos de hoy';
+                    break;
+                case 'semana':
+                    filtroTexto = 'Mostrando gastos de los últimos 7 días';
+                    break;
+                case 'mes':
+                    filtroTexto = 'Mostrando gastos del mes actual';
+                    break;
+                case 'personalizado':
+                    if (currentFilters.fechaInicio && currentFilters.fechaFin) {
+                        filtroTexto = `Mostrando gastos desde ${formatDate(currentFilters.fechaInicio)} hasta ${formatDate(currentFilters.fechaFin)}`;
+                    } else {
+                        filtroTexto = 'Rango personalizado seleccionado';
+                    }
+                    break;
+            }
+        } else if (currentFilters.fechaInicio || currentFilters.fechaFin) {
+            // Filtros manuales (por compatibilidad)
+            if (currentFilters.fechaInicio && currentFilters.fechaFin) {
+                filtrosAplicados.push(`Desde: ${formatDate(currentFilters.fechaInicio)} hasta: ${formatDate(currentFilters.fechaFin)}`);
+            } else if (currentFilters.fechaInicio) {
+                filtrosAplicados.push(`Desde: ${formatDate(currentFilters.fechaInicio)}`);
+            } else if (currentFilters.fechaFin) {
+                filtrosAplicados.push(`Hasta: ${formatDate(currentFilters.fechaFin)}`);
+            }
+        }
+        
+        // Combinar filtros de fecha con filtros de descripción
+        if (filtroTexto && filtrosAplicados.length > 0) {
+            filtroTexto += ` | ${filtrosAplicados.join(', ')}`;
+        } else if (filtrosAplicados.length > 0) {
+            filtroTexto = `Filtros aplicados: ${filtrosAplicados.join(', ')}`;
+        }
+        
+        if (filtroTexto) {
+            textoElement.textContent = filtroTexto;
+            alertElement.classList.remove('d-none');
+        } else {
+            alertElement.classList.add('d-none');
+        }
+    }
+
+    // Función para aplicar todos los filtros
+    async function aplicarFiltros() {
+        // Obtener filtro de descripción
+        const descripcion = document.getElementById('buscarDescripcion').value.trim();
+        if (descripcion) {
+            currentFilters.descripcion = descripcion;
+        } else {
+            delete currentFilters.descripcion;
+        }
+
+        // Obtener filtros de fecha si están en modo personalizado
+        const personalizadoBtn = document.querySelector('[data-period="personalizado"]');
+        const isPersonalizado = personalizadoBtn && personalizadoBtn.classList.contains('active');
+        
+        if (isPersonalizado) {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+
+            // Aplicar filtros de fecha según lo que esté completado
+            if (fechaInicio && fechaFin) {
+                // Ambas fechas completas
+                if (fechaInicio > fechaFin) {
+                    showAlert('La fecha de inicio no puede ser mayor a la fecha final', 'warning');
+                    return;
+                }
+                currentFilters.fechaInicio = fechaInicio;
+                currentFilters.fechaFin = fechaFin;
+            } else if (fechaInicio) {
+                // Solo fecha inicio: desde X hasta cualquier fecha
+                currentFilters.fechaInicio = fechaInicio;
+                delete currentFilters.fechaFin;
+            } else if (fechaFin) {
+                // Solo fecha fin: desde cualquier fecha hasta Y
+                currentFilters.fechaFin = fechaFin;
+                delete currentFilters.fechaInicio;
+            }
+            // Si ambas fechas están vacías, no se aplican filtros de fecha
+        }
+
+        await loadGastos();
+        mostrarFiltrosAplicados();
+    }
+
+    // Función para filtrar gastos por fecha (mantenida por compatibilidad)
+    async function filterGastos() {
+        // Esta función ya no se usa, se reemplazó por aplicarFiltros()
+        await aplicarFiltros();
+    }
+
+    // Función para guardar gasto (agregar o editar)
+    async function guardarGasto() {
+        const descripcion = document.getElementById('modalDescripcion').value.trim();
+        const monto = parseFloat(document.getElementById('modalMonto').value);
+        const fecha = document.getElementById('modalFecha').value;
 
         // Validaciones
         if (!descripcion) {
@@ -168,109 +459,43 @@
         }
 
         try {
-            const userId = localStorage.getItem('userId') || 1;
-            const gastoData = {
-                Descripcion: descripcion,
-                Monto: monto,
-                Fecha: fecha,
-                ID_Usuario: parseInt(userId)
-            };
-
-            await fetchAPI('', {
-                method: 'POST',
-                body: JSON.stringify(gastoData)
-            });
-
-            showAlert('Gasto registrado exitosamente', 'success');
+            if (isEditing) {
+                // Actualizar gasto existente
+                await fetchAPI(`/${gastoEditandoId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        Descripcion: descripcion,
+                        Monto: monto,
+                        Fecha: fecha
+                    })
+                });
+                showAlert('Gasto actualizado exitosamente', 'success');
+            } else {
+                // Agregar nuevo gasto
+                const userId = localStorage.getItem('userId') || 1;
+                await fetchAPI('', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        Descripcion: descripcion,
+                        Monto: monto,
+                        Fecha: fecha,
+                        ID_Usuario: parseInt(userId)
+                    })
+                });
+                showAlert('Gasto registrado exitosamente', 'success');
+            }
             
-            // Limpiar formulario
-            document.getElementById('descripcion').value = '';
-            document.getElementById('monto').value = '';
-            document.getElementById('fecha').value = '';
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('gastoModal'));
+            modal.hide();
             
             // Recargar gastos
             await loadGastos();
         } catch (error) {
-            console.error('Error al registrar gasto:', error);
-            showAlert('Error al registrar el gasto', 'danger');
+            console.error('Error al guardar gasto:', error);
+            showAlert(`Error al ${isEditing ? 'actualizar' : 'registrar'} el gasto`, 'danger');
         }
     }
-
-    // Función para filtrar gastos por fecha
-    async function filterGastos() {
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
-
-        if (!fechaInicio || !fechaFin) {
-            showAlert('Por favor seleccione ambas fechas', 'warning');
-            return;
-        }
-
-        if (fechaInicio > fechaFin) {
-            showAlert('La fecha de inicio no puede ser mayor a la fecha final', 'warning');
-            return;
-        }
-
-        currentFilters = {
-            fechaInicio,
-            fechaFin
-        };
-
-        await loadGastos();
-        showAlert(`Filtrado gastos del ${formatDate(fechaInicio)} al ${formatDate(fechaFin)}`, 'info');
-    }
-
-    // Función para editar gasto
-    window.editGasto = async function(id) {
-        try {
-            const gasto = await fetchAPI(`/${id}`);
-            
-            // Llenar modal de edición (si existe) o usar alert para datos
-            const nuevaDescripcion = prompt('Nueva descripción:', gasto.Descripcion);
-            if (nuevaDescripcion === null) return;
-            
-            const nuevoMonto = prompt('Nuevo monto:', gasto.Monto);
-            if (nuevoMonto === null) return;
-            
-            const nuevaFecha = prompt('Nueva fecha (YYYY-MM-DD):', gasto.Fecha);
-            if (nuevaFecha === null) return;
-
-            // Validaciones
-            if (!nuevaDescripcion.trim()) {
-                showAlert('La descripción es requerida', 'warning');
-                return;
-            }
-
-            const monto = parseFloat(nuevoMonto);
-            if (!monto || monto <= 0) {
-                showAlert('El monto debe ser mayor a 0', 'warning');
-                return;
-            }
-
-            // Validar fecha futura
-            const fechaGasto = new Date(nuevaFecha);
-            const fechaActual = new Date();
-            if (fechaGasto > fechaActual) {
-                showAlert('No se pueden registrar gastos con fecha futura', 'warning');
-                return;
-            }
-
-            await fetchAPI(`/${id}`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    Descripcion: nuevaDescripcion,
-                    Monto: monto,
-                    Fecha: nuevaFecha
-                })
-            });
-
-            showAlert('Gasto actualizado exitosamente', 'success');
-            await loadGastos();
-        } catch (error) {
-            console.error('Error al editar gasto:', error);
-            showAlert('Error al actualizar el gasto', 'danger');
-        }
-    };
 
     // Función para eliminar gasto
     window.deleteGasto = async function(id) {
@@ -297,54 +522,72 @@
 
     // Función para limpiar filtros
     function clearFilters() {
+        // Limpiar campos de fecha
         document.getElementById('fechaInicio').value = '';
         document.getElementById('fechaFin').value = '';
+        
+        // Limpiar campo de búsqueda
+        document.getElementById('buscarDescripcion').value = '';
+        
+        // Ocultar contenedor de fechas personalizadas
+        const datePickerContainer = document.getElementById('datePickerContainer');
+        if (datePickerContainer) {
+            datePickerContainer.style.display = 'none';
+        }
+        
+        // Remover clase activa de todos los botones de filtros rápidos
+        const quickFilterButtons = document.querySelectorAll('[data-period]');
+        quickFilterButtons.forEach(btn => btn.classList.remove('active'));
+        
         currentFilters = {};
+        
+        // Ocultar indicador de filtros
+        const alertElement = document.getElementById('filtrosAplicados');
+        alertElement.classList.add('d-none');
+        
         loadGastos();
-        showAlert('Filtros limpiados', 'info');
     }
 
     // Función para configurar event listeners
     function setupEventListeners() {
-        // Botón de registrar gasto
-        const registrarBtn = document.getElementById('registrarBtn');
-        if (registrarBtn) {
-            registrarBtn.addEventListener('click', registerGasto);
+        // Botón de agregar gasto
+        const agregarGastoBtn = document.getElementById('agregarGastoBtn');
+        if (agregarGastoBtn) {
+            agregarGastoBtn.addEventListener('click', openAddGastoModal);
         }
 
-        // Botón de filtrar
-        const filtrarBtn = document.getElementById('filtrarBtn');
-        if (filtrarBtn) {
-            filtrarBtn.addEventListener('click', filterGastos);
+        // Botón de aplicar filtros
+        const aplicarFiltrosBtn = document.getElementById('aplicarFiltrosBtn');
+        if (aplicarFiltrosBtn) {
+            aplicarFiltrosBtn.addEventListener('click', aplicarFiltros);
         }
 
-        // Botón de limpiar filtros (agregar si no existe)
-        const clearFiltersBtn = document.createElement('button');
-        clearFiltersBtn.className = 'btn btn-outline-secondary ms-2';
-        clearFiltersBtn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Limpiar';
-        clearFiltersBtn.addEventListener('click', clearFilters);
-        
-        const filterContainer = document.querySelector('.row.g-3.mb-4:last-child .col-md-4:last-child');
-        if (filterContainer) {
-            filterContainer.appendChild(clearFiltersBtn);
-        }
-
-        // Configurar fecha por defecto
-        const fechaInput = document.getElementById('fecha');
-        if (fechaInput && !fechaInput.value) {
-            const today = new Date().toISOString().split('T')[0];
-            fechaInput.value = today;
-        }
-
-        // Configurar formato de monto
-        const montoInput = document.getElementById('monto');
-        if (montoInput) {
-            montoInput.addEventListener('blur', function() {
-                if (this.value) {
-                    this.value = parseFloat(this.value).toFixed(2);
+        // Event listener para aplicar filtros con Enter
+        const buscarDescripcionInput = document.getElementById('buscarDescripcion');
+        if (buscarDescripcionInput) {
+            buscarDescripcionInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
                 }
             });
         }
+
+        // Event listener para cerrar filtros desde el indicador
+        const cerrarFiltrosBtn = document.getElementById('cerrarFiltros');
+        if (cerrarFiltrosBtn) {
+            cerrarFiltrosBtn.addEventListener('click', clearFilters);
+        }
+
+        // Event listener para guardar gasto
+        const guardarGastoBtn = document.getElementById('guardarGasto');
+        if (guardarGastoBtn) {
+            guardarGastoBtn.addEventListener('click', guardarGasto);
+        }
+
+        // Configurar botones de incremento/decremento
+        setupMontoInputFormat();
+        setupIncrementDecrementButtons();
+        setupQuickFilters(); // Llamar a la nueva función de filtros rápidos
     }
 
     // Función para inicializar el módulo
