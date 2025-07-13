@@ -1,13 +1,10 @@
-- Recetas:
-  * Que la guía de navegación este abajo del título "Gestión de Recetas"
-
 - Bitácora:
   * Paginar los resultados
   * Usar código de colores en la columna de operación
-  * Mejorar la sección de filtros para:
+  * Mejorar la sección de filtros para que (al *igual* que en el modulo gastos):
     * quitar el texto "Filtrar" del mismo botón
-    * que los campos de fecha ocupen una unidad
-    * que la busqueda por fecha sea flexible
+    * que los campos de fecha ocupen menos
+    * que la busqueda por fecha sea flexible 
     * que el campo para buscar por usuario este con los demás
     * que también se pueda buscar por operación
     * mostrar notificaciónd descriptiva cuando se aplican filtros
@@ -18,6 +15,8 @@
   - Retoques (después de finalizar la base de todos los módulos):
     * Hacer consistente el estilo de los productos (usar misma clase)
     * Añadir a clase productos la capacidad de poner una imagen de fondo
+    * Que todos los items de la clase productos sean del mismo tamaño
+      independientemente del tamaño de imagen o longitud de texto
     * Añadir paginación a todos los módulos
     * Que en todos los modulos el scroll solo sea sobre los contenidos
 

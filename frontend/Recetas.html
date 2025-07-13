@@ -1,5 +1,15 @@
 <!-- recetas.html -->
 <div class="container bg-white rounded-3 p-4">
+    <!-- Navegación y título dinámico -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-outline-secondary" id="backBtn" onclick="showAllProducts()" style="display: none;">
+            <i class="bi bi-arrow-left me-2"></i>Volver a Productos
+        </button>
+        <h1 class="page-title mb-0" id="recipeTitle">
+            <i class="bi bi-journal-text me-2"></i>Gestión de Recetas
+        </h1>
+    </div>
+    
     <!-- Breadcrumb de navegación -->
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -11,16 +21,6 @@
             <li class="breadcrumb-item active" id="currentProduct">Seleccione un producto</li>
         </ol>
     </nav>
-
-    <!-- Navegación y título dinámico -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <button class="btn btn-outline-secondary" id="backBtn" onclick="showAllProducts()" style="display: none;">
-            <i class="bi bi-arrow-left me-2"></i>Volver a Productos
-        </button>
-        <h1 class="page-title mb-0" id="recipeTitle">
-            <i class="bi bi-journal-text me-2"></i>Gestión de Recetas
-        </h1>
-    </div>
     
     <!-- Vista de productos (inicial) -->
     <div id="productsView">
