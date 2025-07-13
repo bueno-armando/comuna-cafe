@@ -74,6 +74,7 @@
         const datePickerContainer = document.getElementById('datePickerContainer');
         const fechaInicio = document.getElementById('fechaInicio');
         const fechaFin = document.getElementById('fechaFin');
+        const aplicarFiltrosContainer = document.getElementById('aplicarFiltrosContainer');
         
         quickFilterButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -91,6 +92,7 @@
                         const todayStr = today.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: todayStr, fechaFin: todayStr };
                         datePickerContainer.style.display = 'none';
+                        if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
                         
                     case 'semana':
@@ -101,6 +103,7 @@
                         const todayStr2 = today.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: weekAgoStr, fechaFin: todayStr2 };
                         datePickerContainer.style.display = 'none';
+                        if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
                         
                     case 'mes':
@@ -111,18 +114,20 @@
                         const lastDayStr = lastDayOfMonth.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: firstDayStr, fechaFin: lastDayStr };
                         datePickerContainer.style.display = 'none';
+                        if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
                         
                     case 'personalizado':
                         // Mostrar campos de fecha personalizada
                         datePickerContainer.style.display = 'block';
                         currentFilters = {};
-                        return; // No aplicar filtro automáticamente
+                        if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.remove('d-none');
+                        return; // No aplicar filtro automáticamente para personalizado
                 }
                 
-                // No aplicar automáticamente, esperar al botón "Aplicar"
-                // loadGastos();
-                // mostrarFiltrosAplicados();
+                // Aplicar filtro automáticamente para filtros rápidos
+                loadGastos();
+                mostrarFiltrosAplicados();
             });
         });
         
@@ -535,6 +540,12 @@
             datePickerContainer.style.display = 'none';
         }
         
+        // Ocultar botón de aplicar filtros
+        const aplicarFiltrosContainer = document.getElementById('aplicarFiltrosContainer');
+        if (aplicarFiltrosContainer) {
+            aplicarFiltrosContainer.classList.add('d-none');
+        }
+        
         // Remover clase activa de todos los botones de filtros rápidos
         const quickFilterButtons = document.querySelectorAll('[data-period]');
         quickFilterButtons.forEach(btn => btn.classList.remove('active'));
@@ -597,6 +608,16 @@
         if (!checkAuth()) {
             console.log('No hay sesión activa, redirigiendo al login...');
             return;
+        }
+
+        // Ocultar botón de aplicar filtros al inicio
+        const aplicarFiltrosContainer = document.getElementById('aplicarFiltrosContainer');
+        console.log('aplicarFiltrosContainer encontrado:', aplicarFiltrosContainer);
+        if (aplicarFiltrosContainer) {
+            aplicarFiltrosContainer.classList.add('d-none');
+            console.log('Botón de aplicar filtros oculto');
+        } else {
+            console.log('ERROR: No se encontró aplicarFiltrosContainer');
         }
 
         setupEventListeners();
