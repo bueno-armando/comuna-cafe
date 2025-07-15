@@ -5,7 +5,7 @@
     * quitar el texto "Filtrar" del mismo botón
     * que los campos de fecha ocupen menos
     * que la busqueda por fecha sea flexible 
-    * que el campo para buscar por usuario este con los demás
+    * agregar un campo para buscar por usuario
     * que también se pueda buscar por operación
     * mostrar notificaciónd descriptiva cuando se aplican filtros
 

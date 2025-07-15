@@ -6,7 +6,7 @@ const verifyToken = require('../middleware/auth');
 // Aplicar middleware de autenticación a todas las rutas
 router.use(verifyToken);
 
-// Obtener todos los registros de bitácora
+// Obtener todos los registros de bitácora (ahora con filtros y paginación como en Gastos)
 router.get('/', BitacoraController.getAll);
 
 // Obtener registros de bitácora por tabla
