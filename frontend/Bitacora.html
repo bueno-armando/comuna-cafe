@@ -1,42 +1,64 @@
 <!-- Vista de Bitácora: muestra los registros de acciones del sistema -->
-<div class="container">
-    <!-- Encabezado de la vista -->
-    <div class="header d-flex justify-content-between align-items-center">
-        <h1 class="page-title mb-0">
-            <i class="bi bi-journal-text me-2"></i>Bitácora
-        </h1>
-    </div>
-    <!-- Filtros de búsqueda por usuario -->
-    <div class="row mb-4">
-        <div class="col-md-6">
+<div class="main-container container bg-white rounded-3 p-4">
+    <!-- Título principal de la vista -->
+    <h1 class="page-title mb-4">
+        <i class="bi bi-journal-text me-2"></i>Bitácora
+    </h1>
+
+    <!-- Filtros para buscar en bitácora -->
+    <div class="row g-3 mb-4 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Filtros rápidos:</label>
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="hoy">Hoy</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="semana">Semana</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="mes">Mes</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-period="personalizado">Personalizado</button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Usuario:</label>
+            <input type="text" id="buscarUsuario" class="form-control form-control-sm" placeholder="Usuario">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Operación:</label>
+            <input type="text" id="buscarOperacion" class="form-control form-control-sm" placeholder="Operación">
+        </div>
+        <div class="col-md-3 mt-2 mt-md-0">
+            <label class="form-label">Descripción:</label>
+            <input type="text" id="buscarDescripcion" class="form-control form-control-sm" placeholder="Descripción...">
+        </div>
+        <div class="col-md-5" id="datePickerContainer" style="display: none;">
+            <label class="form-label">Rango de fechas:</label>
             <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Buscar por usuario...">
-            </div>
-        </div>
-    </div>
-    <!-- Filtro por fechas -->
-    <div class="date-filter">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Desde</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Hasta</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-primary w-100">
-                    <i class="bi bi-funnel me-2"></i>Filtrar
+                <input type="date" id="fechaInicio" class="form-control form-control-sm" placeholder="Desde">
+                <span class="input-group-text">hasta</span>
+                <input type="date" id="fechaFin" class="form-control form-control-sm" placeholder="Hasta">
+                <button id="limpiarFiltrosBtn" class="btn btn-outline-secondary btn-sm ms-2" title="Limpiar filtros">
+                    <i class="bi bi-x-lg"></i>
                 </button>
+                <span id="aplicarFiltrosContainer" class="ms-2 d-none">
+                    <button id="aplicarFiltrosBtn" class="btn btn-primary form-control form-control-sm" style="height: 100%;" title="Aplicar filtro personalizado">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </span>
             </div>
         </div>
     </div>
+
+    <!-- Indicador de filtros aplicados -->
+    <div id="filtrosAplicados" class="alert alert-info d-none position-absolute top-0 end-0 mt-3 me-3 shadow">
+        <i class="bi bi-info-circle me-2"></i>
+        <span id="textoFiltrosAplicados"></span>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-3" id="cerrarFiltros">
+            <i class="bi bi-funnel-x me-1"></i>Quitar filtros
+        </button>
+    </div>
+
     <!-- Tabla de registros de bitácora -->
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
+        <table class="table table-hover table-striped">
+            <thead class="table-dark">
                 <tr>
                     <th><i class="bi bi-hash me-2"></i>ID</th>
                     <th><i class="bi bi-table me-2"></i>Tabla</th>
@@ -46,53 +68,31 @@
                     <th><i class="bi bi-chat-text me-2"></i>Descripción</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Ejemplo de registros estáticos -->
+            <tbody id="bitacoraTable">
                 <tr>
-                    <td>01</td>
-                    <td>Ventas</td>
-                    <td><span class="badge badge-insert rounded-pill">Inserción</span></td>
-                    <td>Parker21</td>
-                    <td>16/11/2024</td>
-                    <td>Venta registrada</td>
-                </tr>
-                <tr>
-                    <td>02</td>
-                    <td>Inventario</td>
-                    <td><span class="badge badge-update rounded-pill">Modificación</span></td>
-                    <td>AlanaRivas</td>
-                    <td>16/11/2024</td>
-                    <td>Entrada de inventario</td>
-                </tr>
-                <tr>
-                    <td>03</td>
-                    <td>-</td>
-                    <td><span class="badge badge-login rounded-pill">Login</span></td>
-                    <td>GaboMtz</td>
-                    <td>16/11/2024</td>
-                    <td>Inicio de sesión</td>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="bi bi-inbox me-2"></i>No hay registros de bitácora
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <!-- Paginación estática de la tabla -->
+
+    <!-- Paginación dinámica -->
     <nav aria-label="Navegación de bitácora">
-        <ul class="pagination justify-content-center mt-4">
-            <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#">
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-            </li>
+        <ul class="pagination justify-content-center mt-4" id="bitacoraPagination">
+            <!-- Se genera dinámicamente -->
         </ul>
     </nav>
 </div>
-<!-- Script para funcionalidad de Bootstrap (modales, etc.) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/bitacora.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.initBitacora === 'function') {
+            window.initBitacora();
+        } else {
+            console.error('initBitacora no está disponible');
+        }
+    });
+</script>

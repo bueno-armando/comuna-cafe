@@ -93,7 +93,7 @@
         ventasToRender.forEach(venta => {
             const row = tableBody.insertRow();
             row.innerHTML = `
-                <td>${venta.ID_Venta}</td>
+                    <td>${venta.ID_Venta}</td>
                 <td>${formatDate(venta.Fecha)}</td>
                 <td>$${parseFloat(venta.Total).toFixed(2)}</td>
                 <td>${venta.Metodo_Pago}</td>
@@ -102,8 +102,8 @@
                     <button class="btn btn-sm btn-info ver-detalle-btn" data-venta-id="${venta.ID_Venta}">
                         <i class="bi bi-eye me-1"></i>Ver Detalles
                     </button>
-                </td>
-            `;
+                    </td>
+                `;
         });
     }
 

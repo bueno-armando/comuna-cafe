@@ -328,6 +328,55 @@ GET /api/gastos?page=1&limit=9&fechaInicio=2024-01-01&fechaFin=2024-01-31&descri
 
 ---
 
+### Bitácora
+
+| Método | Ruta                | Descripción                                 |
+|--------|---------------------|---------------------------------------------|
+| GET    | /api/bitacora       | Obtener registros con filtros y paginación  |
+
+#### Parámetros para GET /api/bitacora
+
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Registros por página (default: 11)
+- `usuario` (opcional): Nombre de usuario (LIKE) o ID exacto
+- `operacion` (opcional): Tipo de operación (LIKE, ej. "INSERT", "UPDATE", "DELETE")
+- `descripcion` (opcional): Buscar en la descripción (LIKE)
+- `fechaInicio` (opcional): Fecha mínima (YYYY-MM-DD)
+- `fechaFin` (opcional): Fecha máxima (YYYY-MM-DD)
+
+#### Ejemplo de request para GET /api/bitacora
+
+```
+GET /api/bitacora?page=2&limit=11&usuario=admin&operacion=UPDATE&fechaInicio=2024-05-01&fechaFin=2024-05-31
+```
+
+#### Ejemplo de respuesta para GET /api/bitacora
+
+```json
+{
+  "registros": [
+    {
+      "ID_Bitacora": 1,
+      "Tabla_Modificada": "usuarios",
+      "Operacion": "INSERT",
+      "ID_Usuario": 2,
+      "Usuario": "admin",
+      "Fecha": "2024-05-15T10:23:00.000Z",
+      "Descripcion": "Se agregó un nuevo usuario."
+    },
+    ...
+  ],
+  "totalRegistros": 42,
+  "totalPages": 4,
+  "currentPage": 2,
+  "limit": 11
+}
+```
+
+> El endpoint permite combinar cualquier filtro y siempre devuelve la paginación y el total de registros filtrados.
+
+---
+
 ### Productos
 (Completar con los endpoints de productos...)
 

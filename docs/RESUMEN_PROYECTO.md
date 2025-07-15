@@ -214,6 +214,39 @@
 - **Filtros rápidos**: Hoy, Semana, Mes, Personalizado con UX intuitiva
 - **Validación robusta**: Backend valida y maneja todos los casos de filtrado
 
+## Recomendaciones para paginación y filtros en todos los módulos
+
+Para asegurar una experiencia de usuario consistente y profesional, todos los módulos que muestran listas de registros (como Gastos, Bitácora, Ventas, etc.) deben implementar paginación y filtros avanzados siguiendo este patrón:
+
+### Backend (API)
+- El endpoint principal debe aceptar los siguientes parámetros por query string:
+  - `page`: número de página (default: 1)
+  - `limit`: resultados por página (default: 11, o el valor que se defina para el módulo)
+  - Filtros específicos del módulo (ej. usuario, operación, descripción, fechas, etc.)
+- La consulta SQL debe armarse dinámicamente según los filtros recibidos, permitiendo combinaciones flexibles.
+- Se debe devolver una respuesta con la siguiente estructura:
+
+```json
+{
+  "registros": [ ... ],
+  "totalRegistros": 42,
+  "totalPages": 4,
+  "currentPage": 2,
+  "limit": 11
+}
+```
+
+### Frontend (SPA)
+- Los filtros deben ser reactivos y compactos, con filtros rápidos (Hoy, Semana, Mes, Personalizado) cuando aplique.
+- El botón de aplicar filtros solo debe mostrarse para el filtro personalizado.
+- Al aplicar filtros, siempre mostrar la primera página.
+- La paginación debe ser dinámica y mantenerse al cambiar filtros.
+- Mostrar notificación descriptiva de filtros aplicados, con opción clara para limpiar todos los filtros.
+- Los campos de fecha deben ser flexibles (permitir solo inicio, solo fin, o ambos).
+- El diseño debe ser compacto y consistente entre módulos.
+
+> Este patrón fue implementado y validado en los módulos de Gastos y Bitácora. Se recomienda replicarlo en cualquier módulo futuro que requiera filtrado y paginación para mantener la coherencia y calidad UX en todo el sistema.
+
 ## Puntos pendientes o a revisar
 
 ### Insumos
