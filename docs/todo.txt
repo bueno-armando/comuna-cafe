@@ -1,8 +1,6 @@
-- Usuarios:
-  * añadir modal apropiado para la eliminación de usuario.
-  * conectar a backend
-  * implementar filtros siguiendo documentación
-
+- Reportes:
+  * encontrar como generarlos
+  * ver el detalle de la fecha de corte
 
 - MISC:
   - Añadir botón de esconder/mostrar contraseña al inicio de sesión
@@ -14,5 +12,5 @@
     * Añadir a clase productos la capacidad de poner una imagen de fondo
     * Que todos los items de la clase productos sean del mismo tamaño
       independientemente del tamaño de imagen o longitud de texto
-    * Añadir paginación a todos los módulos
+    * Estandarizar estilo de la paginación en todos los módulos
     * Que en todos los modulos el scroll solo sea sobre los contenidos

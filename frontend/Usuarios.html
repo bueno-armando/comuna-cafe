@@ -17,11 +17,62 @@
             <i class="bi bi-plus-circle me-2"></i>Agregar Usuario
         </button>
 
+        <!-- Filtros para buscar usuarios -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Filtros rápidos:</label>
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-filter="todos">Todos</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-filter="activos">Activos</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-filter="inactivos">Inactivos</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-filter="personalizado">Personalizado</button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Nombre:</label>
+                <input type="text" id="buscarNombre" class="form-control" placeholder="Buscar por nombre">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Apellido:</label>
+                <input type="text" id="buscarApellido" class="form-control" placeholder="Buscar por apellido">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Rol:</label>
+                <select id="buscarRol" class="form-select">
+                    <option value="">Todos los roles</option>
+                    <option value="1">Administrador</option>
+                    <option value="2">Cajero</option>
+                    <option value="3">Mesero</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado:</label>
+                <select id="buscarEstado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end d-none" id="aplicarFiltrosContainer">
+                <button id="aplicarFiltrosBtn" class="btn btn-primary w-100" title="Aplicar filtro personalizado">
+                    <i class="bi bi-funnel me-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicador de filtros aplicados -->
+        <div id="filtrosAplicados" class="alert alert-info d-none mb-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <span id="textoFiltrosAplicados"></span>
+            <button type="button" class="btn-close float-end" id="cerrarFiltros"></button>
+        </div>
+
     <!-- Tabla de usuarios -->
     <div class="table-responsive">
             <table class="table table-striped" id="usuariosTable">
             <thead>
                 <tr>
+                    <th><i class="bi bi-hash me-2"></i>ID</th>
                     <th><i class="bi bi-person me-2"></i>Usuario</th>
                     <th><i class="bi bi-person-badge me-2"></i>Nombre</th>
                     <th><i class="bi bi-person-badge me-2"></i>Apellido</th>
@@ -35,6 +86,18 @@
             </tbody>
         </table>
 </div>
+
+        <!-- Paginación -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="text-muted">
+                Mostrando <span id="registrosMostrados">0</span> de <span id="totalRegistros">0</span> usuarios
+            </div>
+            <nav aria-label="Navegación de páginas">
+                <ul class="pagination pagination-sm mb-0" id="pagination">
+                    <!-- La paginación se generará dinámicamente -->
+                </ul>
+            </nav>
+        </div>
 
         <!-- Modal para agregar usuario -->
         <div class="modal fade" id="addUserModal" tabindex="-1">

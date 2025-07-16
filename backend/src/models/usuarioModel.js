@@ -2,15 +2,79 @@ const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class UsuarioModel {
-    // Obtener todos los usuarios
-    static async getAll() {
+    // Obtener todos los usuarios con filtros y paginación
+    static async getAll(filters = {}) {
         try {
-            const [rows] = await pool.query(`
+            const {
+                page = 1,
+                limit = 9,
+                nombre,
+                apellido,
+                rol,
+                estado
+            } = filters;
+
+            // Construir las condiciones WHERE
+            const whereConditions = [];
+            const params = [];
+
+            // Agregar filtros si están presentes
+            if (nombre) {
+                whereConditions.push('u.Nombre LIKE ?');
+                params.push(`%${nombre}%`);
+            }
+            
+            if (apellido) {
+                whereConditions.push('u.Apellido LIKE ?');
+                params.push(`%${apellido}%`);
+            }
+            
+            if (rol) {
+                whereConditions.push('u.ID_Rol = ?');
+                params.push(rol);
+            }
+            
+            if (estado) {
+                whereConditions.push('u.Estado = ?');
+                params.push(estado);
+            }
+
+            // Construir la cláusula WHERE
+            const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+            // Consulta para obtener el total de registros
+            const countSql = `
+                SELECT COUNT(*) as total 
+                FROM usuarios u 
+                JOIN roles r ON u.ID_Rol = r.ID_Rol
+                ${whereClause}
+            `;
+            
+            const [countResult] = await pool.query(countSql, params);
+            const totalRegistros = countResult[0].total;
+
+            // Consulta principal para obtener los usuarios
+            const mainSql = `
                 SELECT u.*, r.Nombre_Rol as Rol_Nombre 
                 FROM usuarios u 
                 JOIN roles r ON u.ID_Rol = r.ID_Rol
-            `);
-            return rows;
+                ${whereClause}
+                ORDER BY u.ID_Usuario DESC
+                LIMIT ? OFFSET ?
+            `;
+            
+            const offset = (page - 1) * limit;
+            const mainParams = [...params, limit, offset];
+            
+            const [rows] = await pool.query(mainSql, mainParams);
+
+            return {
+                usuarios: rows,
+                totalRegistros,
+                totalPages: Math.ceil(totalRegistros / limit),
+                currentPage: page,
+                limit
+            };
         } catch (error) {
             throw error;
         }

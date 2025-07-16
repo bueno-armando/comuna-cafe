@@ -377,11 +377,124 @@ GET /api/bitacora?page=2&limit=11&usuario=admin&operacion=UPDATE&fechaInicio=202
 
 ---
 
+### Usuarios
+
+| Método | Ruta                                    | Descripción                                    |
+|--------|-----------------------------------------|------------------------------------------------|
+| GET    | /api/usuarios                           | Obtener usuarios con filtros y paginación      |
+| GET    | /api/usuarios/:id                       | Obtener detalles de un usuario específico      |
+| POST   | /api/usuarios                           | Crear nuevo usuario                            |
+| PUT    | /api/usuarios/:id                       | Actualizar usuario                             |
+| DELETE | /api/usuarios/:id                       | Eliminar usuario                               |
+| POST   | /api/usuarios/login                     | Iniciar sesión                                 |
+
+#### Parámetros para GET /api/usuarios
+
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Usuarios por página (default: 9)
+- `nombre` (opcional): Buscar por nombre (LIKE)
+- `apellido` (opcional): Buscar por apellido (LIKE)
+- `rol` (opcional): Filtrar por ID de rol (1=Administrador, 2=Cajero, 3=Mesero)
+- `estado` (opcional): Filtrar por estado (Activo, Inactivo)
+
+#### Ejemplo de respuesta para GET /api/usuarios
+
+```json
+{
+  "usuarios": [
+    {
+      "ID_Usuario": 1,
+      "Nombre": "Ana",
+      "Apellido": "Rivas",
+      "Usuario": "ARivas",
+      "ID_Rol": 1,
+      "Estado": "Activo",
+      "Rol_Nombre": "Administrador"
+    },
+    {
+      "ID_Usuario": 2,
+      "Nombre": "Juan",
+      "Apellido": "Pérez",
+      "Usuario": "JPérez",
+      "ID_Rol": 2,
+      "Estado": "Activo",
+      "Rol_Nombre": "Cajero"
+    }
+  ],
+  "totalRegistros": 8,
+  "totalPages": 1,
+  "currentPage": 1,
+  "limit": 9
+}
+```
+
+#### Ejemplo de request para POST /api/usuarios
+
+```json
+{
+  "Nombre": "Nuevo Usuario",
+  "Apellido": "Apellido",
+  "Contraseña": "password123",
+  "ID_Rol": 2,
+  "Estado": "Activo"
+}
+```
+
+#### Ejemplo de response para POST /api/usuarios
+
+```json
+{
+  "id": 19,
+  "message": "Usuario creado exitosamente"
+}
+```
+
+#### Ejemplo de request para PUT /api/usuarios/1
+
+```json
+{
+  "Nombre": "Ana Actualizada",
+  "Apellido": "Rivas",
+  "ID_Rol": 1,
+  "Estado": "Activo"
+}
+```
+
+#### Ejemplo de request para POST /api/usuarios/login
+
+```json
+{
+  "usuario": "ARivas",
+  "contraseña": "password123"
+}
+```
+
+#### Ejemplo de response para POST /api/usuarios/login
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "usuario": {
+    "id": 1,
+    "usuario": "ARivas",
+    "nombre": "Ana",
+    "apellido": "Rivas",
+    "rol": "Administrador",
+    "estado": "Activo"
+  }
+}
+```
+
+#### Ejemplo de request para GET /api/usuarios con filtros
+
+```
+GET /api/usuarios?page=1&limit=9&nombre=Ana&estado=Activo&rol=1
+```
+
+---
+
 ### Productos
 (Completar con los endpoints de productos...)
-
-### Usuarios
-(Completar con los endpoints de usuarios...)
 
 ### Inventario
 (Completar con los endpoints de inventario...)

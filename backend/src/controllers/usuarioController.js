@@ -9,7 +9,25 @@ class UsuarioController {
     // Obtener todos los usuarios
     static async getAll(req, res) {
         try {
-            const usuarios = await UsuarioModel.getAll();
+            // Obtener parámetros de filtro y paginación
+            const {
+                page = 1,
+                limit = 9,
+                nombre,
+                apellido,
+                rol,
+                estado
+            } = req.query;
+
+            const usuarios = await UsuarioModel.getAll({
+                page: parseInt(page),
+                limit: parseInt(limit),
+                nombre,
+                apellido,
+                rol,
+                estado
+            });
+            
             res.json(usuarios);
         } catch (error) {
             console.error('Error al obtener usuarios:', error);
@@ -60,18 +78,11 @@ class UsuarioController {
     // Actualizar un usuario
     static async update(req, res) {
         try {
-            console.log('=== UPDATE USUARIO ===');
-            console.log('Body recibido:', req.body);
-            console.log('ID:', req.params.id);
-            
             const { id } = req.params;
             const { Nombre, Apellido, Contraseña, ID_Rol, Estado } = req.body;
-            
-            console.log('Campos extraídos:', { Nombre, Apellido, Contraseña: Contraseña ? 'SÍ' : 'NO', ID_Rol, Estado });
 
             // Validaciones básicas
             if (!Nombre || !Apellido || !ID_Rol) {
-                console.log('Validación falló:', { Nombre: !!Nombre, Apellido: !!Apellido, ID_Rol: !!ID_Rol });
                 return res.status(400).json({ error: 'Nombre, Apellido e ID_Rol son requeridos' });
             }
 
