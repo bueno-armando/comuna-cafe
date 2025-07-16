@@ -2,6 +2,7 @@
     const API_URL_USUARIOS = '/api/usuarios'; 
     let usuarios = [];
     let editUsuarioId = null;
+    let deleteUsuarioId = null;
 
     function getToken() {
         return localStorage.getItem('token');
@@ -26,6 +27,47 @@
         }
     }
 
+    // Función para mostrar modal de error
+    function showErrorModal(message) {
+        const errorModal = document.getElementById('errorModal');
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) {
+            errorMessage.textContent = message;
+        }
+        if (errorModal) {
+            const modal = bootstrap.Modal.getInstance(errorModal) || new bootstrap.Modal(errorModal);
+            modal.show();
+        }
+    }
+
+    // Función para mostrar modal de confirmación de eliminación
+    function showDeleteConfirmModal(userId) {
+        deleteUsuarioId = userId;
+        const deleteModal = document.getElementById('deleteConfirmModal');
+        if (deleteModal) {
+            const modal = bootstrap.Modal.getInstance(deleteModal) || new bootstrap.Modal(deleteModal);
+            modal.show();
+        }
+    }
+
+    // Función para mostrar modal de confirmación de edición
+    function showEditConfirmModal() {
+        const editModal = document.getElementById('editConfirmModal');
+        if (editModal) {
+            const modal = bootstrap.Modal.getInstance(editModal) || new bootstrap.Modal(editModal);
+            modal.show();
+        }
+    }
+
+    // Función para mostrar modal de confirmación de creación
+    function showCreateConfirmModal() {
+        const createModal = document.getElementById('createConfirmModal');
+        if (createModal) {
+            const modal = bootstrap.Modal.getInstance(createModal) || new bootstrap.Modal(createModal);
+            modal.show();
+        }
+    }
+
     async function fetchUsuarios() {
         try {
             const data = await fetchAPI(API_URL_USUARIOS);
@@ -33,7 +75,7 @@
             usuarios = Array.isArray(data) ? data : (data.usuarios || []);
             renderTableUsuarios(usuarios);
         } catch (error) {
-            alert('No se pudieron cargar los usuarios: ' + error.message);
+            showErrorModal('No se pudieron cargar los usuarios: ' + error.message);
         }
     }
 
@@ -69,7 +111,7 @@
             Estado: 'Activo'
         };
         if (!data.Nombre || !data.Apellido || !data.Contraseña || !data.ID_Rol) {
-            return alert('Todos los campos son requeridos.');
+            return showErrorModal('Todos los campos son requeridos.');
         }
         try {
             await fetchAPI(API_URL_USUARIOS, { method: 'POST', body: JSON.stringify(data) });
@@ -80,16 +122,16 @@
                 if (modal) modal.hide();
             }
             event.target.reset();
+            showCreateConfirmModal();
         } catch (error) {
-            alert('No se pudo agregar el usuario: ' + error.message);
+            showErrorModal('No se pudo agregar el usuario: ' + error.message);
         }
     }
-    
+
     function editUsuario(id) {
         const usuario = usuarios.find(u => u.ID_Usuario == id);
         if (!usuario) return console.warn('Usuario no encontrado para editar:', id);
         editUsuarioId = id;
-        
         const editForm = document.getElementById('editUserForm');
         if(editForm){
             editForm.querySelector('[name="nombre"]').value = usuario.Nombre || '';
@@ -120,7 +162,7 @@
             data.Contraseña = contrasena;
         }
         if (!data.Nombre || !data.Apellido || !data.ID_Rol || !data.Estado) {
-            return alert('Todos los campos son requeridos.');
+            return showErrorModal('Todos los campos son requeridos.');
         }
         try {
             await fetchAPI(`${API_URL_USUARIOS}/${editUsuarioId}`, { method: 'PUT', body: JSON.stringify(data) });
@@ -131,18 +173,25 @@
                 if (modal) modal.hide();
             }
             editUsuarioId = null;
+            showEditConfirmModal();
         } catch (error) {
-            alert('No se pudo actualizar el usuario: ' + error.message);
+            showErrorModal('No se pudo actualizar el usuario: ' + error.message);
         }
     }
 
     async function deleteUsuario(id) {
-        if (!confirm('¿Está seguro de eliminar este usuario?')) return;
         try {
             await fetchAPI(`${API_URL_USUARIOS}/${id}`, { method: 'DELETE' });
             fetchUsuarios();
+            // Cerrar modal de confirmación
+            const deleteModal = document.getElementById('deleteConfirmModal');
+            if (deleteModal) {
+                const modal = bootstrap.Modal.getInstance(deleteModal);
+                if (modal) modal.hide();
+            }
+            deleteUsuarioId = null;
         } catch (error) {
-            alert('No se pudo eliminar el usuario: ' + error.message);
+            showErrorModal('No se pudo eliminar el usuario: ' + error.message);
         }
     }
 
@@ -158,6 +207,16 @@
         if (editForm) editForm.addEventListener('submit', saveEditUsuario);
         else console.warn('Usuarios: editUserForm no encontrado');
 
+        // Evento para confirmar eliminación
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (deleteUsuarioId) {
+                    deleteUsuario(deleteUsuarioId);
+                }
+            });
+        }
+
         const tableBody = document.getElementById('usersTableBody');
         if (tableBody) {
             tableBody.addEventListener('click', function(e) {
@@ -167,7 +226,7 @@
                 }
                 const deleteBtn = e.target.closest('.delete-user-btn');
                 if (deleteBtn && deleteBtn.dataset.id) {
-                    deleteUsuario(deleteBtn.dataset.id);
+                    showDeleteConfirmModal(deleteBtn.dataset.id);
                 }
             });
         } else console.warn('Usuarios: usersTableBody no encontrado para delegación de eventos.');
