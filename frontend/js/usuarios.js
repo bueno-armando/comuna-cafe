@@ -29,7 +29,8 @@
     async function fetchUsuarios() {
         try {
             const data = await fetchAPI(API_URL_USUARIOS);
-            usuarios = data.usuarios || data; 
+            // El backend devuelve un array de usuarios con campos: ID_Usuario, Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado, Rol_Nombre
+            usuarios = Array.isArray(data) ? data : (data.usuarios || []);
             renderTableUsuarios(usuarios);
         } catch (error) {
             alert('No se pudieron cargar los usuarios: ' + error.message);
@@ -43,12 +44,11 @@
         (usersToRender || []).forEach(user => {
             const row = tableBody.insertRow();
             row.innerHTML = `
-                <td>${user.ID_Usuario}</td>
+                <td>${user.Usuario || ''}</td>
                 <td>${user.Nombre || ''}</td>
-                <td>${user.Apellido_Paterno || ''}</td> 
-                <td>${user.Apellido_Materno || ''}</td>
-                <td>${user.Email || ''}</td>
-                <td>${user.Rol || ''}</td>
+                <td>${user.Apellido || ''}</td>
+                <td>${user.Rol_Nombre || ''}</td>
+                <td>${user.Estado || ''}</td>
                 <td>
                     <button class="btn btn-sm btn-warning edit-user-btn" data-id="${user.ID_Usuario}">Editar</button>
                     <button class="btn btn-sm btn-danger delete-user-btn" data-id="${user.ID_Usuario}">Eliminar</button>
@@ -60,15 +60,15 @@
     async function addUsuario(event) {
         event.preventDefault();
         const formData = new FormData(event.target);
+        // Concatenar apellidos si fuera necesario, aquí solo hay un campo 'apellido'
         const data = {
-            Nombre: formData.get('addNombre'),
-            Apellido_Paterno: formData.get('addApellidoPaterno'),
-            Apellido_Materno: formData.get('addApellidoMaterno'),
-            Email: formData.get('addEmail'),
-            Contrasena: formData.get('addContrasena'),
-            Rol: formData.get('addRol')
+            Nombre: formData.get('nombre'),
+            Apellido: formData.get('apellido'),
+            Contraseña: formData.get('contraseña'),
+            ID_Rol: parseInt(formData.get('rol'), 10),
+            Estado: 'Activo'
         };
-        if (!data.Nombre || !data.Apellido_Paterno || !data.Email || !data.Contrasena || !data.Rol) {
+        if (!data.Nombre || !data.Apellido || !data.Contraseña || !data.ID_Rol) {
             return alert('Todos los campos son requeridos.');
         }
         try {
@@ -92,13 +92,11 @@
         
         const editForm = document.getElementById('editUserForm');
         if(editForm){
-            editForm.querySelector('#editUserId').value = usuario.ID_Usuario;
-            editForm.querySelector('#editNombre').value = usuario.Nombre || '';
-            editForm.querySelector('#editApellidoPaterno').value = usuario.Apellido_Paterno || '';
-            editForm.querySelector('#editApellidoMaterno').value = usuario.Apellido_Materno || '';
-            editForm.querySelector('#editEmail').value = usuario.Email || '';
-            editForm.querySelector('#editRol').value = usuario.Rol || '';
-            editForm.querySelector('#editContrasena').value = ''; 
+            editForm.querySelector('[name="nombre"]').value = usuario.Nombre || '';
+            editForm.querySelector('[name="apellido"]').value = usuario.Apellido || '';
+            editForm.querySelector('[name="rol"]').value = usuario.ID_Rol || '';
+            editForm.querySelector('[name="estado"]').value = usuario.Estado || 'Activo';
+            editForm.querySelector('[name="contraseña"]').value = '';
         }
         const modalEl = document.getElementById('editUserModal');
         if (modalEl) {
@@ -112,18 +110,17 @@
         if (!editUsuarioId) return;
         const formData = new FormData(event.target);
         const data = {
-            Nombre: formData.get('editNombre'),
-            Apellido_Paterno: formData.get('editApellidoPaterno'),
-            Apellido_Materno: formData.get('editApellidoMaterno'),
-            Email: formData.get('editEmail'),
-            Rol: formData.get('editRol')
+            Nombre: formData.get('nombre'),
+            Apellido: formData.get('apellido'),
+            ID_Rol: parseInt(formData.get('rol'), 10),
+            Estado: formData.get('estado')
         };
-        const contrasena = formData.get('editContrasena');
-        if (contrasena && contrasena.trim() !== '') { 
-            data.Contrasena = contrasena;
+        const contrasena = formData.get('contraseña');
+        if (contrasena && contrasena.trim() !== '') {
+            data.Contraseña = contrasena;
         }
-        if (!data.Nombre || !data.Apellido_Paterno || !data.Email || !data.Rol) {
-            return alert('Los campos Nombre, Apellido Paterno, Email y Rol son requeridos.');
+        if (!data.Nombre || !data.Apellido || !data.ID_Rol || !data.Estado) {
+            return alert('Todos los campos son requeridos.');
         }
         try {
             await fetchAPI(`${API_URL_USUARIOS}/${editUsuarioId}`, { method: 'PUT', body: JSON.stringify(data) });

@@ -77,17 +77,22 @@ class UsuarioModel {
         try {
             const { Nombre, Apellido, Contraseña, ID_Rol, Estado } = usuario;
             
-            // Si se proporciona una nueva contraseña, encriptarla
-            let hashedPassword = Contraseña;
-            if (Contraseña) {
+            // Construir la consulta SQL dinámicamente
+            let sql = 'UPDATE usuarios SET Nombre = ?, Apellido = ?, ID_Rol = ?, Estado = ?';
+            let params = [Nombre, Apellido, ID_Rol, Estado];
+            
+            // Solo actualizar contraseña si se proporciona una nueva
+            if (Contraseña && Contraseña.trim() !== '') {
                 const salt = await bcrypt.genSalt(10);
-                hashedPassword = await bcrypt.hash(Contraseña, salt);
+                const hashedPassword = await bcrypt.hash(Contraseña, salt);
+                sql += ', Contraseña = ?';
+                params.push(hashedPassword);
             }
             
-            const [result] = await pool.query(
-                'UPDATE usuarios SET Nombre = ?, Apellido = ?, Contraseña = ?, ID_Rol = ?, Estado = ? WHERE ID_Usuario = ?',
-                [Nombre, Apellido, hashedPassword, ID_Rol, Estado, id]
-            );
+            sql += ' WHERE ID_Usuario = ?';
+            params.push(id);
+            
+            const [result] = await pool.query(sql, params);
             return result.affectedRows > 0;
         } catch (error) {
             throw error;

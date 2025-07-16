@@ -1,10 +1,5 @@
 - Usuarios:
-  * ver problema de que los íconos de la barra lateral cambian al poner este módulo
-  (probablemente se deba a scripts conflictivos, hay que asegurarnos de que se cargue
-  y desocupe del mismo modo que los demás modulos)
-  * ver si ya hay endpoints necesarios en la API, si no, implementarlos según
-  1_Modulo_Usuarios_Roles.txt. Si ya están, pero no siguen este documento,
-  cambiarlos para que lo sigan.
+  * añadir modal apropiado para la eliminación de usuario.
   * conectar a backend
   * implementar filtros siguiendo documentación
 
@@ -21,8 +16,3 @@
       independientemente del tamaño de imagen o longitud de texto
     * Añadir paginación a todos los módulos
     * Que en todos los modulos el scroll solo sea sobre los contenidos
-
-- ERRORES:
-  * Al seleccionar el módulo de usuarios los íconos en el sidebar cambian;
-  investigar la causa de esto (probablemente hay que corregir la manera en 
-  que se carga la vista usuarios para que sea consistente con las demás)
