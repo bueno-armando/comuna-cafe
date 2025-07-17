@@ -364,6 +364,35 @@ async function loadView(view) {
                 console.error('initGastos no está definida!');
             }
         }
+        // Si la vista es Reportes, inicializa el módulo de reportes
+        else if (view === 'Reportes') {
+            console.log('=== Inicializando módulo Reportes ===');
+            // Remover script anterior si existe
+            const oldScript = document.querySelector('script[src="js/reportes.js"]');
+            if (oldScript) {
+                console.log('Removiendo script anterior de reportes');
+                oldScript.remove();
+            }
+
+            await new Promise(resolve => {
+                const script = document.createElement('script');
+                script.src = 'js/reportes.js';
+                script.onload = () => {
+                    console.log('Script de Reportes cargado');
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+            
+            if (typeof window.initReportes === 'function') {
+                console.log('Llamando a initReportes...');
+                requestAnimationFrame(() => {
+                    window.initReportes();
+                });
+            } else {
+                console.error('initReportes no está definida!');
+            }
+        }
 
         console.log('=== Finalización de carga de vista ===');
         console.log('Estado final de los módulos:', {
@@ -406,3 +435,15 @@ function setupSidebarLinks() {
         });
     }
 } 
+
+// Lógica para cargar el JS de reportes cuando se carga Reportes.html
+document.addEventListener('DOMContentLoaded', () => {
+  // Suponiendo que tienes una función para cargar vistas SPA
+  // y que al cargar Reportes.html, también debes cargar reportes.js
+  // Ejemplo simple:
+  if (window.location.hash === '#Reportes') {
+    const script = document.createElement('script');
+    script.src = 'js/reportes.js';
+    document.body.appendChild(script);
+  }
+}); 

@@ -2,7 +2,11 @@
   * encontrar como generarlos
   * ver el detalle de la fecha de corte
 
+- Gastos:
+  * que el filtro de descripción se aplique al ir escribiendo
+
 - MISC:
+  - Considerar borrar los logs de depuración 
   - Añadir botón de esconder/mostrar contraseña al inicio de sesión
   - Hacer logo del café en la barra lateral más grande y de fondo transparente
     (lo de hacerlo transparente lo tengo que hacer manualmente)

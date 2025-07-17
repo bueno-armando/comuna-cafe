@@ -195,6 +195,13 @@
 - **Encriptación de contraseñas**: bcrypt para seguridad
 - **Columna de ID**: Información técnica para administradores de sistemas
 
+### ✅ **Módulo de Reportes - COMPLETADO**
+- **Generación de reportes**: Permite crear reportes consolidados de ventas y gastos por periodo (diario, semanal, mensual, etc.)
+- **Consulta y desglose**: Listado de reportes con filtros y paginación, consulta de detalles, ventas y gastos incluidos, producto más vendido y día con más ventas.
+- **Integración SPA**: Frontend conectado al backend, tabla dinámica, modal de detalles, y UX consistente con el resto del sistema.
+- **API documentada y probada**: Todos los endpoints REST implementados y verificados con curl.
+- **Listo para producción**: Lógica robusta, validaciones, y preparado para futuras extensiones (exportar PDF/Excel).
+
 ### 🔧 **Detalles técnicos importantes:**
 
 #### Insumos

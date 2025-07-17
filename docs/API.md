@@ -507,4 +507,141 @@ GET /api/usuarios?page=1&limit=9&nombre=Ana&estado=Activo&rol=1
 
 ---
 
+### Reportes
+
+| Método | Ruta                                         | Descripción                                      |
+|--------|----------------------------------------------|--------------------------------------------------|
+| POST   | /api/reportes                               | Generar un nuevo reporte                         |
+| GET    | /api/reportes                               | Listar reportes generados (paginación/filtros)   |
+| GET    | /api/reportes/:id                           | Obtener encabezado/detalle de un reporte         |
+| GET    | /api/reportes/:id/ventas                    | Ventas incluidas en el reporte                   |
+| GET    | /api/reportes/:id/gastos                    | Gastos incluidos en el reporte                   |
+| GET    | /api/reportes/:id/producto-mas-vendido      | Producto más vendido en el periodo del reporte   |
+| GET    | /api/reportes/:id/dia-mas-ventas            | Día con más ventas en el periodo del reporte     |
+
+> Todos los endpoints requieren autenticación JWT.
+
+#### Ejemplo de request para POST /api/reportes
+
+```json
+{
+  "tipo": "Diario",
+  "fecha_inicio": "2025-03-21",
+  "fecha_fin": "2025-03-22"
+}
+```
+
+#### Ejemplo de response para POST /api/reportes
+
+```json
+{
+  "message": "Reporte generado exitosamente",
+  "reporte": {
+    "ID_Reporte": 1,
+    "Tipo": "Diario",
+    "Fecha_Inicio": "2025-03-21",
+    "Fecha_Fin": "2025-03-22",
+    "Total_Gastos": "500.00",
+    "Total_Ventas": "2000.00",
+    "Ganancia": "1500.00"
+  }
+}
+```
+
+#### Ejemplo de request para GET /api/reportes
+
+```
+GET /api/reportes?page=1&limit=10&tipo=Diario&fechaInicio=2025-03-01&fechaFin=2025-03-31
+```
+
+#### Ejemplo de response para GET /api/reportes
+
+```json
+{
+  "reportes": [
+    {
+      "ID_Reporte": 1,
+      "Tipo": "Diario",
+      "Fecha_Inicio": "2025-03-21",
+      "Fecha_Fin": "2025-03-22",
+      "Total_Gastos": "500.00",
+      "Total_Ventas": "2000.00",
+      "Ganancia": "1500.00"
+    }
+  ],
+  "totalRegistros": 1,
+  "totalPages": 1,
+  "currentPage": 1,
+  "limit": 10
+}
+```
+
+#### Ejemplo de response para GET /api/reportes/1
+
+```json
+{
+  "reporte": {
+    "ID_Reporte": 1,
+    "Tipo": "Diario",
+    "Fecha_Inicio": "2025-03-21",
+    "Fecha_Fin": "2025-03-22",
+    "Total_Gastos": "500.00",
+    "Total_Ventas": "2000.00",
+    "Ganancia": "1500.00"
+  }
+}
+```
+
+#### Ejemplo de response para GET /api/reportes/1/ventas
+
+```json
+{
+  "ventas": [
+    {
+      "ID_Venta": 1,
+      "Fecha": "2025-03-21",
+      "Total": "1000.00",
+      "Metodo_Pago": "Efectivo",
+      "Usuario": "admin"
+    }
+  ]
+}
+```
+
+#### Ejemplo de response para GET /api/reportes/1/gastos
+
+```json
+{
+  "gastos": [
+    {
+      "ID_Gasto": 1,
+      "Descripcion": "Renta",
+      "Monto": "500.00",
+      "Fecha": "2025-03-21",
+      "Usuario": "admin"
+    }
+  ]
+}
+```
+
+#### Ejemplo de response para GET /api/reportes/1/producto-mas-vendido
+
+```json
+{
+  "producto": "Latte",
+  "TotalVendido": 10
+}
+```
+
+#### Ejemplo de response para GET /api/reportes/1/dia-mas-ventas
+
+```json
+{
+  "fecha": "2025-03-21",
+  "TotalDia": "2000.00"
+}
+```
+
+---
+
 > **Nota:** Para detalles de parámetros y ejemplos de request/response, consulta el código fuente o amplía esta documentación según las necesidades del proyecto. 

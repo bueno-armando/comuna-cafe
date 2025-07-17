@@ -10,7 +10,7 @@ const authRoutes = require('./auth.routes');
 const ventasRoutes = require('./ventasRoutes');
 // const cajaRoutes = require('./caja.routes');
 // const gastosRoutes = require('./gastos.routes');
-// const reportesRoutes = require('./reportes.routes');
+const reportesRoutes = require('./reportesRoutes');
 // const usuariosRoutes = require('./usuarios.routes');
 // const bitacoraRoutes = require('./bitacora.routes');
 
@@ -23,7 +23,7 @@ router.use('/auth', authRoutes);
 router.use('/ventas', ventasRoutes);
 // router.use('/caja', cajaRoutes);
 // router.use('/gastos', gastosRoutes);
-// router.use('/reportes', reportesRoutes);
+router.use('/reportes', reportesRoutes);
 // router.use('/usuarios', usuariosRoutes);
 // router.use('/bitacora', bitacoraRoutes);
 
