@@ -129,7 +129,7 @@ async function generarReporte() {
     const data = await res.json();
     if (res.ok) {
       showNotif('Reporte generado exitosamente');
-      buscarReportes(); // Refresca la tabla
+      buscarReportes(false); // Refresca la tabla sin filtro de tipo
     } else {
       showNotif(data.message || 'Error al generar reporte', 'danger');
     }
@@ -139,14 +139,15 @@ async function generarReporte() {
 }
 
 // Buscar/listar reportes
-async function buscarReportes() {
+async function buscarReportes(applyTipoFilter = false) {
   const fechaInicio = document.getElementById('fechaBusqInicio').value;
   const fechaFin = document.getElementById('fechaBusqFin').value;
   const tipo = document.getElementById('tipoReporte').value;
   let url = API_URL + `?limit=10`;
   if (fechaInicio) url += `&fechaInicio=${fechaInicio}`;
   if (fechaFin) url += `&fechaFin=${fechaFin}`;
-  if (tipo) url += `&tipo=${tipo}`;
+  // Solo aplicar filtro de tipo si se solicita explícitamente o si hay filtros de fecha
+  if (applyTipoFilter && tipo) url += `&tipo=${tipo}`;
   try {
     const res = await fetch(url, {
       headers: { 'Authorization': 'Bearer ' + JWT }
@@ -159,6 +160,100 @@ async function buscarReportes() {
     }
   } catch (err) {
     showNotif('Error de red al buscar reportes', 'danger');
+  }
+}
+
+// Aplicar filtro rápido
+function aplicarFiltroRapido(periodo) {
+  const fechaInicio = document.getElementById('fechaBusqInicio');
+  const fechaFin = document.getElementById('fechaBusqFin');
+  const datePickerContainer = document.getElementById('datePickerContainer');
+  const aplicarFiltrosContainer = document.getElementById('aplicarFiltrosContainer');
+  
+  const hoy = new Date();
+  const inicioSemana = new Date(hoy);
+  inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+  const finSemana = new Date(inicioSemana);
+  finSemana.setDate(inicioSemana.getDate() + 6);
+  
+  const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  
+  // Limpiar fechas primero
+  fechaInicio.value = '';
+  fechaFin.value = '';
+  
+  switch (periodo) {
+    case 'hoy':
+      fechaInicio.value = hoy.toISOString().split('T')[0];
+      fechaFin.value = hoy.toISOString().split('T')[0];
+      datePickerContainer.style.display = 'none';
+      aplicarFiltrosContainer.classList.add('d-none');
+      mostrarFiltrosAplicados();
+      buscarReportes(false);
+      break;
+    case 'semana':
+      fechaInicio.value = inicioSemana.toISOString().split('T')[0];
+      fechaFin.value = finSemana.toISOString().split('T')[0];
+      datePickerContainer.style.display = 'none';
+      aplicarFiltrosContainer.classList.add('d-none');
+      mostrarFiltrosAplicados();
+      buscarReportes(false);
+      break;
+    case 'mes':
+      fechaInicio.value = inicioMes.toISOString().split('T')[0];
+      fechaFin.value = finMes.toISOString().split('T')[0];
+      datePickerContainer.style.display = 'none';
+      aplicarFiltrosContainer.classList.add('d-none');
+      mostrarFiltrosAplicados();
+      buscarReportes(false);
+      break;
+    case 'personalizado':
+      datePickerContainer.style.display = 'block';
+      aplicarFiltrosContainer.classList.remove('d-none');
+      document.getElementById('filtrosAplicados').classList.add('d-none');
+      break;
+  }
+}
+
+// Limpiar filtros
+function limpiarFiltros() {
+  document.getElementById('fechaBusqInicio').value = '';
+  document.getElementById('fechaBusqFin').value = '';
+  document.getElementById('datePickerContainer').style.display = 'none';
+  document.getElementById('aplicarFiltrosContainer').classList.add('d-none');
+  
+  // Resetear botones de filtros rápidos
+  document.querySelectorAll('[data-period]').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Ocultar indicador de filtros aplicados
+  document.getElementById('filtrosAplicados').classList.add('d-none');
+  
+  buscarReportes(false); // Sin filtro de tipo
+}
+
+// Mostrar indicador de filtros aplicados
+function mostrarFiltrosAplicados() {
+  const fechaInicio = document.getElementById('fechaBusqInicio').value;
+  const fechaFin = document.getElementById('fechaBusqFin').value;
+  const filtrosAplicados = document.getElementById('filtrosAplicados');
+  const textoFiltrosAplicados = document.getElementById('textoFiltrosAplicados');
+  
+  if (fechaInicio || fechaFin) {
+    let texto = 'Filtros aplicados: ';
+    if (fechaInicio && fechaFin) {
+      texto += `Desde ${new Date(fechaInicio).toLocaleDateString('es-MX')} hasta ${new Date(fechaFin).toLocaleDateString('es-MX')}`;
+    } else if (fechaInicio) {
+      texto += `Desde ${new Date(fechaInicio).toLocaleDateString('es-MX')}`;
+    } else if (fechaFin) {
+      texto += `Hasta ${new Date(fechaFin).toLocaleDateString('es-MX')}`;
+    }
+    textoFiltrosAplicados.textContent = texto;
+    filtrosAplicados.classList.remove('d-none');
+  } else {
+    filtrosAplicados.classList.add('d-none');
   }
 }
 
@@ -263,7 +358,24 @@ function llenarTablaDetalleGastos(gastos) {
 // Eventos
 
 document.getElementById('generarReporteBtn').addEventListener('click', generarReporte);
-document.getElementById('buscarReportesBtn').addEventListener('click', buscarReportes);
+document.getElementById('buscarReportesBtn').addEventListener('click', function() {
+  mostrarFiltrosAplicados();
+  buscarReportes(true); // Aplicar filtro de tipo cuando se hace clic explícitamente
+});
+document.getElementById('cerrarFiltros').addEventListener('click', limpiarFiltros);
+document.getElementById('cerrarFiltrosX').addEventListener('click', limpiarFiltros);
+
+// Eventos para filtros rápidos
+document.querySelectorAll('[data-period]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    // Remover clase active de todos los botones
+    document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+    // Agregar clase active al botón clickeado
+    this.classList.add('active');
+    // Aplicar filtro
+    aplicarFiltroRapido(this.getAttribute('data-period'));
+  });
+});
 
 document.getElementById('reportesTableBody').addEventListener('click', function(e) {
   if (e.target.classList.contains('ver-detalle-reporte-btn')) {
@@ -273,7 +385,25 @@ document.getElementById('reportesTableBody').addEventListener('click', function(
 });
 
 // Inicializar tabla al cargar
-window.addEventListener('DOMContentLoaded', buscarReportes);
+window.addEventListener('DOMContentLoaded', () => buscarReportes(false));
+
+// Función de inicialización
+function initReportes() {
+  // Cargar reportes al inicio
+  buscarReportes(false);
+  
+  // Evento para mostrar el modal de detalles de reporte
+  document.getElementById('detalleReporteModal').addEventListener('show.bs.modal', function(event) {
+    const button = event.relatedTarget;
+    const reporteId = button.getAttribute('data-reporte-id');
+    if (reporteId) {
+      mostrarDetalleReporte(reporteId);
+    }
+  });
+}
+
+// Inicializar cuando el DOM esté listo
+window.addEventListener('DOMContentLoaded', initReportes);
 
 // Funciones de exportación
 window.exportarPDF = exportarPDF;

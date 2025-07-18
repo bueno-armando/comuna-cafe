@@ -1,6 +1,6 @@
 - Reportes:
-  * encontrar como generarlos
   * ver el detalle de la fecha de corte
+  * considerar agregar filtros para los demás atributos
 
 - Gastos:
   * que el filtro de descripción se aplique al ir escribiendo
