@@ -8,8 +8,6 @@
 - MISC:
   - Considerar borrar los logs de depuración 
   - Añadir botón de esconder/mostrar contraseña al inicio de sesión
-  - Hacer logo del café en la barra lateral más grande y de fondo transparente
-    (lo de hacerlo transparente lo tengo que hacer manualmente)
   - Investigar sobre mecanismos de recuperación del sistema
   - Retoques (después de finalizar la base de todos los módulos):
     * Hacer consistente el estilo de los productos (usar misma clase)
