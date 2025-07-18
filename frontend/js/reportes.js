@@ -113,10 +113,18 @@ async function generarReporte() {
   const tipo = document.getElementById('tipoReporte').value;
   const fecha_inicio = document.getElementById('fechaGenInicio').value;
   const fecha_fin = document.getElementById('fechaGenFin').value;
+  const btn = document.getElementById('generarReporteBtn');
+  
   if (!tipo || !fecha_inicio || !fecha_fin) {
     showNotif('Completa todos los campos para generar el reporte', 'danger');
     return;
   }
+  
+  // Mostrar estado de carga
+  btn.classList.add('generating');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generando...';
+  
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -135,6 +143,11 @@ async function generarReporte() {
     }
   } catch (err) {
     showNotif('Error de red al generar reporte', 'danger');
+  } finally {
+    // Restaurar estado normal
+    btn.classList.remove('generating');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-plus-circle"></i> Generar Reporte';
   }
 }
 
