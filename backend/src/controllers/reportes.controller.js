@@ -1,6 +1,9 @@
 // Controlador para el módulo de reportes
 
 const pool = require('../config/database');
+const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 const generarReporte = async (req, res) => {
   try {
@@ -220,6 +223,214 @@ const diaMasVentas = async (req, res) => {
   }
 };
 
+const exportarPDF = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Obtener datos del reporte
+    const [reporteRows] = await pool.query('SELECT * FROM reportes WHERE ID_Reporte = ?', [id]);
+    if (!reporteRows.length) {
+      return res.status(404).json({ message: 'Reporte no encontrado' });
+    }
+    const reporte = reporteRows[0];
+    // Obtener ventas del reporte
+    const [ventas] = await pool.query(
+      `SELECT v.ID_Venta, v.Fecha, v.Total, v.Metodo_Pago, u.Usuario
+       FROM ventas v
+       JOIN usuarios u ON v.ID_Usuario = u.ID_Usuario
+       WHERE v.Fecha BETWEEN ? AND ?
+       ORDER BY v.Fecha DESC, v.ID_Venta DESC`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    // Obtener gastos del reporte
+    const [gastos] = await pool.query(
+      `SELECT g.ID_Gasto, g.Descripcion, g.Monto, g.Fecha, u.Usuario
+       FROM gastos g
+       JOIN usuarios u ON g.ID_Usuario = u.ID_Usuario
+       WHERE g.Fecha BETWEEN ? AND ?
+       ORDER BY g.Fecha DESC, g.ID_Gasto DESC`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    // Obtener producto más vendido
+    const [productoMasVendido] = await pool.query(
+      `SELECT p.Nombre, SUM(dv.Cantidad) AS TotalVendido
+       FROM detalle_venta dv
+       JOIN productos_venta p ON dv.ID_Producto = p.ID_Producto
+       JOIN ventas v ON dv.ID_Venta = v.ID_Venta
+       WHERE v.Fecha BETWEEN ? AND ?
+       GROUP BY p.Nombre
+       ORDER BY TotalVendido DESC
+       LIMIT 1`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    // Obtener día con más ventas
+    const [diaMasVentas] = await pool.query(
+      `SELECT Fecha, SUM(Total) AS TotalDia
+       FROM ventas
+       WHERE Fecha BETWEEN ? AND ?
+       GROUP BY Fecha
+       ORDER BY TotalDia DESC
+       LIMIT 1`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    // Crear el documento PDF
+    const doc = new PDFDocument();
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="reporte_${reporte.Tipo}_${reporte.Fecha_Inicio}_${reporte.Fecha_Fin}.pdf"`);
+    // Pipe el PDF a la respuesta
+    doc.pipe(res);
+    // Generar contenido del PDF
+    generarContenidoPDF(doc, reporte, ventas, gastos, productoMasVendido[0], diaMasVentas[0]);
+    // Finalizar el documento
+    doc.end();
+  } catch (error) {
+    console.error('Error al exportar PDF:', error);
+    res.status(500).json({ message: 'Error al exportar PDF', error: error.message });
+  }
+};
+
+// Función auxiliar para generar el contenido del PDF
+const generarContenidoPDF = (doc, reporte, ventas, gastos, productoMasVendido, diaMasVentas) => {
+  const tituloFont = 18;
+  const subtituloFont = 14;
+  const textoFont = 12;
+  const margen = 50;
+  let y = margen;
+
+  // Logo (busca primero en frontend, luego en backend)
+  let logoPath = path.resolve(__dirname, '../../../frontend/cafe-logo-transparent.png');
+  /*if (!fs.existsSync(logoPath)) {
+    logoPath = path.resolve(__dirname, '../cafe-logo-transparent.png');
+  }*/
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, doc.page.width / 2 - 50, y, { width: 100, align: 'center' });
+    y += 120; // Más espacio después del logo
+  }
+
+  // Título principal
+  doc.fontSize(tituloFont)
+     .font('Helvetica-Bold')
+     .text('LA COMUNA CAFÉ', margen, y, { align: 'center' });
+  y += 30;
+  // Subtítulo del reporte
+  doc.fontSize(subtituloFont)
+     .font('Helvetica-Bold')
+     .text(`Reporte ${reporte.Tipo}`, margen, y, { align: 'center' });
+  y += 25;
+  // Información del periodo
+  doc.fontSize(textoFont)
+     .font('Helvetica')
+     .text(`Periodo: ${new Date(reporte.Fecha_Inicio).toLocaleDateString('es-MX')} - ${new Date(reporte.Fecha_Fin).toLocaleDateString('es-MX')}`, margen, y);
+  y += 20;
+  // Fecha de generación del reporte
+  const fechaGen = new Date();
+  const fechaStr = fechaGen.toLocaleDateString('es-MX');
+  const horaStr = fechaGen.toLocaleTimeString('es-MX');
+  doc.fontSize(textoFont)
+     .font('Helvetica')
+     .fillColor('black')
+     .text(`Generado el: ${fechaStr} a las ${horaStr}`, margen, y);
+  y += 20;
+  // Resumen financiero
+  doc.fontSize(subtituloFont)
+     .font('Helvetica-Bold')
+     .fillColor('black')
+     .text('Resumen Financiero', margen, y);
+  y += 20;
+  doc.fontSize(textoFont)
+     .font('Helvetica')
+     .text(`Total Ventas: $${parseFloat(reporte.Total_Ventas).toFixed(2)}`, margen, y);
+  y += 15;
+  doc.text(`Total Gastos: $${parseFloat(reporte.Total_Gastos).toFixed(2)}`, margen, y);
+  y += 15;
+  doc.font('Helvetica-Bold')
+     .text(`Ganancia Neta: $${parseFloat(reporte.Ganancia).toFixed(2)}`, margen, y);
+  y += 30;
+  // Ventas
+  if (ventas.length > 0) {
+    doc.fontSize(subtituloFont)
+       .font('Helvetica-Bold')
+       .text('Ventas del Periodo', margen, y);
+    y += 20;
+    // Encabezados de tabla
+    const colWidth = 100;
+    const x1 = margen;
+    const x2 = x1 + colWidth;
+    const x3 = x2 + colWidth;
+    const x4 = x3 + colWidth;
+    doc.fontSize(textoFont)
+       .font('Helvetica-Bold')
+       .text('Fecha', x1, y)
+       .text('Total', x2, y)
+       .text('Método', x3, y)
+       .text('Usuario', x4, y);
+    y += 15;
+    // Datos de ventas
+    doc.font('Helvetica');
+    ventas.forEach(venta => {
+      if (y > 700) { // Volver al límite original
+        doc.addPage();
+        y = margen;
+      }
+      doc.text(new Date(venta.Fecha).toLocaleDateString('es-MX'), x1, y)
+         .text(`$${parseFloat(venta.Total).toFixed(2)}`, x2, y)
+         .text(venta.Metodo_Pago, x3, y)
+         .text(venta.Usuario, x4, y);
+      y += 15;
+    });
+    y += 20;
+  }
+  // Gastos
+  if (gastos.length > 0) {
+    doc.fontSize(subtituloFont)
+       .font('Helvetica-Bold')
+       .text('Gastos del Periodo', margen, y);
+    y += 20;
+    // Encabezados de tabla
+    const colWidth = 120;
+    const x1 = margen;
+    const x2 = x1 + colWidth;
+    const x3 = x2 + colWidth;
+    const x4 = x3 + colWidth;
+    doc.fontSize(textoFont)
+       .font('Helvetica-Bold')
+       .text('Fecha', x1, y)
+       .text('Descripción', x2, y)
+       .text('Monto', x3, y)
+       .text('Usuario', x4, y);
+    y += 15;
+    // Datos de gastos
+    doc.font('Helvetica');
+    gastos.forEach(gasto => {
+      if (y > 700) { // Volver al límite original
+        doc.addPage();
+        y = margen;
+      }
+      doc.text(new Date(gasto.Fecha).toLocaleDateString('es-MX'), x1, y)
+         .text(gasto.Descripcion.substring(0, 30), x2, y) // Limitar descripción
+         .text(`$${parseFloat(gasto.Monto).toFixed(2)}`, x3, y)
+         .text(gasto.Usuario, x4, y);
+      y += 15;
+    });
+    y += 20;
+  }
+  // Estadísticas adicionales
+  doc.fontSize(subtituloFont)
+     .font('Helvetica-Bold')
+     .text('Estadísticas Adicionales', margen, y);
+  y += 20;
+  doc.fontSize(textoFont)
+     .font('Helvetica');
+  if (productoMasVendido) {
+    doc.text(`Producto más vendido: ${productoMasVendido.Nombre} (${productoMasVendido.TotalVendido} unidades)`, margen, y);
+    y += 15;
+  }
+  if (diaMasVentas) {
+    doc.text(`Día con más ventas: ${new Date(diaMasVentas.Fecha).toLocaleDateString('es-MX')} ($${parseFloat(diaMasVentas.TotalDia).toFixed(2)})`, margen, y);
+    y += 15;
+  }
+};
+
 module.exports = {
   generarReporte,
   listarReportes,
@@ -228,4 +439,5 @@ module.exports = {
   gastosReporte,
   productoMasVendido,
   diaMasVentas,
+  exportarPDF,
 }; 

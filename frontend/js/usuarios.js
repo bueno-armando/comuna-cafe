@@ -371,7 +371,7 @@
             showErrorModal('No se pudo agregar el usuario: ' + error.message);
         }
     }
-
+    
     function editUsuario(id) {
         const usuario = usuarios.find(u => u.ID_Usuario == id);
         if (!usuario) return console.warn('Usuario no encontrado para editar:', id);
@@ -402,7 +402,7 @@
             Estado: formData.get('estado')
         };
         const contrasena = formData.get('contraseña');
-        if (contrasena && contrasena.trim() !== '') {
+        if (contrasena && contrasena.trim() !== '') { 
             data.Contraseña = contrasena;
         }
         if (!data.Nombre || !data.Apellido || !data.ID_Rol || !data.Estado) {
@@ -455,7 +455,7 @@
                     const page = parseInt(e.target.dataset.page);
                     if (page && page !== currentPage && page >= 1 && page <= totalPages) {
                         currentPage = page;
-                        fetchUsuarios();
+        fetchUsuarios();
                     }
                 }
             });
