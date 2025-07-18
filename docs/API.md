@@ -518,6 +518,8 @@ GET /api/usuarios?page=1&limit=9&nombre=Ana&estado=Activo&rol=1
 | GET    | /api/reportes/:id/gastos                    | Gastos incluidos en el reporte                   |
 | GET    | /api/reportes/:id/producto-mas-vendido      | Producto más vendido en el periodo del reporte   |
 | GET    | /api/reportes/:id/dia-mas-ventas            | Día con más ventas en el periodo del reporte     |
+| GET    | /api/reportes/:id/exportar/pdf              | Exportar reporte a PDF                           |
+| GET    | /api/reportes/:id/exportar/excel            | Exportar reporte a Excel                         |
 
 > Todos los endpoints requieren autenticación JWT.
 
@@ -641,6 +643,33 @@ GET /api/reportes?page=1&limit=10&tipo=Diario&fechaInicio=2025-03-01&fechaFin=20
   "TotalDia": "2000.00"
 }
 ```
+
+#### Ejemplo de request para GET /api/reportes/1/exportar/pdf
+
+```
+GET /api/reportes/1/exportar/pdf
+```
+
+> **Response:** Archivo PDF descargable con formato profesional que incluye:
+> - Logo del café en el encabezado
+> - Información del reporte (tipo, fechas, totales)
+> - Tabla de ventas con detalles completos
+> - Tabla de gastos con detalles completos
+> - Estadísticas (producto más vendido, día con más ventas)
+> - Fecha de generación del reporte
+
+#### Ejemplo de request para GET /api/reportes/1/exportar/excel
+
+```
+GET /api/reportes/1/exportar/excel
+```
+
+> **Response:** Archivo Excel (.xlsx) descargable con formato profesional que incluye:
+> - Hoja "Resumen" con información general del reporte
+> - Hoja "Ventas" con tabla detallada de ventas
+> - Hoja "Gastos" con tabla detallada de gastos
+> - Formato de moneda y fechas aplicado automáticamente
+> - Estilos profesionales con colores temáticos
 
 ---
 

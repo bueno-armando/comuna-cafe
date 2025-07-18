@@ -197,10 +197,14 @@
 
 ### ✅ **Módulo de Reportes - COMPLETADO**
 - **Generación de reportes**: Permite crear reportes consolidados de ventas y gastos por periodo (diario, semanal, mensual, etc.)
-- **Consulta y desglose**: Listado de reportes con filtros y paginación, consulta de detalles, ventas y gastos incluidos, producto más vendido y día con más ventas.
-- **Integración SPA**: Frontend conectado al backend, tabla dinámica, modal de detalles, y UX consistente con el resto del sistema.
-- **API documentada y probada**: Todos los endpoints REST implementados y verificados con curl.
-- **Listo para producción**: Lógica robusta, validaciones, y preparado para futuras extensiones (exportar PDF/Excel).
+- **Consulta y desglose**: Listado de reportes con filtros y paginación, consulta de detalles, ventas y gastos incluidos, producto más vendido y día con más ventas
+- **Exportación a PDF**: Genera archivos PDF profesionales con logo, encabezado, tablas de ventas y gastos, estadísticas y fecha de generación
+- **Exportación a Excel**: Genera archivos Excel (.xlsx) con hojas separadas para resumen, ventas y gastos, con formatos de moneda y fecha
+- **Filtros profesionales**: Filtros rápidos (Hoy, Semana, Mes, Personalizado) siguiendo el patrón de Gastos y Bitácora
+- **Notificaciones modales**: Sistema de notificaciones con modales Bootstrap para éxito y errores
+- **Integración SPA completa**: Frontend conectado al backend, tabla dinámica, modal de detalles, y UX consistente
+- **API robusta**: Todos los endpoints REST implementados, incluyendo exportación a PDF y Excel
+- **Listo para producción**: Lógica robusta, validaciones, y funcionalidad completa de exportación
 
 ### 🔧 **Detalles técnicos importantes:**
 
@@ -244,6 +248,16 @@
 - **Roles y permisos**: Validación de permisos para crear usuarios (solo administradores)
 - **UX profesional**: Filtros reactivos, búsqueda por múltiples criterios
 - **Información técnica**: IDs visibles para administradores de sistemas
+
+#### Reportes
+- **Exportación profesional**: PDF con logo, encabezado, tablas y estadísticas
+- **Exportación Excel**: Múltiples hojas con formatos de moneda y fecha
+- **Filtros consistentes**: Mismo patrón que Gastos y Bitácora (Hoy, Semana, Mes, Personalizado)
+- **Notificaciones modales**: Sistema unificado de notificaciones con Bootstrap
+- **Carga dinámica**: Tabla de reportes sin contenido estático
+- **Modal de detalles**: Información completa con ventas, gastos y estadísticas
+- **UX pulida**: Filtros sin interferencias, botones de exportación integrados
+- **API completa**: Endpoints para exportación a PDF y Excel implementados
 
 ## Recomendaciones para paginación y filtros en todos los módulos
 
@@ -321,4 +335,4 @@ Para asegurar una experiencia de usuario consistente y profesional, todos los m�
 
 ---
 
-> **Módulos de Insumos, Recetas, Ventas, Gastos y Usuarios COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción.
+> **Módulos de Insumos, Recetas, Ventas, Gastos, Usuarios y Reportes COMPLETADOS** - Todas las funcionalidades principales están implementadas y funcionando correctamente. Los módulos están listos para uso en producción.
