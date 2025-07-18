@@ -2,6 +2,7 @@
 
 const pool = require('../config/database');
 const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
 
@@ -431,6 +432,273 @@ const generarContenidoPDF = (doc, reporte, ventas, gastos, productoMasVendido, d
   }
 };
 
+const exportarExcel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Obtener datos del reporte
+    const [reporteRows] = await pool.query('SELECT * FROM reportes WHERE ID_Reporte = ?', [id]);
+    if (!reporteRows.length) {
+      return res.status(404).json({ message: 'Reporte no encontrado' });
+    }
+    const reporte = reporteRows[0];
+    
+    // Obtener ventas del reporte
+    const [ventas] = await pool.query(
+      `SELECT v.ID_Venta, v.Fecha, v.Total, v.Metodo_Pago, u.Usuario
+       FROM ventas v
+       JOIN usuarios u ON v.ID_Usuario = u.ID_Usuario
+       WHERE v.Fecha BETWEEN ? AND ?
+       ORDER BY v.Fecha DESC, v.ID_Venta DESC`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    
+    // Obtener gastos del reporte
+    const [gastos] = await pool.query(
+      `SELECT g.ID_Gasto, g.Descripcion, g.Monto, g.Fecha, u.Usuario
+       FROM gastos g
+       JOIN usuarios u ON g.ID_Usuario = u.ID_Usuario
+       WHERE g.Fecha BETWEEN ? AND ?
+       ORDER BY g.Fecha DESC, g.ID_Gasto DESC`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    
+    // Obtener producto más vendido
+    const [productoMasVendido] = await pool.query(
+      `SELECT p.Nombre, SUM(dv.Cantidad) AS TotalVendido
+       FROM detalle_venta dv
+       JOIN productos_venta p ON dv.ID_Producto = p.ID_Producto
+       JOIN ventas v ON dv.ID_Venta = v.ID_Venta
+       WHERE v.Fecha BETWEEN ? AND ?
+       GROUP BY p.Nombre
+       ORDER BY TotalVendido DESC
+       LIMIT 1`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    
+    // Obtener día con más ventas
+    const [diaMasVentas] = await pool.query(
+      `SELECT Fecha, SUM(Total) AS TotalDia
+       FROM ventas
+       WHERE Fecha BETWEEN ? AND ?
+       GROUP BY Fecha
+       ORDER BY TotalDia DESC
+       LIMIT 1`,
+      [reporte.Fecha_Inicio, reporte.Fecha_Fin]
+    );
+    
+    // Crear el libro de Excel
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'La Comuna Café';
+    workbook.lastModifiedBy = 'Sistema de Reportes';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="reporte_${reporte.Tipo}_${reporte.Fecha_Inicio}_${reporte.Fecha_Fin}.xlsx"`);
+    
+    // Generar contenido del Excel
+    generarContenidoExcel(workbook, reporte, ventas, gastos, productoMasVendido[0], diaMasVentas[0]);
+    
+    // Escribir el archivo a la respuesta
+    await workbook.xlsx.write(res);
+    
+  } catch (error) {
+    console.error('Error al exportar Excel:', error);
+    res.status(500).json({ message: 'Error al exportar Excel', error: error.message });
+  }
+};
+
+// Función auxiliar para generar el contenido del Excel
+const generarContenidoExcel = (workbook, reporte, ventas, gastos, productoMasVendido, diaMasVentas) => {
+  // Hoja 1: Resumen
+  const resumenSheet = workbook.addWorksheet('Resumen');
+  
+  // Estilos para encabezados
+  const headerStyle = {
+    font: { bold: true, size: 14, color: { argb: 'FFFFFF' } },
+    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '366092' } },
+    alignment: { horizontal: 'center', vertical: 'middle' }
+  };
+  
+  const subHeaderStyle = {
+    font: { bold: true, size: 12 },
+    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'D9E1F2' } },
+    alignment: { horizontal: 'left', vertical: 'middle' }
+  };
+  
+  const dataStyle = {
+    font: { size: 11 },
+    alignment: { horizontal: 'left', vertical: 'middle' }
+  };
+  
+  // Título principal
+  resumenSheet.mergeCells('A1:D1');
+  resumenSheet.getCell('A1').value = 'LA COMUNA CAFÉ';
+  resumenSheet.getCell('A1').style = headerStyle;
+  
+  // Subtítulo
+  resumenSheet.mergeCells('A2:D2');
+  resumenSheet.getCell('A2').value = `Reporte ${reporte.Tipo}`;
+  resumenSheet.getCell('A2').style = headerStyle;
+  
+  // Información del reporte
+  resumenSheet.getCell('A4').value = 'Periodo:';
+  resumenSheet.getCell('A4').style = subHeaderStyle;
+  resumenSheet.getCell('B4').value = `${new Date(reporte.Fecha_Inicio).toLocaleDateString('es-MX')} - ${new Date(reporte.Fecha_Fin).toLocaleDateString('es-MX')}`;
+  resumenSheet.getCell('B4').style = dataStyle;
+  
+  // Fecha de generación
+  const fechaGen = new Date();
+  const fechaStr = fechaGen.toLocaleDateString('es-MX');
+  const horaStr = fechaGen.toLocaleTimeString('es-MX');
+  resumenSheet.getCell('A5').value = 'Generado el:';
+  resumenSheet.getCell('A5').style = subHeaderStyle;
+  resumenSheet.getCell('B5').value = `${fechaStr} a las ${horaStr}`;
+  resumenSheet.getCell('B5').style = dataStyle;
+  
+  // Resumen financiero
+  resumenSheet.getCell('A7').value = 'RESUMEN FINANCIERO';
+  resumenSheet.getCell('A7').style = headerStyle;
+  resumenSheet.mergeCells('A7:D7');
+  
+  resumenSheet.getCell('A8').value = 'Total Ventas:';
+  resumenSheet.getCell('A8').style = subHeaderStyle;
+  resumenSheet.getCell('B8').value = parseFloat(reporte.Total_Ventas);
+  resumenSheet.getCell('B8').style = dataStyle;
+  resumenSheet.getCell('B8').numFmt = '"$"#,##0.00';
+  
+  resumenSheet.getCell('A9').value = 'Total Gastos:';
+  resumenSheet.getCell('A9').style = subHeaderStyle;
+  resumenSheet.getCell('B9').value = parseFloat(reporte.Total_Gastos);
+  resumenSheet.getCell('B9').style = dataStyle;
+  resumenSheet.getCell('B9').numFmt = '"$"#,##0.00';
+  
+  resumenSheet.getCell('A10').value = 'Ganancia Neta:';
+  resumenSheet.getCell('A10').style = subHeaderStyle;
+  resumenSheet.getCell('B10').value = parseFloat(reporte.Ganancia);
+  resumenSheet.getCell('B10').style = dataStyle;
+  resumenSheet.getCell('B10').numFmt = '"$"#,##0.00';
+  
+  // Estadísticas adicionales
+  resumenSheet.getCell('A12').value = 'ESTADÍSTICAS ADICIONALES';
+  resumenSheet.getCell('A12').style = headerStyle;
+  resumenSheet.mergeCells('A12:D12');
+  
+  let row = 13;
+  if (productoMasVendido) {
+    resumenSheet.getCell(`A${row}`).value = 'Producto más vendido:';
+    resumenSheet.getCell(`A${row}`).style = subHeaderStyle;
+    resumenSheet.getCell(`B${row}`).value = `${productoMasVendido.Nombre} (${productoMasVendido.TotalVendido} unidades)`;
+    resumenSheet.getCell(`B${row}`).style = dataStyle;
+    row++;
+  }
+  
+  if (diaMasVentas) {
+    resumenSheet.getCell(`A${row}`).value = 'Día con más ventas:';
+    resumenSheet.getCell(`A${row}`).style = subHeaderStyle;
+    resumenSheet.getCell(`B${row}`).value = `${new Date(diaMasVentas.Fecha).toLocaleDateString('es-MX')} ($${parseFloat(diaMasVentas.TotalDia).toFixed(2)})`;
+    resumenSheet.getCell(`B${row}`).style = dataStyle;
+  }
+  
+  // Ajustar ancho de columnas
+  resumenSheet.getColumn('A').width = 20;
+  resumenSheet.getColumn('B').width = 30;
+  resumenSheet.getColumn('C').width = 15;
+  resumenSheet.getColumn('D').width = 15;
+  
+  // Hoja 2: Ventas
+  if (ventas.length > 0) {
+    const ventasSheet = workbook.addWorksheet('Ventas');
+    
+    // Encabezados
+    ventasSheet.getCell('A1').value = 'ID Venta';
+    ventasSheet.getCell('A1').style = headerStyle;
+    ventasSheet.getCell('B1').value = 'Fecha';
+    ventasSheet.getCell('B1').style = headerStyle;
+    ventasSheet.getCell('C1').value = 'Total';
+    ventasSheet.getCell('C1').style = headerStyle;
+    ventasSheet.getCell('D1').value = 'Método de Pago';
+    ventasSheet.getCell('D1').style = headerStyle;
+    ventasSheet.getCell('E1').value = 'Usuario';
+    ventasSheet.getCell('E1').style = headerStyle;
+    
+    // Datos
+    ventas.forEach((venta, index) => {
+      const row = index + 2;
+      ventasSheet.getCell(`A${row}`).value = venta.ID_Venta;
+      ventasSheet.getCell(`A${row}`).style = dataStyle;
+      
+      ventasSheet.getCell(`B${row}`).value = new Date(venta.Fecha);
+      ventasSheet.getCell(`B${row}`).style = dataStyle;
+      ventasSheet.getCell(`B${row}`).numFmt = 'dd/mm/yyyy';
+      
+      ventasSheet.getCell(`C${row}`).value = parseFloat(venta.Total);
+      ventasSheet.getCell(`C${row}`).style = dataStyle;
+      ventasSheet.getCell(`C${row}`).numFmt = '"$"#,##0.00';
+      
+      ventasSheet.getCell(`D${row}`).value = venta.Metodo_Pago;
+      ventasSheet.getCell(`D${row}`).style = dataStyle;
+      
+      ventasSheet.getCell(`E${row}`).value = venta.Usuario;
+      ventasSheet.getCell(`E${row}`).style = dataStyle;
+    });
+    
+    // Ajustar ancho de columnas
+    ventasSheet.getColumn('A').width = 12;
+    ventasSheet.getColumn('B').width = 15;
+    ventasSheet.getColumn('C').width = 15;
+    ventasSheet.getColumn('D').width = 20;
+    ventasSheet.getColumn('E').width = 20;
+  }
+  
+  // Hoja 3: Gastos
+  if (gastos.length > 0) {
+    const gastosSheet = workbook.addWorksheet('Gastos');
+    
+    // Encabezados
+    gastosSheet.getCell('A1').value = 'ID Gasto';
+    gastosSheet.getCell('A1').style = headerStyle;
+    gastosSheet.getCell('B1').value = 'Fecha';
+    gastosSheet.getCell('B1').style = headerStyle;
+    gastosSheet.getCell('C1').value = 'Descripción';
+    gastosSheet.getCell('C1').style = headerStyle;
+    gastosSheet.getCell('D1').value = 'Monto';
+    gastosSheet.getCell('D1').style = headerStyle;
+    gastosSheet.getCell('E1').value = 'Usuario';
+    gastosSheet.getCell('E1').style = headerStyle;
+    
+    // Datos
+    gastos.forEach((gasto, index) => {
+      const row = index + 2;
+      gastosSheet.getCell(`A${row}`).value = gasto.ID_Gasto;
+      gastosSheet.getCell(`A${row}`).style = dataStyle;
+      
+      gastosSheet.getCell(`B${row}`).value = new Date(gasto.Fecha);
+      gastosSheet.getCell(`B${row}`).style = dataStyle;
+      gastosSheet.getCell(`B${row}`).numFmt = 'dd/mm/yyyy';
+      
+      gastosSheet.getCell(`C${row}`).value = gasto.Descripcion;
+      gastosSheet.getCell(`C${row}`).style = dataStyle;
+      
+      gastosSheet.getCell(`D${row}`).value = parseFloat(gasto.Monto);
+      gastosSheet.getCell(`D${row}`).style = dataStyle;
+      gastosSheet.getCell(`D${row}`).numFmt = '"$"#,##0.00';
+      
+      gastosSheet.getCell(`E${row}`).value = gasto.Usuario;
+      gastosSheet.getCell(`E${row}`).style = dataStyle;
+    });
+    
+    // Ajustar ancho de columnas
+    gastosSheet.getColumn('A').width = 12;
+    gastosSheet.getColumn('B').width = 15;
+    gastosSheet.getColumn('C').width = 40;
+    gastosSheet.getColumn('D').width = 15;
+    gastosSheet.getColumn('E').width = 20;
+  }
+};
+
 module.exports = {
   generarReporte,
   listarReportes,
@@ -440,4 +708,5 @@ module.exports = {
   productoMasVendido,
   diaMasVentas,
   exportarPDF,
+  exportarExcel,
 }; 

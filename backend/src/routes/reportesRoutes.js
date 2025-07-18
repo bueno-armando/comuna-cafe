@@ -12,5 +12,6 @@ router.get('/:id/gastos', auth, reportesController.gastosReporte);
 router.get('/:id/producto-mas-vendido', auth, reportesController.productoMasVendido);
 router.get('/:id/dia-mas-ventas', auth, reportesController.diaMasVentas);
 router.get('/:id/exportar/pdf', auth, reportesController.exportarPDF);
+router.get('/:id/exportar/excel', auth, reportesController.exportarExcel);
 
 module.exports = router; 
