@@ -11,10 +11,101 @@ function formatFecha(fecha) {
   return d.toLocaleDateString('es-MX', { year: '2-digit', month: '2-digit', day: '2-digit' });
 }
 
-// Mostrar notificación (puedes mejorar con Toasts de Bootstrap)
+// Mostrar notificación con modal de Bootstrap
 function showNotif(msg, type = 'success') {
-  // Simple: alert, reemplaza por toast si tienes
-  alert(msg);
+  const modal = new bootstrap.Modal(document.getElementById('notificacionModal'));
+  const titulo = document.getElementById('notificacionTitulo');
+  const mensaje = document.getElementById('notificacionMensaje');
+  const icono = titulo.querySelector('i');
+  
+  // Configurar según el tipo
+  if (type === 'success') {
+    titulo.innerHTML = '<i class="bi bi-check-circle me-2"></i>Éxito';
+    titulo.className = 'modal-title text-success';
+  } else if (type === 'danger' || type === 'error') {
+    titulo.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Error';
+    titulo.className = 'modal-title text-danger';
+  } else {
+    titulo.innerHTML = '<i class="bi bi-info-circle me-2"></i>Información';
+    titulo.className = 'modal-title text-info';
+  }
+  
+  mensaje.textContent = msg;
+  modal.show();
+}
+
+// Exportar reporte a PDF
+async function exportarPDF() {
+  const reporteId = document.getElementById('detalleReporteId').value;
+  if (!reporteId) {
+    showNotif('No hay reporte seleccionado', 'danger');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/${reporteId}/exportar/pdf`, {
+      headers: {
+        'Authorization': 'Bearer ' + JWT
+      }
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al exportar PDF');
+    }
+    
+    // Crear blob y descargar
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte_${reporteId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    showNotif('PDF exportado exitosamente');
+  } catch (error) {
+    showNotif('Error al exportar PDF: ' + error.message, 'danger');
+  }
+}
+
+// Exportar reporte a Excel
+async function exportarExcel() {
+  const reporteId = document.getElementById('detalleReporteId').value;
+  if (!reporteId) {
+    showNotif('No hay reporte seleccionado', 'danger');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/${reporteId}/exportar/excel`, {
+      headers: {
+        'Authorization': 'Bearer ' + JWT
+      }
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al exportar Excel');
+    }
+    
+    // Crear blob y descargar
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte_${reporteId}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    showNotif('Excel exportado exitosamente');
+  } catch (error) {
+    showNotif('Error al exportar Excel: ' + error.message, 'danger');
+  }
 }
 
 // Generar reporte
@@ -184,6 +275,6 @@ document.getElementById('reportesTableBody').addEventListener('click', function(
 // Inicializar tabla al cargar
 window.addEventListener('DOMContentLoaded', buscarReportes);
 
-// Placeholders para exportar a PDF/Excel
-// document.querySelector('.btn-success').addEventListener('click', exportarPDF);
-// document.querySelector('.btn-cafe').addEventListener('click', exportarExcel); 
+// Funciones de exportación
+window.exportarPDF = exportarPDF;
+window.exportarExcel = exportarExcel; 

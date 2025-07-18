@@ -193,15 +193,35 @@
                             <input type="text" class="form-control" id="detalleReporteDiaMasVentas" value="25/11/2022" readonly>
                         </div>
                         <div class="d-flex flex-column gap-2 mt-4">
-                            <button type="button" class="btn btn-success">
+                            <button type="button" class="btn btn-success" onclick="exportarPDF()">
                                 <i class="bi bi-file-pdf me-2"></i>Exportar a PDF
                             </button>
-                            <button type="button" class="btn btn-cafe">
+                            <button type="button" class="btn btn-cafe" onclick="exportarExcel()">
                                 <i class="bi bi-file-earmark-excel me-2"></i>Exportar a Excel
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Notificación -->
+<div class="modal fade" id="notificacionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="notificacionTitulo">
+                    <i class="bi bi-check-circle me-2"></i>Éxito
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="notificacionMensaje" class="mb-0">Operación completada exitosamente.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-cafe" data-bs-dismiss="modal">Aceptar</button>
             </div>
         </div>
     </div>
@@ -223,11 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Cargando detalles del reporte ID:', reporteId);
     });
     // Eventos de exportar (simulación visual)
-    document.querySelector('#detalleReporteModal .btn-success').onclick = function() {
-        alert('Funcionalidad de exportar a PDF a implementar por el backend');
-    };
-    document.querySelector('#detalleReporteModal .btn-cafe').onclick = function() {
-        alert('Funcionalidad de exportar a Excel a implementar por el backend');
-    };
+    // document.querySelector('#detalleReporteModal .btn-success').onclick = function() {
+    //     alert('Funcionalidad de exportar a PDF a implementar por el backend');
+    // };
+    // document.querySelector('#detalleReporteModal .btn-cafe').onclick = function() {
+    //     alert('Funcionalidad de exportar a Excel a implementar por el backend');
+    // };
 });
 </script> 
