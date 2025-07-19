@@ -302,30 +302,81 @@ async function mostrarDetalleReporte(id) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
     const rep = data.reporte;
-    document.getElementById('detalleReporteId').value = rep.ID_Reporte;
-    document.getElementById('detalleReporteTipo').value = rep.Tipo;
-    document.getElementById('detalleReporteFechaInicio').value = formatFecha(rep.Fecha_Inicio);
-    document.getElementById('detalleReporteFechaFin').value = formatFecha(rep.Fecha_Fin);
-    document.getElementById('detalleReporteGanancia').value = `$${rep.Ganancia}`;
-    document.getElementById('detalleReporteGastos').value = `$${rep.Total_Gastos}`;
+    
+    // Actualizar información principal
+    document.getElementById('detalleReporteId').textContent = rep.ID_Reporte;
+    document.getElementById('detalleReporteTipo').textContent = rep.Tipo;
+    
+    // Calcular período y duración
+    const fechaInicio = new Date(rep.Fecha_Inicio);
+    const fechaFin = new Date(rep.Fecha_Fin);
+    const periodo = `${fechaInicio.toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit'})} - ${fechaFin.toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit'})}`;
+    const duracion = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+    
+    document.getElementById('detalleReportePeriodo').textContent = periodo;
+    document.getElementById('detalleReporteDuracion').textContent = `${duracion} días`;
+    
+    // Actualizar métricas financieras
+    const ganancia = parseFloat(rep.Ganancia);
+    const gastos = parseFloat(rep.Total_Gastos);
+    const ventas = parseFloat(rep.Total_Ventas);
+    
+    // Mostrar ganancias brutas (ventas) o "Sin ganancias"
+    if (ventas > 0) {
+        document.getElementById('detalleReporteGanancia').textContent = `$${ventas.toFixed(2)}`;
+        document.getElementById('detalleReporteGanancia').className = 'fw-bold text-success fs-5';
+    } else {
+        document.getElementById('detalleReporteGanancia').textContent = 'Sin ganancias';
+        document.getElementById('detalleReporteGanancia').className = 'fw-bold text-muted fs-5';
+    }
+    
+    // Mostrar total de gastos
+    document.getElementById('detalleReporteGastos').textContent = `$${gastos.toFixed(2)}`;
+    
+    // Mostrar balance neto (ganancia ya calculada en el backend)
+    if (ganancia > 0) {
+        document.getElementById('detalleReporteBalance').textContent = `$${ganancia.toFixed(2)}`;
+        document.getElementById('detalleReporteBalance').className = 'fw-bold text-success fs-5';
+    } else if (ganancia < 0) {
+        document.getElementById('detalleReporteBalance').textContent = `$${Math.abs(ganancia).toFixed(2)}`;
+        document.getElementById('detalleReporteBalance').className = 'fw-bold text-danger fs-5';
+    } else {
+        document.getElementById('detalleReporteBalance').textContent = '$0.00';
+        document.getElementById('detalleReporteBalance').className = 'fw-bold text-muted fs-5';
+    }
+    
     // Ventas
     const ventasRes = await fetch(`${API_URL}/${id}/ventas`, { headers: { 'Authorization': 'Bearer ' + JWT } });
     const ventasData = await ventasRes.json();
     llenarTablaDetalleVentas(ventasData.ventas);
+    
     // Gastos
     const gastosRes = await fetch(`${API_URL}/${id}/gastos`, { headers: { 'Authorization': 'Bearer ' + JWT } });
     const gastosData = await gastosRes.json();
     llenarTablaDetalleGastos(gastosData.gastos);
+    
     // Producto más vendido
     const prodRes = await fetch(`${API_URL}/${id}/producto-mas-vendido`, { headers: { 'Authorization': 'Bearer ' + JWT } });
     const prodData = await prodRes.json();
-    document.getElementById('detalleReporteMasVendido').value = prodData.producto || 'N/A';
+    document.getElementById('detalleReporteMasVendido').textContent = prodData.producto || 'N/A';
+    
     // Día con más ventas
     const diaRes = await fetch(`${API_URL}/${id}/dia-mas-ventas`, { headers: { 'Authorization': 'Bearer ' + JWT } });
     const diaData = await diaRes.json();
-    document.getElementById('detalleReporteDiaMasVentas').value = diaData.fecha ? formatFecha(diaData.fecha) : 'N/A';
+    document.getElementById('detalleReporteDiaMasVentas').textContent = diaData.fecha ? formatFecha(diaData.fecha) : 'N/A';
+    
+    // Calcular venta promedio
+    if (ventasData.ventas && ventasData.ventas.length > 0) {
+      const totalVentas = ventasData.ventas.reduce((sum, v) => sum + parseFloat(v.Total), 0);
+      const promedio = totalVentas / ventasData.ventas.length;
+      document.getElementById('detalleReporteVentaPromedio').textContent = `$${promedio.toFixed(2)}`;
+    } else {
+      document.getElementById('detalleReporteVentaPromedio').textContent = '$0.00';
+    }
+    
   } catch (err) {
     showNotif('Error al cargar detalles del reporte: ' + err.message, 'danger');
+    console.error('Error completo:', err);
   }
 }
 
@@ -350,7 +401,7 @@ function llenarTablaDetalleVentas(ventas) {
 }
 
 function llenarTablaDetalleGastos(gastos) {
-  const tbody = document.getElementById('detalleReporteGastos');
+  const tbody = document.getElementById('detalleReporteTablaGastos');
   tbody.innerHTML = '';
   if (!gastos || gastos.length === 0) {
     tbody.innerHTML = `<tr><td colspan="4" class="text-center">Sin gastos</td></tr>`;
@@ -406,13 +457,42 @@ function initReportes() {
   buscarReportes(false);
   
   // Evento para mostrar el modal de detalles de reporte
-  document.getElementById('detalleReporteModal').addEventListener('show.bs.modal', function(event) {
-    const button = event.relatedTarget;
-    const reporteId = button.getAttribute('data-reporte-id');
-    if (reporteId) {
+document.getElementById('detalleReporteModal').addEventListener('show.bs.modal', function(event) {
+  const button = event.relatedTarget;
+  const reporteId = button.getAttribute('data-reporte-id');
+  if (reporteId) {
+    try {
       mostrarDetalleReporte(reporteId);
+    } catch (error) {
+      console.error('Error al cargar detalles:', error);
+      showNotif('Error al cargar los detalles del reporte', 'danger');
+      // Cerrar el modal si hay error
+      const modal = bootstrap.Modal.getInstance(document.getElementById('detalleReporteModal'));
+      if (modal) {
+        modal.hide();
+      }
     }
-  });
+  }
+});
+
+// Evento para limpiar el modal cuando se cierra
+document.getElementById('detalleReporteModal').addEventListener('hidden.bs.modal', function() {
+  // Limpiar contenido del modal
+  document.getElementById('detalleReporteId').textContent = '';
+  document.getElementById('detalleReporteTipo').textContent = '';
+  document.getElementById('detalleReportePeriodo').textContent = '';
+  document.getElementById('detalleReporteDuracion').textContent = '';
+  document.getElementById('detalleReporteGanancia').textContent = '';
+  document.getElementById('detalleReporteGastos').textContent = '';
+  document.getElementById('detalleReporteBalance').textContent = '';
+  document.getElementById('detalleReporteMasVendido').textContent = '';
+  document.getElementById('detalleReporteDiaMasVentas').textContent = '';
+  document.getElementById('detalleReporteVentaPromedio').textContent = '';
+  
+  // Limpiar tablas
+  document.getElementById('detalleReporteVentas').innerHTML = '';
+  document.getElementById('detalleReporteTablaGastos').innerHTML = '';
+});
 }
 
 // Inicializar cuando el DOM esté listo

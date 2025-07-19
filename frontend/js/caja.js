@@ -5,6 +5,39 @@
     let filteredProducts = []; // Para almacenar productos filtrados por búsqueda
     let paymentModalInstance = null; // Para la instancia del modal de Bootstrap
 
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(titulo, mensaje, tipo = 'success') {
+        const modal = document.getElementById('notificacionModal');
+        const tituloElement = document.getElementById('notificacionTitulo');
+        const mensajeElement = document.getElementById('notificacionMensaje');
+        
+        // Configurar icono y color según el tipo
+        let icono, color;
+        switch(tipo) {
+            case 'success':
+                icono = 'bi-check-circle';
+                color = 'text-success';
+                break;
+            case 'error':
+                icono = 'bi-exclamation-triangle';
+                color = 'text-danger';
+                break;
+            case 'warning':
+                icono = 'bi-exclamation-circle';
+                color = 'text-warning';
+                break;
+            default:
+                icono = 'bi-info-circle';
+                color = 'text-info';
+        }
+        
+        tituloElement.innerHTML = `<i class="bi ${icono} me-2 ${color}"></i>${titulo}`;
+        mensajeElement.textContent = mensaje;
+        
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+
     // Simular carga de productos y configuración inicial
     async function initCaja() {
         console.log('initCaja ejecutándose...');
@@ -184,7 +217,7 @@
                 try {
                     const paymentMethodChecked = document.querySelector('input[name="paymentMethod"]:checked');
                     if (!paymentMethodChecked) {
-                        alert('Por favor, seleccione un método de pago.');
+                        mostrarNotificacion('Error', 'Por favor, seleccione un método de pago.', 'error');
                         return;
                     }
                     const saleData = {
@@ -210,16 +243,18 @@
                     const result = await response.json();
                     
                     if (result.success) {
-                        alert('Venta registrada correctamente');
                         cart = [];
                         updateCartDisplay();
                         if (paymentModalInstance) paymentModalInstance.hide();
+                        
+                        // Mostrar notificación de éxito
+                        mostrarNotificacion('Éxito', 'Venta registrada correctamente', 'success');
                     } else {
-                        alert('Error al procesar la venta: ' + (result.error || 'Error desconocido'));
+                        mostrarNotificacion('Error', result.error || 'Error desconocido', 'error');
                     }
                 } catch (error) {
                     console.error('Error en confirmPayment:', error);
-                    alert('Error al procesar la venta. Verifique la consola.');
+                    mostrarNotificacion('Error', 'Error al procesar la venta. Verifique la consola.', 'error');
                 }
             });
         }

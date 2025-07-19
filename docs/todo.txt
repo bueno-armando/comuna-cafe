@@ -1,13 +1,11 @@
 - Reportes:
   * ver el detalle de la fecha de corte
   * considerar agregar filtros para los demás atributos
-  * modal 'detalles de reporte': usar otro componente más apto (no cajas de texto)
-    para mostrar los datos
   * considerar edición/borrado de reportes
 
-- Gastos:
-  * que el filtro de descripción se aplique al ir escribiendo
-
+- Caja:
+  * agregar filtrado por categoría
+  
 - MISC:
   - Considerar borrar los logs de depuración 
   - Retoques (después de finalizar la base de todos los módulos):

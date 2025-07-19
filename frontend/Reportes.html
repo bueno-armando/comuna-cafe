@@ -97,34 +97,78 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-2">
-                            <label class="form-label">ID Reporte</label>
-                            <input type="text" class="form-control" id="detalleReporteId" value="1" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Tipo</label>
-                            <input type="text" class="form-control" id="detalleReporteTipo" value="Semanal" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Fecha Inicio</label>
-                            <input type="text" class="form-control" id="detalleReporteFechaInicio" value="25/11/2022" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Fecha Fin</label>
-                            <input type="text" class="form-control" id="detalleReporteFechaFin" value="02/12/2022" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Ganancias Totales</label>
-                            <input type="text" class="form-control" id="detalleReporteGanancia" value="$200" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Gastos Totales</label>
-                            <input type="text" class="form-control" id="detalleReporteGastos" value="$200" readonly>
+                <!-- Información principal del reporte -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center p-3">
+                                <div class="text-muted small mb-1">ID Reporte</div>
+                                <div class="fw-bold text-primary" id="detalleReporteId">1</div>
+                            </div>
                         </div>
                     </div>
-                </form>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center p-3">
+                                <div class="text-muted small mb-1">Tipo</div>
+                                <div class="fw-bold text-primary" id="detalleReporteTipo">Semanal</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center p-3">
+                                <div class="text-muted small mb-1">Período</div>
+                                <div class="fw-bold" id="detalleReportePeriodo">25/11 - 02/12</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center p-3">
+                                <div class="text-muted small mb-1">Duración</div>
+                                <div class="fw-bold" id="detalleReporteDuracion">8 días</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métricas financieras -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center p-3">
+                                <div class="text-success mb-1">
+                                    <i class="bi bi-graph-up-arrow fs-4"></i>
+                                </div>
+                                <div class="text-muted small">Ventas Totales</div>
+                                <div class="fw-bold text-success fs-5" id="detalleReporteGanancia">$200.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center p-3">
+                                <div class="text-warning mb-1">
+                                    <i class="bi bi-cash-stack fs-4"></i>
+                                </div>
+                                <div class="text-muted small">Gastos Totales</div>
+                                <div class="fw-bold text-warning fs-5" id="detalleReporteGastos">$200.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center p-3">
+                                <div class="text-primary mb-1">
+                                    <i class="bi bi-calculator fs-4"></i>
+                                </div>
+                                <div class="text-muted small">Balance Neto</div>
+                                <div class="fw-bold text-primary fs-5" id="detalleReporteBalance">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-8">
                         <div class="table-responsive mb-3">
@@ -176,7 +220,7 @@
                                         <th><i class="bi bi-calendar me-2"></i>Fecha</th>
                                     </tr>
                                 </thead>
-                                <tbody id="detalleReporteGastos">
+                                <tbody id="detalleReporteTablaGastos">
                                     <!-- Ejemplo de gastos incluidos (debe llenarse dinámicamente por el backend) -->
                                     <tr>
                                         <td>1</td>
@@ -201,19 +245,55 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Producto más vendido:</label>
-                            <input type="text" class="form-control mb-2" id="detalleReporteMasVendido" value="Frappe" readonly>
-                            <label class="form-label">Día con más ventas:</label>
-                            <input type="text" class="form-control" id="detalleReporteDiaMasVentas" value="25/11/2022" readonly>
+                        <!-- Estadísticas destacadas -->
+                        <div class="card border-0 bg-light mb-3">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-star me-2"></i>Estadísticas Destacadas
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-cup-hot text-success me-2"></i>
+                                        <span class="text-muted small">Producto más vendido</span>
+                                    </div>
+                                    <div class="fw-bold text-success" id="detalleReporteMasVendido">Frappe</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-calendar-event text-primary me-2"></i>
+                                        <span class="text-muted small">Día con más ventas</span>
+                                    </div>
+                                    <div class="fw-bold text-primary" id="detalleReporteDiaMasVentas">25/11/2022</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-currency-dollar text-warning me-2"></i>
+                                        <span class="text-muted small">Venta promedio</span>
+                                    </div>
+                                    <div class="fw-bold text-warning" id="detalleReporteVentaPromedio">$45.50</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="d-flex flex-column gap-2 mt-4">
-                            <button type="button" class="btn btn-success" onclick="exportarPDF()">
-                                <i class="bi bi-file-pdf me-2"></i>Exportar a PDF
-                            </button>
-                            <button type="button" class="btn btn-cafe" onclick="exportarExcel()">
-                                <i class="bi bi-file-earmark-excel me-2"></i>Exportar a Excel
-                            </button>
+
+                        <!-- Botones de exportación -->
+                        <div class="card border-0 bg-light">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-download me-2"></i>Exportar Reporte
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <button type="button" class="btn btn-success" onclick="exportarPDF()">
+                                        <i class="bi bi-file-pdf me-2"></i>Exportar a PDF
+                                    </button>
+                                    <button type="button" class="btn btn-cafe" onclick="exportarExcel()">
+                                        <i class="bi bi-file-earmark-excel me-2"></i>Exportar a Excel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -290,6 +370,44 @@
     .form-select:focus, .form-control:focus {
         border-color: #198754;
         box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    /* Estilos para las cards del modal de detalles */
+    .modal .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .modal .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal .card.border-success {
+        border-color: #198754 !important;
+    }
+    
+    .modal .card.border-warning {
+        border-color: #ffc107 !important;
+    }
+    
+    .modal .card.border-primary {
+        border-color: #0d6efd !important;
+    }
+    
+    /* Estilos para los badges */
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        color: #000;
+    }
+    
+    /* Estilos para métricas sin ganancias */
+    .text-muted.fs-5 {
+        color: #6c757d !important;
+    }
+    
+    /* Estilos para balance negativo */
+    .text-danger.fs-5 {
+        color: #dc3545 !important;
     }
 </style>
 

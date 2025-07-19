@@ -8,6 +8,39 @@
     let productosInactivos = [];
     let inactivosLoaded = false;
 
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(titulo, mensaje, tipo = 'success') {
+        const modal = document.getElementById('notificacionModal');
+        const tituloElement = document.getElementById('notificacionTitulo');
+        const mensajeElement = document.getElementById('notificacionMensaje');
+        
+        // Configurar icono y color según el tipo
+        let icono, color;
+        switch(tipo) {
+            case 'success':
+                icono = 'bi-check-circle';
+                color = 'text-success';
+                break;
+            case 'error':
+                icono = 'bi-exclamation-triangle';
+                color = 'text-danger';
+                break;
+            case 'warning':
+                icono = 'bi-exclamation-circle';
+                color = 'text-warning';
+                break;
+            default:
+                icono = 'bi-info-circle';
+                color = 'text-info';
+        }
+        
+        tituloElement.innerHTML = `<i class="bi ${icono} me-2 ${color}"></i>${titulo}`;
+        mensajeElement.textContent = mensaje;
+        
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+
     function getToken() {
         return localStorage.getItem('token');
     }
@@ -163,12 +196,15 @@
                 // Actualizar ambas tablas
                 await fetchProductos();
                 await fetchProductosInactivos();
+                
+                // Mostrar notificación de éxito
+                mostrarNotificacion('Éxito', 'Producto reactivado exitosamente', 'success');
             } else {
-                alert('Error: ' + (result.message || 'Error al reactivar producto'));
+                mostrarNotificacion('Error', result.message || 'Error al reactivar producto', 'error');
             }
         } catch (error) {
             console.error('[reactivarProducto] Error:', error);
-            alert('No se pudo reactivar el producto.');
+            mostrarNotificacion('Error', 'No se pudo reactivar el producto.', 'error');
         }
     }
 
@@ -434,8 +470,6 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Producto agregado exitosamente');
-                
                 // Cerrar modal y limpiar formulario
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
                 if (modal) modal.hide();
@@ -445,13 +479,16 @@
                 // Recargar productos
                 await fetchProductos();
                 
+                // Mostrar notificación de éxito
+                mostrarNotificacion('Éxito', 'Producto agregado exitosamente', 'success');
+                
             } else {
-                alert('Error: ' + (result.message || 'Error al agregar producto'));
+                mostrarNotificacion('Error', result.message || 'Error al agregar producto', 'error');
             }
             
         } catch (error) {
             console.error('Error en handleAddProducto:', error);
-            alert('Error al agregar producto');
+            mostrarNotificacion('Error', 'Error al agregar producto', 'error');
         }
     }
 
@@ -459,7 +496,7 @@
     window.editProducto = function(id) {
         const producto = productos.find(p => p.ID_Producto == id);
         if (!producto) {
-            alert('Producto no encontrado');
+            mostrarNotificacion('Error', 'Producto no encontrado', 'error');
             return;
         }
 
@@ -492,7 +529,7 @@
         };
 
         if (!data.Nombre || !data.ID_Categoria || isNaN(data.Precio_Venta)) {
-            alert('Por favor complete todos los campos correctamente');
+            mostrarNotificacion('Error', 'Por favor complete todos los campos correctamente', 'error');
             return;
         }
 
@@ -509,8 +546,6 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Producto actualizado exitosamente');
-                
                 // Cerrar modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editProductoModal'));
                 if (modal) modal.hide();
@@ -520,13 +555,16 @@
                 // Recargar productos
                 await fetchProductos();
                 
+                // Mostrar notificación de éxito
+                mostrarNotificacion('Éxito', 'Producto actualizado exitosamente', 'success');
+                
             } else {
-                alert('Error: ' + (result.message || 'Error al actualizar producto'));
+                mostrarNotificacion('Error', result.message || 'Error al actualizar producto', 'error');
             }
             
         } catch (error) {
             console.error('Error en handleEditProducto:', error);
-            alert('Error al actualizar producto');
+            mostrarNotificacion('Error', 'Error al actualizar producto', 'error');
         }
     };
 
@@ -554,7 +592,6 @@
                 result = { message: text };
             }
             if (response.ok) {
-                alert('Producto desactivado exitosamente');
                 // Cerrar modal si está abierto
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editProductoModal'));
                 if (modal) modal.hide();
@@ -566,12 +603,15 @@
                 if (section && section.style.display !== 'none') {
                     await fetchProductosInactivos();
                 }
+                
+                // Mostrar notificación de éxito
+                mostrarNotificacion('Éxito', 'Producto desactivado exitosamente', 'success');
             } else {
-                alert('Error: ' + (result.message || 'Error al desactivar producto'));
+                mostrarNotificacion('Error', result.message || 'Error al desactivar producto', 'error');
             }
         } catch (error) {
             console.error('[desactivarProducto] Error:', error);
-            alert('Error al desactivar producto');
+            mostrarNotificacion('Error', 'Error al desactivar producto', 'error');
         }
     };
 
@@ -579,7 +619,7 @@
     window.editCategoria = function(id) {
         const categoria = categorias.find(c => c.ID_Categoria == id);
         if (!categoria) {
-            alert('Categoría no encontrada');
+            mostrarNotificacion('Error', 'Categoría no encontrada', 'error');
             return;
         }
 
@@ -595,7 +635,7 @@
     window.deleteCategoria = async function(id) {
         const categoria = categorias.find(c => c.ID_Categoria == id);
         if (!categoria) {
-            alert('Categoría no encontrada');
+            mostrarNotificacion('Error', 'Categoría no encontrada', 'error');
             return;
         }
 
@@ -612,21 +652,22 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Categoría eliminada exitosamente');
-                
                 // Recargar categorías
                 await fetchCategorias();
                 
                 // Actualizar también los selects de categorías en los formularios de productos
                 populateCategoriasSelects();
                 
+                // Mostrar notificación de éxito
+                mostrarNotificacion('Éxito', 'Categoría eliminada exitosamente', 'success');
+                
             } else {
-                alert('Error: ' + (result.message || 'Error al eliminar categoría'));
+                mostrarNotificacion('Error', result.message || 'Error al eliminar categoría', 'error');
             }
             
         } catch (error) {
             console.error('Error en deleteCategoria:', error);
-            alert('Error al eliminar categoría');
+            mostrarNotificacion('Error', 'Error al eliminar categoría', 'error');
         }
     };
 

@@ -8,6 +8,12 @@
     // Variables globales
     let gastos = [];
     let currentFilters = {};
+    let paginationInfo = {
+        currentPage: 1,
+        totalPages: 1,
+        totalRegistros: 0,
+        limit: 8
+    };
 
     // Función para verificar autenticación
     function checkAuth() {
@@ -86,11 +92,18 @@
                 const period = this.getAttribute('data-period');
                 const today = new Date();
                 
+                // Preservar el filtro de descripción existente
+                const descripcionActual = currentFilters.descripcion;
+                
                 switch(period) {
                     case 'hoy':
                         // Mostrar solo gastos de hoy
                         const todayStr = today.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: todayStr, fechaFin: todayStr };
+                        // Restaurar filtro de descripción si existe
+                        if (descripcionActual) {
+                            currentFilters.descripcion = descripcionActual;
+                        }
                         datePickerContainer.style.display = 'none';
                         if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
@@ -102,6 +115,10 @@
                         const weekAgoStr = weekAgo.toISOString().split('T')[0];
                         const todayStr2 = today.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: weekAgoStr, fechaFin: todayStr2 };
+                        // Restaurar filtro de descripción si existe
+                        if (descripcionActual) {
+                            currentFilters.descripcion = descripcionActual;
+                        }
                         datePickerContainer.style.display = 'none';
                         if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
@@ -113,6 +130,10 @@
                         const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
                         const lastDayStr = lastDayOfMonth.toISOString().split('T')[0];
                         currentFilters = { fechaInicio: firstDayStr, fechaFin: lastDayStr };
+                        // Restaurar filtro de descripción si existe
+                        if (descripcionActual) {
+                            currentFilters.descripcion = descripcionActual;
+                        }
                         datePickerContainer.style.display = 'none';
                         if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.add('d-none');
                         break;
@@ -121,12 +142,16 @@
                         // Mostrar campos de fecha personalizada
                         datePickerContainer.style.display = 'block';
                         currentFilters = {};
+                        // Restaurar filtro de descripción si existe
+                        if (descripcionActual) {
+                            currentFilters.descripcion = descripcionActual;
+                        }
                         if (aplicarFiltrosContainer) aplicarFiltrosContainer.classList.remove('d-none');
                         return; // No aplicar filtro automáticamente para personalizado
                 }
                 
                 // Aplicar filtro automáticamente para filtros rápidos
-                loadGastos();
+                loadGastos(1);
                 mostrarFiltrosAplicados();
             });
         });
@@ -176,13 +201,42 @@
     }
 
     // Función para cargar todos los gastos
-    async function loadGastos() {
+    async function loadGastos(page = 1) {
         try {
-            const queryParams = new URLSearchParams(currentFilters).toString();
+            // Agregar parámetros de paginación
+            const filtersWithPagination = {
+                ...currentFilters,
+                page: page,
+                limit: paginationInfo.limit
+            };
+            
+            const queryParams = new URLSearchParams(filtersWithPagination).toString();
             const endpoint = queryParams ? `?${queryParams}` : '';
-            gastos = await fetchAPI(endpoint);
+            const response = await fetchAPI(endpoint);
+            
+            // Actualizar datos de paginación
+            if (response.gastos !== undefined) {
+                gastos = response.gastos;
+                paginationInfo = {
+                    currentPage: response.currentPage,
+                    totalPages: response.totalPages,
+                    totalRegistros: response.totalRegistros,
+                    limit: response.limit
+                };
+            } else {
+                // Fallback para respuesta sin paginación
+                gastos = response;
+                paginationInfo = {
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalRegistros: gastos.length,
+                    limit: paginationInfo.limit
+                };
+            }
+            
             renderTable();
             updateTotal();
+            renderPagination();
         } catch (error) {
             console.error('Error al cargar gastos:', error);
             showAlert('Error al cargar los gastos', 'danger');
@@ -244,6 +298,80 @@
         const total = gastos.reduce((sum, gasto) => sum + parseFloat(gasto.Monto), 0);
         totalElement.textContent = `$${total.toFixed(2)}`;
     }
+
+    // Función para renderizar la paginación
+    function renderPagination() {
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (!paginationContainer) return;
+
+        if (paginationInfo.totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '<nav aria-label="Paginación de gastos"><ul class="pagination justify-content-center">';
+        
+        // Botón "Anterior"
+        const prevDisabled = paginationInfo.currentPage === 1 ? 'disabled' : '';
+        paginationHTML += `
+            <li class="page-item ${prevDisabled}">
+                <button class="page-link" onclick="changePage(${paginationInfo.currentPage - 1})" ${prevDisabled}>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </li>
+        `;
+
+        // Calcular rango de páginas a mostrar
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, paginationInfo.currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(paginationInfo.totalPages, startPage + maxVisiblePages - 1);
+        
+        // Ajustar si no se muestran suficientes páginas
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Páginas numeradas
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === paginationInfo.currentPage ? 'active' : '';
+            paginationHTML += `
+                <li class="page-item ${activeClass}">
+                    <button class="page-link" onclick="changePage(${i})">${i}</button>
+                </li>
+            `;
+        }
+
+        // Botón "Siguiente"
+        const nextDisabled = paginationInfo.currentPage === paginationInfo.totalPages ? 'disabled' : '';
+        paginationHTML += `
+            <li class="page-item ${nextDisabled}">
+                <button class="page-link" onclick="changePage(${paginationInfo.currentPage + 1})" ${nextDisabled}>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </li>
+        `;
+
+        paginationHTML += '</ul></nav>';
+
+        // Información de paginación
+        const startRecord = (paginationInfo.currentPage - 1) * paginationInfo.limit + 1;
+        const endRecord = Math.min(paginationInfo.currentPage * paginationInfo.limit, paginationInfo.totalRegistros);
+        
+        paginationHTML += `
+            <div class="text-muted small mt-1">
+                Mostrando ${startRecord}-${endRecord} de ${paginationInfo.totalRegistros} gastos
+            </div>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    // Función para cambiar de página
+    window.changePage = function(page) {
+        if (page >= 1 && page <= paginationInfo.totalPages) {
+            loadGastos(page);
+        }
+    };
 
     // Función para mostrar alertas
     function showAlert(message, type = 'info') {
@@ -386,6 +514,12 @@
 
     // Función para aplicar todos los filtros
     async function aplicarFiltros() {
+        // Mostrar indicador de búsqueda
+        const searchIndicator = document.getElementById('searchIndicator');
+        if (searchIndicator) {
+            searchIndicator.classList.remove('d-none');
+        }
+        
         // Obtener filtro de descripción
         const descripcion = document.getElementById('buscarDescripcion').value.trim();
         if (descripcion) {
@@ -423,8 +557,13 @@
             // Si ambas fechas están vacías, no se aplican filtros de fecha
         }
 
-        await loadGastos();
+        await loadGastos(1);
         mostrarFiltrosAplicados();
+        
+        // Ocultar indicador de búsqueda
+        if (searchIndicator) {
+            searchIndicator.classList.add('d-none');
+        }
     }
 
     // Función para filtrar gastos por fecha (mantenida por compatibilidad)
@@ -495,7 +634,7 @@
             modal.hide();
             
             // Recargar gastos
-            await loadGastos();
+            await loadGastos(1);
         } catch (error) {
             console.error('Error al guardar gasto:', error);
             showAlert(`Error al ${isEditing ? 'actualizar' : 'registrar'} el gasto`, 'danger');
@@ -514,7 +653,7 @@
             });
 
             showAlert('Gasto eliminado exitosamente', 'success');
-            await loadGastos();
+            await loadGastos(1);
         } catch (error) {
             console.error('Error al eliminar gasto:', error);
             if (error.message.includes('30 días')) {
@@ -533,6 +672,12 @@
         
         // Limpiar campo de búsqueda
         document.getElementById('buscarDescripcion').value = '';
+        
+        // Ocultar indicador de búsqueda
+        const searchIndicator = document.getElementById('searchIndicator');
+        if (searchIndicator) {
+            searchIndicator.classList.add('d-none');
+        }
         
         // Ocultar contenedor de fechas personalizadas
         const datePickerContainer = document.getElementById('datePickerContainer');
@@ -556,7 +701,7 @@
         const alertElement = document.getElementById('filtrosAplicados');
         alertElement.classList.add('d-none');
         
-        loadGastos();
+        loadGastos(1);
     }
 
     // Función para configurar event listeners
@@ -573,11 +718,23 @@
             aplicarFiltrosBtn.addEventListener('click', aplicarFiltros);
         }
 
-        // Event listener para aplicar filtros con Enter
+        // Event listener para aplicar filtros con Enter y en tiempo real
         const buscarDescripcionInput = document.getElementById('buscarDescripcion');
         if (buscarDescripcionInput) {
+            // Debounce para evitar demasiadas peticiones
+            let debounceTimer;
+            
+            buscarDescripcionInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    aplicarFiltros();
+                }, 500); // Esperar 500ms después de que el usuario deje de escribir
+            });
+            
+            // Mantener el evento Enter para compatibilidad
             buscarDescripcionInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
+                    clearTimeout(debounceTimer);
                     aplicarFiltros();
                 }
             });
@@ -587,6 +744,25 @@
         const cerrarFiltrosBtn = document.getElementById('cerrarFiltros');
         if (cerrarFiltrosBtn) {
             cerrarFiltrosBtn.addEventListener('click', clearFilters);
+        }
+        
+        // Event listener para limpiar solo el filtro de descripción con Escape
+        const descripcionInput = document.getElementById('buscarDescripcion');
+        if (descripcionInput) {
+            descripcionInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    delete currentFilters.descripcion;
+                    loadGastos(1);
+                    mostrarFiltrosAplicados();
+                    
+                    // Ocultar indicador de búsqueda
+                    const searchIndicator = document.getElementById('searchIndicator');
+                    if (searchIndicator) {
+                        searchIndicator.classList.add('d-none');
+                    }
+                }
+            });
         }
 
         // Event listener para guardar gasto
@@ -621,7 +797,7 @@
         }
 
         setupEventListeners();
-        loadGastos();
+        loadGastos(1);
     }
 
     // Exportar la función de inicialización

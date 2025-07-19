@@ -1,13 +1,31 @@
 const pool = require('../config/database');
 
 const gastosController = {
-    // Obtener todos los gastos con información del usuario
+    // Obtener todos los gastos con información del usuario y paginación
     async getAll(req, res) {
         try {
-            const { fechaInicio, fechaFin, descripcion } = req.query;
+            const { 
+                fechaInicio, 
+                fechaFin, 
+                descripcion, 
+                page = 1, 
+                limit = 8 
+            } = req.query;
             
-            let query = `
-                SELECT g.*, u.Usuario as Nombre_Usuario
+            // Validar parámetros de paginación
+            const pageNum = parseInt(page);
+            const limitNum = parseInt(limit);
+            
+            if (pageNum < 1 || limitNum < 1) {
+                return res.status(400).json({ 
+                    message: 'Los parámetros page y limit deben ser números positivos' 
+                });
+            }
+            
+            // Calcular offset
+            const offset = (pageNum - 1) * limitNum;
+            
+            let baseQuery = `
                 FROM gastos g
                 JOIN usuarios u ON g.ID_Usuario = u.ID_Usuario
             `;
@@ -37,16 +55,40 @@ const gastosController = {
             
             // Construir WHERE si hay condiciones
             if (whereConditions.length > 0) {
-                query += ` WHERE ${whereConditions.join(' AND ')}`;
+                baseQuery += ` WHERE ${whereConditions.join(' AND ')}`;
             }
             
-            query += ` ORDER BY g.Fecha DESC`;
+            // Query para contar total de registros
+            const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
+            const [countResult] = await pool.query(countQuery, params);
+            const totalRegistros = countResult[0].total;
             
-            console.log('Query SQL:', query);
-            console.log('Parámetros:', params);
+            // Query para obtener registros paginados
+            const dataQuery = `
+                SELECT g.*, u.Usuario as Nombre_Usuario 
+                ${baseQuery}
+                ORDER BY g.Fecha DESC
+                LIMIT ? OFFSET ?
+            `;
             
-            const [gastos] = await pool.query(query, params);
-            res.json(gastos);
+            // Agregar parámetros de paginación
+            const queryParams = [...params, limitNum, offset];
+            
+            console.log('Query SQL (datos):', dataQuery);
+            console.log('Parámetros (datos):', queryParams);
+            
+            const [gastos] = await pool.query(dataQuery, queryParams);
+            
+            // Calcular información de paginación
+            const totalPages = Math.ceil(totalRegistros / limitNum);
+            
+            res.json({
+                gastos,
+                totalRegistros,
+                totalPages,
+                currentPage: pageNum,
+                limit: limitNum
+            });
         } catch (error) {
             console.error('Error al obtener gastos:', error);
             res.status(500).json({ message: 'Error al obtener gastos' });
