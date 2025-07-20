@@ -143,7 +143,7 @@
             return productosList;
         } catch (error) {
             console.error('Error al cargar productos:', error);
-            alert('Error al cargar los productos: ' + error.message);
+            notificationModal.showError('Error al cargar los productos: ' + error.message);
             return [];
         }
     }
@@ -177,7 +177,7 @@
             displayRecetas(recetas);
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al cargar las recetas: ' + error.message);
+            notificationModal.showError('Error al cargar las recetas: ' + error.message);
         }
     }
 
@@ -215,7 +215,7 @@
             }
         } catch (error) {
             console.error('Error al cargar insumos:', error);
-            alert('Error al cargar los insumos disponibles: ' + error.message);
+            notificationModal.showError('Error al cargar los insumos disponibles: ' + error.message);
         }
     }
 
@@ -435,7 +435,7 @@
             }
         } catch (error) {
             console.error('Error en búsqueda:', error);
-            alert('Error al buscar productos: ' + error.message);
+            notificationModal.showError('Error al buscar productos: ' + error.message);
         }
     }
 
@@ -444,7 +444,7 @@
         event.preventDefault();
         
         if (!currentProductId) {
-            alert('Por favor, seleccione un producto primero');
+            notificationModal.showWarning('Por favor, seleccione un producto primero');
             return;
         }
 
@@ -452,12 +452,12 @@
         const cantidad = document.getElementById('ingredientQuantity').value;
 
         if (!insumoId || !cantidad) {
-            alert('Por favor, complete todos los campos');
+            notificationModal.showWarning('Por favor, complete todos los campos');
             return;
         }
 
         if (parseFloat(cantidad) <= 0) {
-            alert('La cantidad debe ser mayor a 0');
+            notificationModal.showWarning('La cantidad debe ser mayor a 0');
             return;
         }
 
@@ -533,10 +533,10 @@
             // Recargar las recetas
             loadRecetas(currentProductId, selectedProductName);
             
-            alert('Ingrediente agregado exitosamente');
+            notificationModal.showSuccess('Ingrediente agregado exitosamente');
         } catch (error) {
             console.error('Error completo:', error);
-            alert(error.message || 'Error al agregar el ingrediente');
+            notificationModal.showError(error.message || 'Error al agregar el ingrediente');
         }
     }
 
@@ -593,10 +593,10 @@
 
             // Recargar las recetas después de eliminar
             loadRecetas(productoId, selectedProductName);
-            alert('Ingrediente eliminado exitosamente');
+            notificationModal.showSuccess('Ingrediente eliminado exitosamente');
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message || 'Error al eliminar el ingrediente');
+            notificationModal.showError(error.message || 'Error al eliminar el ingrediente');
         }
     }
 
@@ -610,7 +610,7 @@
         const unidad = document.getElementById('editIngredientUnit').textContent;
 
         if (parseFloat(cantidad) <= 0) {
-            alert('La cantidad debe ser mayor a 0');
+            notificationModal.showWarning('La cantidad debe ser mayor a 0');
             return;
         }
 
@@ -657,17 +657,17 @@
             document.body.style.paddingRight = '';
             
             loadRecetas(productoId, selectedProductName);
-            alert('Ingrediente actualizado exitosamente');
+            notificationModal.showSuccess('Ingrediente actualizado exitosamente');
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message || 'Error al actualizar el ingrediente');
+            notificationModal.showError(error.message || 'Error al actualizar el ingrediente');
         }
     }
 
     // Función para abrir el modal de agregar ingrediente
     function openAddIngredientModal() {
         if (!currentProductId) {
-            alert('Por favor, seleccione un producto primero');
+            notificationModal.showWarning('Por favor, seleccione un producto primero');
             return;
         }
         

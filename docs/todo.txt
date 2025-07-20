@@ -2,6 +2,7 @@
   * tamaño de las tarjetas de producto
   * subir las imágenes por URL o localmente?
 
+
 - Reportes:
   * ver el detalle de la fecha de corte
   * considerar agregar filtros para los demás atributos
@@ -11,11 +12,15 @@
   * usar modales en vez de alerts
   
 - MISC:
+  - IMPORTANTE: que hacer con la variación de ingredientes?
+    e.g., leche entera o deslactosada, con o sin azúcar, etc
+  - Ver por que no se puede iniciar sesión desde el teléfono
   - Considerar borrar los logs de depuración 
+  - Considerar hacer un componente universal para cada uno:
+    - Tablas
+    - Paginación
   - Retoques (después de finalizar la base de todos los módulos):
-    * Hacer consistente el estilo de los productos (usar misma clase)
-    * Añadir a clase productos la capacidad de poner una imagen de fondo
     * Que todos los items de la clase productos sean del mismo tamaño
       independientemente del tamaño de imagen o longitud de texto
     * Estandarizar estilo de la paginación en todos los módulos
-    * Que en todos los modulos el scroll solo sea sobre los contenidos
+    * Considerar que en todos los modulos el scroll solo sea sobre los contenidos

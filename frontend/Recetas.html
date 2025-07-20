@@ -204,3 +204,27 @@
     border-bottom: none;
 }
 </style>
+
+<!-- Modal: Notificación -->
+<div class="modal fade" id="notificacionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="notificacionTitulo">
+                    <i class="bi bi-check-circle me-2"></i>Éxito
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="notificacionMensaje" class="mb-0">Operación completada exitosamente.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-cafe" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir el archivo JavaScript de Recetas -->
+<script src="js/notificationModal.js"></script>
+<script src="js/recetas.js"></script>
