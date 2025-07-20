@@ -2,7 +2,9 @@
     // Variables globales para esta vista (dentro de la IIFE)
     let cart = [];
     let products = [];
+    let categorias = [];
     let filteredProducts = []; // Para almacenar productos filtrados por búsqueda
+    let selectedCategory = ''; // Para almacenar la categoría seleccionada
     let paymentModalInstance = null; // Para la instancia del modal de Bootstrap
 
     // Función para mostrar notificaciones
@@ -38,11 +40,49 @@
         bootstrapModal.show();
     }
 
+    // Función para cargar categorías
+    async function fetchCategorias() {
+        try {
+            console.log('Cargando categorías...');
+            const response = await fetch('/api/caja/categorias');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            categorias = await response.json();
+            console.log('Categorías cargadas:', categorias);
+            populateCategoryFilter();
+        } catch (error) {
+            console.error('Error al cargar categorías:', error);
+        }
+    }
+
+    // Función para poblar el filtro de categorías
+    function populateCategoryFilter() {
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (!categoryFilter) {
+            console.warn('Elemento categoryFilter no encontrado');
+            return;
+        }
+
+        // Mantener la opción "Todas las categorías"
+        categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+        
+        // Agregar las categorías
+        categorias.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.ID_Categoria;
+            option.textContent = categoria.Nombre;
+            categoryFilter.appendChild(option);
+        });
+    }
+
     // Simular carga de productos y configuración inicial
     async function initCaja() {
         console.log('initCaja ejecutándose...');
         cart = []; // Reiniciar carrito
         products = []; // Reiniciar productos
+        categorias = []; // Reiniciar categorías
+        selectedCategory = ''; // Reiniciar categoría seleccionada
 
         // Asegurarse de que el modal se inicialice solo una vez o se obtenga la instancia si ya existe
         const paymentModalElement = document.getElementById('paymentModal');
@@ -64,6 +104,9 @@
             
             // Inicializar productos filtrados con todos los productos
             filteredProducts = [...products];
+            
+            // Cargar categorías
+            await fetchCategorias();
             
             renderProducts();
             setupEventListeners(); // Configurar listeners después de cargar y renderizar productos
@@ -106,17 +149,32 @@
         });
     }
 
-    // Función para filtrar productos por búsqueda
+    // Función para filtrar productos por búsqueda y categoría
     function filterProducts(searchTerm) {
-        if (!searchTerm || searchTerm.trim() === '') {
-            filteredProducts = [...products];
-        } else {
+        applyFilters(searchTerm, selectedCategory);
+    }
+
+    // Función para aplicar filtros combinados
+    function applyFilters(searchTerm = '', categoryId = '') {
+        let filtered = [...products];
+        
+        // Filtrar por término de búsqueda
+        if (searchTerm && searchTerm.trim() !== '') {
             const term = searchTerm.toLowerCase().trim();
-            filteredProducts = products.filter(product => 
+            filtered = filtered.filter(product => 
                 product.Nombre.toLowerCase().includes(term) ||
                 (product.categoria_nombre && product.categoria_nombre.toLowerCase().includes(term))
             );
         }
+        
+        // Filtrar por categoría
+        if (categoryId && categoryId !== '') {
+            filtered = filtered.filter(product => 
+                product.ID_Categoria == categoryId
+            );
+        }
+        
+        filteredProducts = filtered;
         renderProducts();
     }
 
@@ -140,6 +198,18 @@
             });
         } else {
             console.warn('Elemento productSearch no encontrado para configurar búsqueda');
+        }
+
+        // Event listener para el filtro de categoría
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', function() {
+                selectedCategory = this.value;
+                const searchTerm = document.getElementById('productSearch')?.value || '';
+                applyFilters(searchTerm, selectedCategory);
+            });
+        } else {
+            console.warn('Elemento categoryFilter no encontrado para configurar filtro de categoría');
         }
 
         // Delegación de eventos para elementos dinámicos dentro de #main-content

@@ -12,6 +12,17 @@ class CajaController {
     }
   }
 
+  // Obtener todas las categorías
+  static async getCategorias(req, res) {
+    try {
+      const categorias = await CajaModel.getCategorias();
+      res.json(categorias);
+    } catch (error) {
+      console.error('Error al obtener categorías:', error);
+      res.status(500).json({ error: 'Error al obtener las categorías' });
+    }
+  }
+
   // Procesar una nueva venta
   static async processSale(req, res) {
     try {

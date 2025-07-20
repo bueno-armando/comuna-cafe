@@ -3,6 +3,7 @@ const router = express.Router();
 const CajaController = require('../controllers/cajaController');
 
 router.get('/productos', CajaController.getProducts);
+router.get('/categorias', CajaController.getCategorias);
 router.post('/venta', CajaController.processSale);
 
 module.exports = router;

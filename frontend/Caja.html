@@ -7,10 +7,24 @@
         </h1>
     </div>
     
-    <!-- Barra de búsqueda de productos -->
-    <div class="search-container mb-4 position-relative">
-        <i class="bi bi-search search-icon position-absolute"></i>
-        <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
+    <!-- Barra de búsqueda y filtro de productos -->
+    <div class="search-container mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="position-relative">
+                    <i class="bi bi-search search-icon position-absolute"></i>
+                    <input type="text" id="productSearch" class="form-control ps-5" placeholder="Buscar producto...">
+                </div>
+            </div>
+            
+            <!-- Filtro por categoría -->
+            <div class="col-md-6 col-lg-4">
+                <select id="categoryFilter" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    <!-- Las categorías se cargarán dinámicamente -->
+                </select>
+            </div>
+        </div>
     </div>
     
     <!-- Sección de productos disponibles -->

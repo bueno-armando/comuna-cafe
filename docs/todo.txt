@@ -3,8 +3,6 @@
   * considerar agregar filtros para los demás atributos
   * considerar edición/borrado de reportes
 
-- Caja:
-  * agregar filtrado por categoría
   
 - MISC:
   - Considerar borrar los logs de depuración 

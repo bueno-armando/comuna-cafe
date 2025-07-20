@@ -12,6 +12,16 @@ class CajaModel {
     return rows;
   }
 
+  // Obtener todas las categorías
+  static async getCategorias() {
+    const [rows] = await db.query(`
+      SELECT ID_Categoria, Nombre 
+      FROM categorias 
+      ORDER BY Nombre
+    `);
+    return rows;
+  }
+
   // Crear una nueva venta
   static async createSale(saleData) {
     const { ID_Usuario, Total, Metodo_Pago } = saleData;
