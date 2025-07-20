@@ -434,6 +434,7 @@ GET /api/bitacora?page=2&limit=11&usuario=admin&operacion=UPDATE&fechaInicio=202
 {
   "Nombre": "Nuevo Usuario",
   "Apellido": "Apellido",
+  "Usuario": "nuevo_usuario",
   "Contraseña": "password123",
   "ID_Rol": 2,
   "Estado": "Activo"
@@ -455,6 +456,7 @@ GET /api/bitacora?page=2&limit=11&usuario=admin&operacion=UPDATE&fechaInicio=202
 {
   "Nombre": "Ana Actualizada",
   "Apellido": "Rivas",
+  "Usuario": "ana_actualizada",
   "ID_Rol": 1,
   "Estado": "Activo"
 }

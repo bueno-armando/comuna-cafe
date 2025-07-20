@@ -110,27 +110,32 @@ class UsuarioModel {
         }
     }
 
-    // Crear un nuevo usuario usando el procedimiento almacenado
+    // Crear un nuevo usuario
     static async create(usuario) {
         try {
-            const { Nombre, Apellido, Contraseña, ID_Rol } = usuario;
+            const { Nombre, Apellido, Usuario, Contraseña, ID_Rol } = usuario;
             
             // Encriptar la contraseña
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(Contraseña, salt);
             
-            await pool.query(
-                'CALL CrearUsuario(?, ?, ?, ?)',
-                [Nombre, Apellido, hashedPassword, ID_Rol]
+            // Verificar si el nombre de usuario ya existe
+            const [existingUser] = await pool.query(
+                'SELECT ID_Usuario FROM usuarios WHERE Usuario = ?',
+                [Usuario]
             );
             
-            // Obtener el ID del usuario recién creado
-            const [rows] = await pool.query(
-                'SELECT ID_Usuario FROM usuarios WHERE Nombre = ? AND Apellido = ? ORDER BY ID_Usuario DESC LIMIT 1',
-                [Nombre, Apellido]
+            if (existingUser.length > 0) {
+                throw new Error('El nombre de usuario ya existe');
+            }
+            
+            // Insertar el usuario directamente
+            const [result] = await pool.query(
+                'INSERT INTO usuarios (Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado) VALUES (?, ?, ?, ?, ?, "Activo")',
+                [Nombre, Apellido, Usuario, hashedPassword, ID_Rol]
             );
             
-            return rows[0].ID_Usuario;
+            return result.insertId;
         } catch (error) {
             throw error;
         }
@@ -139,11 +144,23 @@ class UsuarioModel {
     // Actualizar un usuario
     static async update(id, usuario) {
         try {
-            const { Nombre, Apellido, Contraseña, ID_Rol, Estado } = usuario;
+            const { Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado } = usuario;
+            
+            // Verificar si el nombre de usuario ya existe (excluyendo el usuario actual)
+            if (Usuario) {
+                const [existingUser] = await pool.query(
+                    'SELECT ID_Usuario FROM usuarios WHERE Usuario = ? AND ID_Usuario != ?',
+                    [Usuario, id]
+                );
+                
+                if (existingUser.length > 0) {
+                    throw new Error('El nombre de usuario ya existe');
+                }
+            }
             
             // Construir la consulta SQL dinámicamente
-            let sql = 'UPDATE usuarios SET Nombre = ?, Apellido = ?, ID_Rol = ?, Estado = ?';
-            let params = [Nombre, Apellido, ID_Rol, Estado];
+            let sql = 'UPDATE usuarios SET Nombre = ?, Apellido = ?, Usuario = ?, ID_Rol = ?, Estado = ?';
+            let params = [Nombre, Apellido, Usuario, ID_Rol, Estado];
             
             // Solo actualizar contraseña si se proporciona una nueva
             if (Contraseña && Contraseña.trim() !== '') {

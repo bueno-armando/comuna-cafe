@@ -60,17 +60,26 @@ class UsuarioController {
                 return res.status(403).json({ error: 'Solo los administradores pueden crear usuarios' });
             }
 
-            const { Nombre, Apellido, Contraseña, ID_Rol } = req.body;
+            const { Nombre, Apellido, Usuario, Contraseña, ID_Rol } = req.body;
 
             // Validaciones básicas
-            if (!Nombre || !Apellido || !Contraseña || !ID_Rol) {
+            if (!Nombre || !Apellido || !Usuario || !Contraseña || !ID_Rol) {
                 return res.status(400).json({ error: 'Todos los campos son requeridos' });
             }
 
-            const userId = await UsuarioModel.create({ Nombre, Apellido, Contraseña, ID_Rol });
+            // Validar formato del nombre de usuario (solo letras, números y guiones bajos)
+            const usuarioRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usuarioRegex.test(Usuario)) {
+                return res.status(400).json({ error: 'El nombre de usuario solo puede contener letras, números y guiones bajos' });
+            }
+
+            const userId = await UsuarioModel.create({ Nombre, Apellido, Usuario, Contraseña, ID_Rol });
             res.status(201).json({ id: userId, message: 'Usuario creado exitosamente' });
         } catch (error) {
             console.error('Error al crear usuario:', error);
+            if (error.message === 'El nombre de usuario ya existe') {
+                return res.status(400).json({ error: error.message });
+            }
             res.status(500).json({ error: 'Error al crear usuario' });
         }
     }
@@ -79,11 +88,17 @@ class UsuarioController {
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const { Nombre, Apellido, Contraseña, ID_Rol, Estado } = req.body;
+            const { Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado } = req.body;
 
             // Validaciones básicas
-            if (!Nombre || !Apellido || !ID_Rol) {
-                return res.status(400).json({ error: 'Nombre, Apellido e ID_Rol son requeridos' });
+            if (!Nombre || !Apellido || !Usuario || !ID_Rol) {
+                return res.status(400).json({ error: 'Nombre, Apellido, Usuario e ID_Rol son requeridos' });
+            }
+
+            // Validar formato del nombre de usuario (solo letras, números y guiones bajos)
+            const usuarioRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usuarioRegex.test(Usuario)) {
+                return res.status(400).json({ error: 'El nombre de usuario solo puede contener letras, números y guiones bajos' });
             }
 
             // Verificar si el usuario existe
@@ -92,7 +107,7 @@ class UsuarioController {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
 
-            const success = await UsuarioModel.update(id, { Nombre, Apellido, Contraseña, ID_Rol, Estado });
+            const success = await UsuarioModel.update(id, { Nombre, Apellido, Usuario, Contraseña, ID_Rol, Estado });
             if (success) {
                 res.json({ message: 'Usuario actualizado exitosamente' });
             } else {
@@ -100,6 +115,9 @@ class UsuarioController {
             }
         } catch (error) {
             console.error('Error al actualizar usuario:', error);
+            if (error.message === 'El nombre de usuario ya existe') {
+                return res.status(400).json({ error: error.message });
+            }
             res.status(500).json({ error: 'Error al actualizar usuario' });
         }
     }

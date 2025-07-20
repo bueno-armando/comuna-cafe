@@ -3,7 +3,8 @@
   * subir las imágenes por URL o localmente?
 
 - Usuarios:
-  * añadir campo Usuario a modal de edición (antes ver si API lo soporta)
+  * creación: llenar campo de usuario automáticamente cuando se llenen 
+              ambos nombre y apellido 
 
 
 - Reportes:

@@ -346,15 +346,15 @@
     async function addUsuario(event) {
         event.preventDefault();
         const formData = new FormData(event.target);
-        // Concatenar apellidos si fuera necesario, aquí solo hay un campo 'apellido'
         const data = {
             Nombre: formData.get('nombre'),
             Apellido: formData.get('apellido'),
+            Usuario: formData.get('usuario'),
             Contraseña: formData.get('contraseña'),
             ID_Rol: parseInt(formData.get('rol'), 10),
             Estado: 'Activo'
         };
-        if (!data.Nombre || !data.Apellido || !data.Contraseña || !data.ID_Rol) {
+        if (!data.Nombre || !data.Apellido || !data.Usuario || !data.Contraseña || !data.ID_Rol) {
             return showErrorModal('Todos los campos son requeridos.');
         }
         try {
@@ -380,6 +380,7 @@
         if(editForm){
             editForm.querySelector('[name="nombre"]').value = usuario.Nombre || '';
             editForm.querySelector('[name="apellido"]').value = usuario.Apellido || '';
+            editForm.querySelector('[name="usuario"]').value = usuario.Usuario || '';
             editForm.querySelector('[name="rol"]').value = usuario.ID_Rol || '';
             editForm.querySelector('[name="estado"]').value = usuario.Estado || 'Activo';
             editForm.querySelector('[name="contraseña"]').value = '';
@@ -398,6 +399,7 @@
         const data = {
             Nombre: formData.get('nombre'),
             Apellido: formData.get('apellido'),
+            Usuario: formData.get('usuario'),
             ID_Rol: parseInt(formData.get('rol'), 10),
             Estado: formData.get('estado')
         };
@@ -405,7 +407,7 @@
         if (contrasena && contrasena.trim() !== '') { 
             data.Contraseña = contrasena;
         }
-        if (!data.Nombre || !data.Apellido || !data.ID_Rol || !data.Estado) {
+        if (!data.Nombre || !data.Apellido || !data.Usuario || !data.ID_Rol || !data.Estado) {
             return showErrorModal('Todos los campos son requeridos.');
         }
         try {
