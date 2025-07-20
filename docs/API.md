@@ -676,3 +676,6 @@ GET /api/reportes/1/exportar/excel
 ---
 
 > **Nota:** Para detalles de parámetros y ejemplos de request/response, consulta el código fuente o amplía esta documentación según las necesidades del proyecto. 
+
+#### Nota sobre el campo Usuario
+- El campo "Usuario" se sugiere automáticamente en el frontend a partir del nombre y apellido (primera letra del nombre + apellido, sin acentos ni espacios, ejemplo: Ana Rivas → ARivas), pero puede ser editado manualmente antes de guardar. 

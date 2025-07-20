@@ -428,3 +428,6 @@ Para asegurar una experiencia de usuario consistente y profesional, todos los m�
 > **Sistema de Autenticación y Recuperación COMPLETADO** - Login con botón mostrar/ocultar contraseña, sistema de recuperación de emergencia, y documentación completa implementados.
 
 > **Sistema de Notificaciones Unificado COMPLETADO** - Todos los módulos utilizan modales Bootstrap profesionales en lugar de alerts básicos, proporcionando una experiencia de usuario consistente y elegante.
+
+### Mejoras en el módulo de Usuarios
+- **Sugerencia automática de nombre de usuario**: Al ingresar nombre y apellido en el formulario de alta de usuario, el campo "Usuario" se autocompleta automáticamente con la sugerencia generada a partir de la primera letra del nombre y el apellido (sin acentos ni espacios, ejemplo: Ana Rivas → ARivas). El usuario puede editar este campo antes de guardar si lo desea.
