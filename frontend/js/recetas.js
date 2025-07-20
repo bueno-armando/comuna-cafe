@@ -285,27 +285,22 @@
             return;
         }
 
+        // Configurar el manejador de clicks para botones
+        ProductCard.setButtonClickHandler(viewRecipe);
+
         productos.forEach(producto => {
-            const col = document.createElement('div');
-            col.className = 'col';
-            col.innerHTML = `
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h4 class="card-title fw-bold mb-3">${producto.Nombre}</h4>
-                        <p class="card-text text-muted">${producto.Categoria || 'Sin categoría'}</p>
-                        <p class="card-text">
-                            <small class="text-muted">
-                                <i class="bi bi-journal-text me-1"></i>
-                                <span id="ingredientCount-${producto.ID_Producto}">Cargando...</span> ingredientes
-                            </small>
-                        </p>
-                        <button class="btn btn-success btn-sm px-3 py-1" onclick="viewRecipe(${producto.ID_Producto}, '${producto.Nombre}')">
-                            <i class="bi bi-journal-text me-1"></i>Ver Receta
-                        </button>
-                    </div>
-                </div>
-            `;
-            productGrid.appendChild(col);
+            const productCard = new ProductCard(producto, {
+                showPrice: false,
+                showCategory: true,
+                showIngredients: true,
+                showButton: true,
+                buttonText: 'Ver Receta',
+                buttonClass: 'btn-success',
+                buttonIcon: 'bi-journal-text',
+                cardClass: 'product-card'
+            });
+            
+            productGrid.innerHTML += productCard.renderColumn();
             
             // Cargar el conteo de ingredientes para este producto
             loadIngredientCount(producto.ID_Producto);
@@ -327,16 +322,11 @@
                 count = recetas.length;
             }
             
-            const countElement = document.getElementById(`ingredientCount-${productId}`);
-            if (countElement) {
-                countElement.textContent = count;
-            }
+            // Usar el método estático de ProductCard para actualizar el conteo
+            ProductCard.updateIngredientCount(productId, count);
         } catch (error) {
             console.error('Error al cargar conteo de ingredientes:', error);
-            const countElement = document.getElementById(`ingredientCount-${productId}`);
-            if (countElement) {
-                countElement.textContent = '0';
-            }
+            ProductCard.updateIngredientCount(productId, 0);
         }
     }
 

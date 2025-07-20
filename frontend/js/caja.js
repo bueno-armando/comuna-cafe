@@ -133,19 +133,14 @@
         }
 
         filteredProducts.forEach(product => {
-            const precio = parseFloat(product.Precio_Venta) || 0;
-            const productCard = `
-                <div class="col">
-                    <div class="card product-card h-100" data-product-id="${product.ID_Producto}">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.Nombre}</h5>
-                            <p class="card-text text-success">$${precio.toFixed(2)}</p>
-                            <small class="text-muted">${product.categoria_nombre || 'Sin categoría'}</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-            productListElement.innerHTML += productCard;
+            const productCard = new ProductCard(product, {
+                showPrice: true,
+                showCategory: true,
+                showButton: false,
+                cardClass: 'product-card'
+            });
+            
+            productListElement.innerHTML += productCard.renderColumn();
         });
     }
 

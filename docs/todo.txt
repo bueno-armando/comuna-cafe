@@ -3,6 +3,8 @@
   * considerar agregar filtros para los demás atributos
   * considerar edición/borrado de reportes
 
+- Recetas:
+  * usar modales en vez de alerts
   
 - MISC:
   - Considerar borrar los logs de depuración 
