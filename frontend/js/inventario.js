@@ -206,7 +206,7 @@
         const tipo = tipoDiv ? tipoDiv.textContent.trim() : '';
 
         if (!insumoId || !cantidad || !descripcion) {
-            alert('Por favor complete todos los campos requeridos');
+            notificationModal.showWarning('Por favor complete todos los campos requeridos');
             return;
         }
 
@@ -229,7 +229,7 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Movimiento registrado exitosamente');
+                notificationModal.showSuccess('Movimiento registrado exitosamente');
                 
                 // Cerrar modal y limpiar formulario
                 const modal = bootstrap.Modal.getInstance(document.getElementById('registerMovementModal'));
@@ -248,12 +248,12 @@
                 await fetchInventario();
                 
             } else {
-                alert('Error: ' + (result.message || 'Error al registrar movimiento'));
+                notificationModal.showError('Error: ' + (result.message || 'Error al registrar movimiento'));
             }
             
         } catch (error) {
             console.error('Error en handleRegisterMovement:', error);
-            alert('Error al registrar movimiento');
+            notificationModal.showError('Error al registrar movimiento');
         }
     }
 
@@ -277,7 +277,7 @@
             
         } catch (error) {
             console.error('Error en viewMovements:', error);
-            alert('Error al cargar movimientos');
+            notificationModal.showError('Error al cargar movimientos');
         }
     };
 

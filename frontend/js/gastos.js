@@ -373,25 +373,21 @@
         }
     };
 
-    // Función para mostrar alertas
+    // Función para mostrar alertas (usando notificationModal)
     function showAlert(message, type = 'info') {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        const container = document.querySelector('.main-container');
-        if (container) {
-            container.insertBefore(alertDiv, container.firstChild);
-            
-            // Auto-remover después de 5 segundos
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
+        switch(type) {
+            case 'success':
+                notificationModal.showSuccess(message);
+                break;
+            case 'danger':
+            case 'error':
+                notificationModal.showError(message);
+                break;
+            case 'warning':
+                notificationModal.showWarning(message);
+                break;
+            default:
+                notificationModal.showInfo(message);
         }
     }
 

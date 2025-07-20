@@ -36,7 +36,7 @@
             }
         } catch (error) {
             console.error('Error en fetchInsumos:', error);
-            alert('No se pudieron cargar los insumos.');
+            notificationModal.showError('No se pudieron cargar los insumos.');
         }
     }
     
@@ -399,7 +399,7 @@
             event.target.reset();
         } catch (error) {
             console.error('Error en addInsumo:', error);
-            alert('No se pudo agregar el insumo.');
+            notificationModal.showError('No se pudo agregar el insumo.');
         }
     }
     
@@ -457,7 +457,7 @@
             editInsumoId = null;
         } catch (error) {
             console.error('Error en saveEditInsumo:', error);
-            alert('No se pudo actualizar el insumo.');
+            notificationModal.showError('No se pudo actualizar el insumo.');
         }
     }
 
@@ -480,10 +480,10 @@
             }
             
             fetchInsumos(currentFilters, currentPage, rowsPerPage); // Recargar
-            alert('Insumo eliminado exitosamente');
+            notificationModal.showSuccess('Insumo eliminado exitosamente');
         } catch (error) {
             console.error('Error en deleteInsumo:', error);
-            alert('No se pudo eliminar el insumo.');
+            notificationModal.showError('No se pudo eliminar el insumo.');
         }
     }
 
@@ -502,7 +502,7 @@
             renderProveedoresTable(proveedores);
         } catch (error) {
             console.error('Error al cargar proveedores:', error);
-            alert('No se pudieron cargar los proveedores.');
+            notificationModal.showError('No se pudieron cargar los proveedores.');
         }
     }
 
@@ -558,10 +558,10 @@
             
             // Limpiar formulario
             form.reset();
-            alert('Proveedor agregado exitosamente');
+            notificationModal.showSuccess('Proveedor agregado exitosamente');
         } catch (error) {
             console.error('Error en addProveedor:', error);
-            alert('No se pudo agregar el proveedor.');
+            notificationModal.showError('No se pudo agregar el proveedor.');
         }
     }
 
@@ -591,7 +591,7 @@
             document.getElementById('cancelProveedorEdit').style.display = 'inline-block';
         } catch (error) {
             console.error('Error en editProveedor:', error);
-            alert('No se pudo cargar el proveedor.');
+            notificationModal.showError('No se pudo cargar el proveedor.');
         }
     }
 
@@ -635,10 +635,10 @@
             // Ocultar botón cancelar
             document.getElementById('cancelProveedorEdit').style.display = 'none';
             
-            alert('Proveedor actualizado exitosamente');
+            notificationModal.showSuccess('Proveedor actualizado exitosamente');
         } catch (error) {
             console.error('Error en saveEditProveedor:', error);
-            alert('No se pudo actualizar el proveedor.');
+            notificationModal.showError('No se pudo actualizar el proveedor.');
         }
     }
 
@@ -675,10 +675,10 @@
             await cargarProveedoresTabla();
             await cargarProveedores(); // Recargar también el select de insumos
             
-            alert('Proveedor eliminado exitosamente');
+            notificationModal.showSuccess('Proveedor eliminado exitosamente');
         } catch (error) {
             console.error('Error en deleteProveedor:', error);
-            alert(error.message || 'No se pudo eliminar el proveedor.');
+            notificationModal.showError(error.message || 'No se pudo eliminar el proveedor.');
         }
     }
 

@@ -195,6 +195,32 @@
 - **Fácil mantenimiento**: Un solo lugar para cambios en el diseño de notificaciones
 - **UX mejorada**: Modales elegantes en lugar de alerts básicos del navegador
 - **Integración completa**: Disponible globalmente en todo el sistema SPA
+- **Migración completa**: Todos los módulos migrados al sistema unificado:
+  - ✅ Ventas: 3 alerts reemplazados
+  - ✅ Productos: 7 alerts reemplazados
+  - ✅ Insumos: 12 alerts reemplazados
+  - ✅ Inventario: 3 alerts reemplazados
+  - ✅ Gastos: Función showAlert migrada
+  - ✅ Bitácora: 1 alert reemplazado
+  - ✅ Recetas: 15 alerts reemplazados (previamente)
+  - ✅ Usuarios: Soporte agregado
+  - ✅ Caja: Ya usaba notificationModal
+  - ✅ Reportes: Ya usaba notificationModal
+
+### ✅ **Estandarización de Modales - COMPLETADO**
+- **Centrado vertical**: Todos los modales del sistema ahora aparecen centrados usando `modal-dialog-centered`
+- **Módulos actualizados**: 8 módulos con 20+ modales estandarizados:
+  - ✅ Usuarios: 6 modales centrados
+  - ✅ Gastos: 2 modales centrados
+  - ✅ Ventas: 1 modal centrado
+  - ✅ Productos: 3 modales centrados
+  - ✅ Inventario: 2 modales centrados
+  - ✅ Insumos: 2 modales centrados
+  - ✅ Recetas: 2 modales centrados
+  - ✅ Caja, Reportes: Ya estaban centrados
+- **Mejoras en UX**: Modales centrados siguen mejores prácticas de accesibilidad
+- **Responsive**: Funciona mejor en dispositivos móviles
+- **Consistencia visual**: Todos los modales siguen el mismo patrón de diseño
 
 ### 🔧 **Detalles técnicos importantes:**
 

@@ -56,7 +56,7 @@
             renderPagination();
         } catch (error) {
             console.error('Error al cargar bitácora:', error);
-            showAlert('Error al cargar los registros de bitácora', 'danger');
+            notificationModal.showError('Error al cargar los registros de bitácora');
         }
     }
 

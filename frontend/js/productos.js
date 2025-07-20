@@ -459,7 +459,7 @@
         };
 
         if (!data.Nombre || !data.ID_Categoria || isNaN(data.Precio_Venta)) {
-            alert('Por favor complete todos los campos correctamente');
+            notificationModal.showWarning('Por favor complete todos los campos correctamente');
             return;
         }
 
@@ -709,7 +709,7 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Categoría actualizada exitosamente');
+                notificationModal.showSuccess('Categoría actualizada exitosamente');
                 
                 // Recargar categorías
                 await fetchCategorias();
@@ -718,12 +718,12 @@
                 populateCategoriasSelects();
                 
             } else {
-                alert('Error: ' + (result.message || 'Error al actualizar categoría'));
+                notificationModal.showError('Error: ' + (result.message || 'Error al actualizar categoría'));
             }
             
         } catch (error) {
             console.error('Error en updateCategoria:', error);
-            alert('Error al actualizar categoría');
+            notificationModal.showError('Error al actualizar categoría');
         }
     }
 
@@ -734,7 +734,7 @@
         const nombre = document.getElementById('newCategoryName').value.trim();
         
         if (!nombre) {
-            alert('Por favor ingrese el nombre de la categoría');
+            notificationModal.showWarning('Por favor ingrese el nombre de la categoría');
             return;
         }
 
@@ -751,7 +751,7 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Categoría agregada exitosamente');
+                notificationModal.showSuccess('Categoría agregada exitosamente');
                 
                 // Limpiar formulario
                 document.getElementById('newCategoryName').value = '';
@@ -763,12 +763,12 @@
                 populateCategoriasSelects();
                 
             } else {
-                alert('Error: ' + (result.message || 'Error al agregar categoría'));
+                notificationModal.showError('Error: ' + (result.message || 'Error al agregar categoría'));
             }
             
         } catch (error) {
             console.error('Error en handleAddCategoria:', error);
-            alert('Error al agregar categoría');
+            notificationModal.showError('Error al agregar categoría');
         }
     }
 

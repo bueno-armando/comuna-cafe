@@ -70,7 +70,7 @@
                 }
             }
         } catch (error) {
-            alert('No se pudieron cargar las ventas: ' + error.message);
+            notificationModal.showError('No se pudieron cargar las ventas: ' + error.message);
         }
     }
 
@@ -188,7 +188,7 @@
         try {
             const res = await fetchAPI(`${API_URL_VENTAS}/${ventaId}`);
             if (!res || !res.venta) {
-                alert('No se encontraron detalles para esta venta.');
+                notificationModal.showWarning('No se encontraron detalles para esta venta.');
                 return;
             }
             // Llenar campos del modal
@@ -218,7 +218,7 @@
             const modal = new bootstrap.Modal(document.getElementById('detalleVentaModal'));
             modal.show();
         } catch (error) {
-            alert('Error al cargar los detalles de la venta: ' + error.message);
+            notificationModal.showError('Error al cargar los detalles de la venta: ' + error.message);
         }
     }
 

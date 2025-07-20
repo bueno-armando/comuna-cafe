@@ -2,16 +2,18 @@
   * tamaño de las tarjetas de producto
   * subir las imágenes por URL o localmente?
 
+- Usuarios:
+  * añadir campo Usuario a modal de edición (antes ver si API lo soporta)
+
 
 - Reportes:
   * ver el detalle de la fecha de corte
   * considerar agregar filtros para los demás atributos
   * considerar edición/borrado de reportes
 
-- Recetas:
-  * usar modales en vez de alerts
-  
 - MISC:
+  - Registrar la compra de insumos como gastos
+  - Revisar si coinciden la unidad de compra y uso de insumos
   - IMPORTANTE: que hacer con la variación de ingredientes?
     e.g., leche entera o deslactosada, con o sin azúcar, etc
   - Ver por que no se puede iniciar sesión desde el teléfono
