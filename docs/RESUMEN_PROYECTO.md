@@ -12,6 +12,9 @@
   - `src/controllers/ventasController.js`: lógica de ventas
   - `src/routes/gastosRoutes.js`: rutas de gastos (`/api/gastos`, `/api/gastos/:id`, etc.)
   - `src/controllers/gastosController.js`: lógica de gastos
+  - `src/routes/cajaRoutes.js`: rutas de caja (`/api/caja/productos`, `/api/caja/categorias`, `/api/caja/venta`)
+  - `src/controllers/cajaController.js`: lógica de caja
+  - `src/models/cajaModel.js`: consultas SQL para productos de caja y categorías
 - **frontend/**: HTML + JS vanilla
   - `Insumos.html`: vista de gestión de insumos
   - `js/insumos.js`: lógica de frontend para insumos
@@ -21,6 +24,10 @@
   - `js/ventas.js`: lógica de frontend para ventas
   - `Gastos.html`: vista de gestión de gastos
   - `js/gastos.js`: lógica de frontend para gastos
+  - `Caja.html`: vista de punto de venta
+  - `js/caja.js`: lógica de frontend para caja
+  - `js/productCard.js`: clase común para renderizar tarjetas de productos
+  - `css/productCards.css`: estilos para tarjetas de productos con imágenes de fondo
 - **docs/**: documentación y especificaciones
 
 ## Tablas principales (DB)
@@ -100,6 +107,11 @@
 - `PUT /api/gastos/:id` — actualizar gasto
 - `DELETE /api/gastos/:id` — eliminar gasto
 
+### Caja
+- `GET /api/caja/productos` — lista productos disponibles para la venta
+- `GET /api/caja/categorias` — lista categorías de productos
+- `POST /api/caja/venta` — procesar una venta (ID_Producto, Cantidad, Metodo_Pago)
+
 ## Decisiones de UX y validación
 
 ### Insumos
@@ -143,99 +155,36 @@
 - ✅ **UX profesional**: Filtros flexibles, búsqueda por descripción
 - ✅ **Validación robusta**: Backend maneja filtros individuales y combinados
 
-## Estado actual de los módulos
+### Caja
+- ✅ **Filtro por categoría**: Seleccionar una categoría para filtrar productos
+- ✅ **Búsqueda de productos**: Filtrado en tiempo real de productos disponibles
+- ✅ **Carrito de compras**: Agregar, eliminar y modificar cantidades de productos
+- ✅ **Cálculo automático**: Subtotal y total de la venta calculados dinámicamente
+- ✅ **Métodos de pago**: Efectivo, Tarjeta, Transferencia con validación
+- ✅ **Modal de confirmación**: Confirmación de pago con cálculo de cambio para efectivo
+- ✅ **Notificaciones modales**: Sistema unificado de notificaciones con Bootstrap para éxito y errores
+- ✅ **UX profesional**: Modales elegantes en lugar de alerts básicos
+- ✅ **Integración completa**: Conectado al backend para procesar ventas reales
+- ✅ **Validaciones robustas**: Verificación de método de pago y datos de venta
 
-### ✅ **Módulo de Insumos - COMPLETADO**
-- **CRUD completo de insumos**: Crear, leer, actualizar, eliminar
-- **CRUD completo de proveedores**: Crear, leer, actualizar, eliminar
-- **Panel de proveedores**: Modal con formulario y tabla
-- **Búsqueda de insumos**: Por nombre en tiempo real
-- **Validaciones**: Campos requeridos, formato de costo, bloqueo de eliminación
-- **UX mejorada**: Modales con diseño consistente, iconos, feedback visual
-- **Formateo de decimales**: Punto decimal forzado, sin conflictos de locale
+### ✅ **Sistema de Tarjetas de Productos - COMPLETADO**
+- **Clase ProductCard común**: Reutilizable en todos los módulos que muestran productos
+- **Configuración flexible**: Mostrar/ocultar precio, categoría, ingredientes, botones según el módulo
+- **Imágenes de fondo**: Soporte para imágenes como fondo con transparencia
+- **Estilos responsivos**: Adaptación automática a diferentes tamaños de pantalla
+- **Efectos visuales**: Hover effects, sombras de texto, transiciones suaves
+- **Compatibilidad**: Funciona con o sin imágenes, sin afectar funcionalidad existente
+- **Optimización de espacio**: Imagen como fondo en lugar de elemento separado
+- **Legibilidad garantizada**: Overlay semi-transparente y sombras de texto para contraste
 
-### ✅ **Módulo de Recetas - COMPLETADO**
-- **Vista inicial informativa**: Grid de productos con conteo de ingredientes
-- **CRUD completo de recetas**: Crear, leer, actualizar, eliminar ingredientes
-- **Navegación intuitiva**: Breadcrumb + botón "Volver a Productos"
-- **Botones de incremento/decremento**: Para cantidades con formato decimal
-- **Búsqueda de productos**: Con resultados en dropdown
-- **Modales consistentes**: Con íconos Bootstrap y colores unificados
-- **UX profesional**: Nunca muestra página vacía, siempre hay contenido útil
-
-### ✅ **Módulo de Ventas - COMPLETADO**
-- **Paginación completa**: 9 ventas por página con navegación intuitiva
-- **Filtros por fecha**: Rango de fechas con campos "Desde" y "Hasta"
-- **Modal de detalles**: Información completa de venta y productos vendidos
-- **Formato de fechas**: Solo fecha sin hora (dd/mm/yyyy)
-- **Precio unitario calculado**: Subtotal ÷ Cantidad para precisión histórica
-- **UX consistente**: Iconos Bootstrap, colores unificados, diseño responsive
-- **Exportación preparada**: Botones para PDF y Excel (pendientes de implementar)
-
-### ✅ **Módulo de Gastos - COMPLETADO**
-- **CRUD completo de gastos**: Crear, leer, actualizar, eliminar
-- **Filtros avanzados**: Fecha inicio/fin (rangos abiertos), descripción (LIKE)
-- **Filtros rápidos**: Hoy, Semana, Mes, Personalizado
-- **Modal unificado**: Crear/editar gastos en un solo modal dinámico
-- **Botones incremento/decremento**: Para montos con paso de 1.00
-- **Formato decimal consistente**: Punto decimal, formateo automático
-- **UX profesional**: Filtros flexibles, búsqueda por descripción
-- **Validación robusta**: Backend maneja filtros individuales y combinados
-
-### ✅ **Módulo de Usuarios - COMPLETADO**
-- **CRUD completo de usuarios**: Crear, leer, actualizar, eliminar
-- **Autenticación y login**: Sistema de login con JWT y verificación de credenciales
-- **Gestión de roles**: Administrador, Cajero, Mesero con permisos diferenciados
-- **Filtros avanzados**: Por nombre, apellido, rol, estado con filtros rápidos
-- **Paginación dinámica**: 9 usuarios por página con navegación intuitiva
-- **Modales profesionales**: Confirmaciones de creación, edición, eliminación y errores
-- **UX consistente**: Diseño compacto, badges de estado, iconos Bootstrap
-- **Validaciones robustas**: Backend maneja filtros individuales y combinados
-- **Generación automática de usuarios**: Procedimiento almacenado para nombres únicos
-- **Encriptación de contraseñas**: bcrypt para seguridad
-- **Columna de ID**: Información técnica para administradores de sistemas
-
-### ✅ **Módulo de Reportes - COMPLETADO**
-- **Generación de reportes**: Permite crear reportes consolidados de ventas y gastos por periodo (diario, semanal, mensual, etc.)
-- **Consulta y desglose**: Listado de reportes con filtros y paginación, consulta de detalles, ventas y gastos incluidos, producto más vendido y día con más ventas
-- **Exportación a PDF**: Genera archivos PDF profesionales con logo, encabezado, tablas de ventas y gastos, estadísticas y fecha de generación
-- **Exportación a Excel**: Genera archivos Excel (.xlsx) con hojas separadas para resumen, ventas y gastos, con formatos de moneda y fecha
-- **Filtros profesionales**: Filtros rápidos (Hoy, Semana, Mes, Personalizado) siguiendo el patrón de Gastos y Bitácora
-- **Notificaciones modales**: Sistema de notificaciones con modales Bootstrap para éxito y errores
-- **Integración SPA completa**: Frontend conectado al backend, tabla dinámica, modal de detalles, y UX consistente
-- **API robusta**: Todos los endpoints REST implementados, incluyendo exportación a PDF y Excel
-- **Listo para producción**: Lógica robusta, validaciones, y funcionalidad completa de exportación
-- **UX mejorada**: Botón de generar con estilo consistente (btn-success), efectos de carga, y feedback visual profesional
-- **Modal de detalles mejorado**: Información estática en cards y badges en lugar de inputs readonly
-- **Lógica de ganancias corregida**: "Ventas Totales" muestra ventas brutas, "Balance Neto" muestra ganancia neta
-- **Manejo de casos especiales**: "Sin ganancias" cuando no hay ventas, colores apropiados para balance negativo
-- **Corrección de errores**: Modal de detalles funciona correctamente sin errores de DOM
-- **Limpieza de modal**: Contenido se limpia al cerrar para evitar datos obsoletos
-
-### ✅ **Módulo de Productos - COMPLETADO**
-- **CRUD completo de productos**: Crear, leer, actualizar, eliminar
-- **Gestión de categorías**: Crear, editar, eliminar categorías de productos
-- **Filtros avanzados**: Por nombre, categoría, estado con filtros rápidos
-- **Paginación dinámica**: 9 productos por página con navegación intuitiva
-- **Modales profesionales**: Confirmaciones de creación, edición, eliminación y errores
-- **UX consistente**: Diseño compacto, badges de estado, iconos Bootstrap
-- **Validaciones robustas**: Backend maneja filtros individuales y combinados
-- **Productos inactivos**: Vista separada para productos desactivados con opción de reactivación
-- **Campos de precio mejorados**: Símbolo de moneda ($) en inputs de precio con input groups
-- **Notificaciones modales**: Sistema unificado de notificaciones con Bootstrap para éxito y errores
-- **UX mejorada**: Modales profesionales en lugar de alerts básicos para mejor experiencia de usuario
-
-### ✅ **Módulo de Caja - COMPLETADO**
-- **Interfaz de punto de venta**: Vista intuitiva para procesar ventas rápidas
-- **Búsqueda de productos**: Filtrado en tiempo real de productos disponibles
-- **Carrito de compras**: Agregar, eliminar y modificar cantidades de productos
-- **Cálculo automático**: Subtotal y total de la venta calculados dinámicamente
-- **Métodos de pago**: Efectivo, Tarjeta, Transferencia con validación
-- **Modal de confirmación**: Confirmación de pago con cálculo de cambio para efectivo
-- **Notificaciones modales**: Sistema unificado de notificaciones con Bootstrap para éxito y errores
-- **UX profesional**: Modales elegantes en lugar de alerts básicos
-- **Integración completa**: Conectado al backend para procesar ventas reales
-- **Validaciones robustas**: Verificación de método de pago y datos de venta
+### ✅ **Sistema de Imágenes de Productos - COMPLETADO**
+- **Campo ruta_imagen**: Agregado a la tabla productos_venta para almacenar URLs de imágenes
+- **Compatibilidad hacia atrás**: Sistema funciona con productos existentes sin imágenes
+- **Modales actualizados**: Campo de URL de imagen en formularios de agregar/editar productos
+- **Preview en tiempo real**: Visualización de imagen mientras se escribe la URL
+- **Validación de URLs**: Manejo de errores de carga de imagen
+- **Estilos CSS específicos**: Transparencia configurable, efectos hover, responsive design
+- **Integración completa**: Imágenes se muestran en Caja, Recetas y cualquier módulo que use ProductCard
 
 ### 🔧 **Detalles técnicos importantes:**
 
@@ -303,14 +252,28 @@
 - **UX profesional**: Modales elegantes en lugar de alerts básicos
 
 #### Caja
-- **Interfaz de punto de venta**: Vista intuitiva para procesar ventas rápidas
-- **Búsqueda en tiempo real**: Filtrado de productos con debounce
-- **Carrito dinámico**: Agregar, eliminar y modificar cantidades
-- **Cálculo automático**: Subtotal y total calculados dinámicamente
-- **Modal de confirmación**: Confirmación de pago con cálculo de cambio
-- **Notificaciones modales**: Sistema unificado con Bootstrap para éxito y errores
-- **Validaciones**: Verificación de método de pago y datos de venta
-- **Integración completa**: Conectado al backend para procesar ventas reales
+- **Filtros flexibles**: Backend maneja filtros individuales (solo categoría, solo búsqueda, o combinados)
+- **Búsqueda en tiempo real**: Filtrado de productos con debounce y indicador visual
+- **Combinación de filtros**: Categoría se combina con búsqueda por texto
+- **Paginación completa**: Backend y frontend con tamaño de página dinámico
+- **UI de filtros mejorada**: Controles alineados con texto de total de productos
+- **Notificaciones modales**: Sistema unificado de notificaciones con Bootstrap
+
+#### ProductCard
+- **Clase reutilizable**: Una sola implementación para todos los módulos
+- **Configuración por opciones**: showPrice, showCategory, showIngredients, showButton
+- **Manejadores de eventos**: Sistema unificado para clicks en botones
+- **Renderizado condicional**: Imagen de fondo solo cuando existe ruta_imagen
+- **Estilos CSS modulares**: Archivo separado para facilitar mantenimiento
+- **Responsive design**: Adaptación automática a diferentes dispositivos
+
+#### Sistema de Imágenes
+- **Campo ruta_imagen**: VARCHAR(255) con valor por defecto NULL
+- **Compatibilidad total**: Productos existentes funcionan sin cambios
+- **Preview en tiempo real**: Validación visual de URLs de imagen
+- **Overlay configurable**: Transparencia ajustable en CSS
+- **Efectos visuales**: Hover effects, sombras de texto, transiciones
+- **Optimización de espacio**: Imagen como fondo en lugar de elemento separado
 
 ## Recomendaciones para paginación y filtros en todos los módulos
 

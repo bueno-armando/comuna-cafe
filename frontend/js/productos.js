@@ -379,6 +379,11 @@
 
         // Formatear campos de precio para mantener 2 decimales
         setupPriceFormatting();
+
+        // Configurar preview de imagen para el modal de agregar
+        setupImagePreview('addRutaImagenProducto', 'addImagePreview');
+        // Configurar preview de imagen para el modal de editar
+        setupImagePreview('editRutaImagenProducto', 'editImagePreview');
     }
 
     // Configurar formateo de precios
@@ -449,7 +454,8 @@
         const data = {
             Nombre: formData.get('addNombreProducto'),
             ID_Categoria: parseInt(formData.get('addCategoriaProducto')),
-            Precio_Venta: parseFloat(formData.get('addPrecioVentaProducto'))
+            Precio_Venta: parseFloat(formData.get('addPrecioVentaProducto')),
+            ruta_imagen: formData.get('addRutaImagenProducto') || null
         };
 
         if (!data.Nombre || !data.ID_Categoria || isNaN(data.Precio_Venta)) {
@@ -508,6 +514,22 @@
             form.querySelector('[name="editNombreProducto"]').value = producto.Producto;
             form.querySelector('[name="editCategoriaProducto"]').value = producto.ID_Categoria;
             form.querySelector('[name="editPrecioVentaProducto"]').value = producto.Precio_Venta;
+            form.querySelector('[name="editRutaImagenProducto"]').value = producto.ruta_imagen || '';
+            
+            // Mostrar preview de imagen actual si existe
+            const preview = document.getElementById('editImagePreview');
+            const img = preview.querySelector('img');
+            if (producto.ruta_imagen && img) {
+                img.src = producto.ruta_imagen;
+                img.onload = function() {
+                    preview.style.display = 'block';
+                };
+                img.onerror = function() {
+                    preview.style.display = 'none';
+                };
+            } else {
+                preview.style.display = 'none';
+            }
         }
 
         // Mostrar modal
@@ -525,7 +547,8 @@
         const data = {
             Nombre: formData.get('editNombreProducto'),
             ID_Categoria: parseInt(formData.get('editCategoriaProducto')),
-            Precio_Venta: parseFloat(formData.get('editPrecioVentaProducto'))
+            Precio_Venta: parseFloat(formData.get('editPrecioVentaProducto')),
+            ruta_imagen: formData.get('editRutaImagenProducto') || null
         };
 
         if (!data.Nombre || !data.ID_Categoria || isNaN(data.Precio_Venta)) {
@@ -749,7 +772,30 @@
         }
     }
 
-
+    // Función para manejar preview de imagen
+    function setupImagePreview(inputName, previewId) {
+        const input = document.querySelector(`[name="${inputName}"]`);
+        const preview = document.getElementById(previewId);
+        const img = preview.querySelector('img');
+        
+        if (input && preview && img) {
+            input.addEventListener('input', function() {
+                const url = this.value.trim();
+                if (url) {
+                    img.src = url;
+                    img.onload = function() {
+                        preview.style.display = 'block';
+                    };
+                    img.onerror = function() {
+                        preview.style.display = 'none';
+                        console.warn('No se pudo cargar la imagen:', url);
+                    };
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        }
+    }
 
     // Exportar función de inicialización
     window.initProductos = initProductos;

@@ -1,3 +1,7 @@
+- Detalles a ver con el cliente:
+  * tamaño de las tarjetas de producto
+  * subir las imágenes por URL o localmente?
+
 - Reportes:
   * ver el detalle de la fecha de corte
   * considerar agregar filtros para los demás atributos

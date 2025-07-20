@@ -41,9 +41,22 @@ class ProductCard {
         const precio = parseFloat(this.product.Precio_Venta) || 0;
         const categoria = this.product.categoria_nombre || this.product.Categoria || 'Sin categoría';
         const ingredientes = ingredientCount !== null ? ingredientCount : (this.product.ingredientCount || 0);
+        const rutaImagen = this.product.ruta_imagen;
 
         let cardContent = `
             <div class="card ${cardClass} h-100" data-product-id="${this.product.ID_Producto}">
+        `;
+
+        // Agregar clase y estilo si hay imagen
+        if (rutaImagen) {
+            cardContent = `
+                <div class="card ${cardClass} h-100 with-image" 
+                     data-product-id="${this.product.ID_Producto}"
+                     style="background-image: url('${rutaImagen}');">
+            `;
+        }
+
+        cardContent += `
                 <div class="card-body text-center">
                     <h5 class="card-title fw-bold mb-3">${this.product.Nombre}</h5>
         `;

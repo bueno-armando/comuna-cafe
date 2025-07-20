@@ -11,7 +11,8 @@ const productosController = {
                     p.ID_Categoria,
                     c.Nombre AS Categoria,
                     p.Precio_Venta,
-                    p.Estado
+                    p.Estado,
+                    p.ruta_imagen
                 FROM productos_venta p
                 JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
                 WHERE p.Estado = 1
@@ -34,7 +35,8 @@ const productosController = {
                     p.ID_Categoria,
                     c.Nombre AS Categoria,
                     p.Precio_Venta,
-                    p.Estado
+                    p.Estado,
+                    p.ruta_imagen
                 FROM productos_venta p
                 JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
                 WHERE p.Estado = 0
@@ -97,7 +99,7 @@ const productosController = {
     // Agregar nuevo producto
     async create(req, res) {
         try {
-            const { Nombre, ID_Categoria, Precio_Venta } = req.body;
+            const { Nombre, ID_Categoria, Precio_Venta, ruta_imagen } = req.body;
 
             // Validar datos requeridos
             if (!Nombre || !ID_Categoria || !Precio_Venta) {
@@ -114,8 +116,8 @@ const productosController = {
 
             // Insertar el producto
             const [result] = await pool.query(
-                'INSERT INTO productos_venta (Nombre, ID_Categoria, Precio_Venta) VALUES (?, ?, ?)',
-                [Nombre, ID_Categoria, Precio_Venta]
+                'INSERT INTO productos_venta (Nombre, ID_Categoria, Precio_Venta, ruta_imagen) VALUES (?, ?, ?, ?)',
+                [Nombre, ID_Categoria, Precio_Venta, ruta_imagen || null]
             );
 
             res.status(201).json({
@@ -135,7 +137,7 @@ const productosController = {
     async update(req, res) {
         try {
             const { id } = req.params;
-            const { Nombre, ID_Categoria, Precio_Venta } = req.body;
+            const { Nombre, ID_Categoria, Precio_Venta, ruta_imagen } = req.body;
 
             // Validar datos requeridos
             if (!Nombre || !ID_Categoria || !Precio_Venta) {
@@ -152,8 +154,8 @@ const productosController = {
 
             // Actualizar el producto
             const [result] = await pool.query(
-                'UPDATE productos_venta SET Nombre = ?, ID_Categoria = ?, Precio_Venta = ? WHERE ID_Producto = ?',
-                [Nombre, ID_Categoria, Precio_Venta, id]
+                'UPDATE productos_venta SET Nombre = ?, ID_Categoria = ?, Precio_Venta = ?, ruta_imagen = ? WHERE ID_Producto = ?',
+                [Nombre, ID_Categoria, Precio_Venta, ruta_imagen || null, id]
             );
 
             if (result.affectedRows === 0) {

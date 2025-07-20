@@ -190,7 +190,8 @@ class RecetasController {
                     p.ID_Producto,
                     p.Nombre,
                     p.Precio_Venta,
-                    c.Nombre as Categoria
+                    c.Nombre as Categoria,
+                    p.ruta_imagen
                 FROM productos_venta p
                 LEFT JOIN recetas r ON p.ID_Producto = r.ID_Producto
                 LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
@@ -215,7 +216,8 @@ class RecetasController {
                     p.ID_Producto,
                     p.Nombre,
                     p.Precio_Venta,
-                    c.Nombre as Categoria
+                    c.Nombre as Categoria,
+                    p.ruta_imagen
                 FROM productos_venta p
                 LEFT JOIN categorias c ON p.ID_Categoria = c.ID_Categoria
                 WHERE p.Estado = 1

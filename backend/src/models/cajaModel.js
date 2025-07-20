@@ -4,7 +4,7 @@ class CajaModel {
   // Obtener todos los productos
   static async getProducts() {
     const [rows] = await db.query(`
-      SELECT pv.*, c.Nombre as categoria_nombre 
+      SELECT pv.*, c.Nombre as categoria_nombre, pv.ruta_imagen
       FROM productos_venta pv 
       JOIN categorias c ON pv.ID_Categoria = c.ID_Categoria
       WHERE pv.Estado = 1
