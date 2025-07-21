@@ -13,6 +13,88 @@
     let selectedProductName = '';
     let insumosList = []; // Lista de insumos disponibles
 
+    // === INICIO: Helper de conversión de unidades (portado del backend) ===
+    const CONVERSION_FACTORS = {
+        // Peso
+        'kg_to_g': 1000,
+        'g_to_kg': 0.001,
+        'oz_to_g': 28.3495,
+        'g_to_oz': 0.03527396,
+        'kg_to_oz': 35.27396,
+        'oz_to_kg': 0.0283495,
+        // Volumen
+        'L_to_ml': 1000,
+        'ml_to_L': 0.001,
+        'L_to_oz': 33.814,
+        'oz_to_L': 0.0295735,
+        'L_to_tsp': 202.884,
+        'tsp_to_L': 0.00492892,
+        'L_to_tbsp': 67.628,
+        'tbsp_to_L': 0.0147868,
+        'L_to_cc': 1000,
+        'cc_to_L': 0.001,
+        'ml_to_oz': 0.033814,
+        'oz_to_ml': 29.5735,
+        'ml_to_tsp': 0.202884,
+        'tsp_to_ml': 4.92892,
+        'ml_to_tbsp': 0.067628,
+        'tbsp_to_ml': 14.7868,
+        'ml_to_cc': 1,
+        'cc_to_ml': 1,
+        'oz_to_tsp': 6,
+        'tsp_to_oz': 0.166667,
+        'oz_to_tbsp': 2,
+        'tbsp_to_oz': 0.5,
+        'tbsp_to_tsp': 3,
+        'tsp_to_tbsp': 0.333333,
+        'cc_to_tsp': 0.202884,
+        'tsp_to_cc': 4.92892,
+        'cc_to_tbsp': 0.067628,
+        'tbsp_to_cc': 14.7868,
+        // Volumen a Peso (aproximaciones para agua/leche)
+        'ml_to_g_water': 1,
+        'g_to_ml_water': 1,
+        'L_to_kg_water': 1,
+        'kg_to_L_water': 1
+    };
+    const COMPATIBLE_UNITS = {
+        'weight': ['g', 'kg', 'oz'],
+        'volume': ['ml', 'L', 'oz', 'tsp', 'tbsp', 'cc'],
+        'pieces': ['Pza', 'pkg']
+    };
+    function convertirUnidad(cantidad, unidadOrigen, unidadDestino) {
+        if (unidadOrigen === unidadDestino) return cantidad;
+        const conversionKey = `${unidadOrigen}_to_${unidadDestino}`;
+        const factor = CONVERSION_FACTORS[conversionKey];
+        if (factor) return cantidad * factor;
+        const reverseKey = `${unidadDestino}_to_${unidadOrigen}`;
+        const reverseFactor = CONVERSION_FACTORS[reverseKey];
+        if (reverseFactor) return cantidad / reverseFactor;
+        console.warn(`No se encontró conversión de ${unidadOrigen} a ${unidadDestino}`);
+        return cantidad;
+    }
+    // === FIN: Helper de conversión de unidades ===
+
+    // === INICIO: Helper de formato dinámico de cantidad y unidad ===
+    function formatearCantidadUnidad(cantidad, unidad) {
+        // Formatear cantidad: solo los decimales necesarios
+        let cantidadStr = cantidad % 1 === 0 ? cantidad.toString() : cantidad.toFixed(3).replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1');
+        return `${cantidadStr} ${unidad}`;
+    }
+    // === FIN: Helper de formato dinámico ===
+
+    // Helper para sugerir la unidad más legible
+    function sugerirUnidadLegible(cantidad, unidad) {
+        if (unidad === 'L' && cantidad < 1) return 'ml';
+        if (unidad === 'kg' && cantidad < 1) return 'g';
+        if (unidad === 'ml' && cantidad >= 1000) return 'L';
+        if (unidad === 'g' && cantidad >= 1000) return 'kg';
+        return unidad;
+    }
+
+    // Estado de unidad seleccionada por insumoId (para la tabla)
+    const recetaUnidadSeleccionada = {}; // { [ID_Insumo]: unidadSeleccionada }
+
     // Función para verificar autenticación
     function checkAuth() {
         const token = API.getToken();
@@ -289,12 +371,38 @@
             return;
         }
 
-        recetas.forEach(receta => {
+        recetas.forEach(async receta => {
             const row = document.createElement('tr');
+            // Obtener unidades compatibles para el insumo (API)
+            let unidades = [receta.Unidad];
+            try {
+                const response = await fetch(`${API.URL}/unidades-compatibles/${receta.ID_Insumo}`, {
+                    headers: { 'Authorization': `Bearer ${API.getToken()}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    unidades = [data.unidadInsumo, ...(data.unidadesCompatibles || [])];
+                }
+            } catch (e) { /* fallback: solo unidad base */ }
+            // Sugerir unidad legible solo al cargar (no si el usuario ya cambió)
+            let unidadSugerida = sugerirUnidadLegible(parseFloat(receta.Cantidad_Necesaria), receta.Unidad);
+            const unidadSel = recetaUnidadSeleccionada[receta.ID_Insumo] || unidadSugerida;
+            recetaUnidadSeleccionada[receta.ID_Insumo] = unidadSel; // Guardar sugerencia inicial
+            // Convertir cantidad a la unidad seleccionada (siempre)
+            let cantidadMostrada = convertirUnidad(parseFloat(receta.Cantidad_Necesaria), receta.Unidad, unidadSel);
+            // Mostrar cantidad y unidad seleccionada
+            const cantidadUnidadStr = formatearCantidadUnidad(parseFloat(cantidadMostrada), unidadSel);
+            // Renderizar fila con combo box de unidad
             row.innerHTML = `
                 <td>${receta.Insumo}</td>
-                <td>${receta.Cantidad_Necesaria}</td>
-                <td>${receta.Unidad}</td>
+                <td>
+                    <span id="cantidad-${receta.ID_Insumo}">${cantidadUnidadStr}</span>
+                </td>
+                <td>
+                    <select class="form-select form-select-sm" id="unidad-select-${receta.ID_Insumo}">
+                        ${unidades.map(u => `<option value="${u}" ${u===unidadSel?'selected':''}>${u}</option>`).join('')}
+                    </select>
+                </td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary me-2" 
                             onclick="editIngredient(${receta.ID_Producto}, ${receta.ID_Insumo}, '${receta.Insumo}', ${receta.Cantidad_Necesaria}, '${receta.Unidad}')">
@@ -307,6 +415,18 @@
                 </td>
             `;
             tbody.appendChild(row);
+            // Evento para el combo box de unidad
+            const selectUnidad = row.querySelector(`#unidad-select-${receta.ID_Insumo}`);
+            if (selectUnidad) {
+                selectUnidad.addEventListener('change', function() {
+                    recetaUnidadSeleccionada[receta.ID_Insumo] = this.value;
+                    // Convertir SIEMPRE la cantidad almacenada a la unidad seleccionada
+                    let nuevaCantidad = convertirUnidad(parseFloat(receta.Cantidad_Necesaria), receta.Unidad, this.value);
+                    let nuevaUnidad = this.value;
+                    const cantidadUnidadStr = formatearCantidadUnidad(parseFloat(nuevaCantidad), nuevaUnidad);
+                    row.querySelector(`#cantidad-${receta.ID_Insumo}`).textContent = cantidadUnidadStr;
+                });
+            }
         });
     }
 

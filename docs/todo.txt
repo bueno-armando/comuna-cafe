@@ -8,9 +8,7 @@
     tienen receta (puede ser en otro módulo como recetas)
 
 - Recetas:
-  * conversioń entre unidades compatibles: e.g., si la unidad del insumo
-    está en kg, que se puedan seleccionar gramos en al UI y en la borrado
-    se guarde como su respectiva conversión a kg
+  * Corregir que 15g se están convertiendo a 0.02kg
   * Agregar receta de smoothie de fresa para pruebas:
     - Fresa: 100g
     - Leche: 200ml
