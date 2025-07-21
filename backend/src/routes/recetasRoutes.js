@@ -24,4 +24,7 @@ router.put('/:ID_Producto/:ID_Insumo', RecetasController.updateInsumo);
 // Eliminar un insumo de una receta
 router.delete('/:ID_Producto/:ID_Insumo', RecetasController.deleteInsumo);
 
+// Obtener unidades compatibles para un insumo
+router.get('/unidades-compatibles/:insumoId', RecetasController.getUnidadesCompatibles);
+
 module.exports = router; 

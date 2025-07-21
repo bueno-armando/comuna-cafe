@@ -2,6 +2,7 @@
     // Variables globales para esta vista (dentro de la IIFE)
     let cart = [];
     let products = [];
+    let popularProducts = [];
     let categorias = [];
     let filteredProducts = []; // Para almacenar productos filtrados por búsqueda
     let selectedCategory = ''; // Para almacenar la categoría seleccionada
@@ -56,6 +57,22 @@
         }
     }
 
+    // Función para cargar productos populares
+    async function fetchPopularProducts() {
+        try {
+            console.log('Cargando productos populares...');
+            const response = await fetch('/api/caja/productos/populares');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            popularProducts = await response.json();
+            console.log('Productos populares cargados:', popularProducts);
+        } catch (error) {
+            console.error('Error al cargar productos populares:', error);
+            popularProducts = [];
+        }
+    }
+
     // Función para poblar el filtro de categorías
     function populateCategoryFilter() {
         const categoryFilter = document.getElementById('categoryFilter');
@@ -64,8 +81,15 @@
             return;
         }
 
-        // Mantener la opción "Todas las categorías"
-        categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+        // Mantener las opciones existentes y agregar las categorías
+        const existingOptions = categoryFilter.querySelectorAll('option');
+        const hasPopularOption = Array.from(existingOptions).some(option => option.value === 'populares');
+        
+        // Solo limpiar si no tiene la opción de populares
+        if (!hasPopularOption) {
+            categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+            categoryFilter.innerHTML += '<option value="populares">Más Populares</option>';
+        }
         
         // Agregar las categorías
         categorias.forEach(categoria => {
@@ -105,11 +129,25 @@
             // Inicializar productos filtrados con todos los productos
             filteredProducts = [...products];
             
-            // Cargar categorías
-            await fetchCategorias();
+            // Cargar categorías y productos populares en paralelo
+            await Promise.all([
+                fetchCategorias(),
+                fetchPopularProducts()
+            ]);
             
             renderProducts();
             setupEventListeners(); // Configurar listeners después de cargar y renderizar productos
+            
+            // Cargar preferencia guardada del usuario
+            const savedView = localStorage.getItem('caja_default_view');
+            if (savedView) {
+                const categoryFilter = document.getElementById('categoryFilter');
+                if (categoryFilter) {
+                    categoryFilter.value = savedView;
+                    selectedCategory = savedView;
+                    applyFilters('', savedView);
+                }
+            }
         } catch (error) {
             console.error('Error loading products for Caja:', error);
             const productListElement = document.getElementById('productList');
@@ -162,11 +200,22 @@
             );
         }
         
-        // Filtrar por categoría
+        // Filtrar por categoría o productos populares
         if (categoryId && categoryId !== '') {
-            filtered = filtered.filter(product => 
-                product.ID_Categoria == categoryId
-            );
+            if (categoryId === 'populares') {
+                // Usar productos populares si están disponibles
+                if (popularProducts && popularProducts.length > 0) {
+                    const popularIds = popularProducts.map(p => p.ID_Producto);
+                    filtered = filtered.filter(product => 
+                        popularIds.includes(product.ID_Producto)
+                    );
+                }
+            } else {
+                // Filtrar por categoría normal
+                filtered = filtered.filter(product => 
+                    product.ID_Categoria == categoryId
+                );
+            }
         }
         
         filteredProducts = filtered;
@@ -201,6 +250,12 @@
             categoryFilter.addEventListener('change', function() {
                 selectedCategory = this.value;
                 const searchTerm = document.getElementById('productSearch')?.value || '';
+                
+                // Guardar preferencia del usuario
+                if (selectedCategory) {
+                    localStorage.setItem('caja_default_view', selectedCategory);
+                }
+                
                 applyFilters(searchTerm, selectedCategory);
             });
         } else {

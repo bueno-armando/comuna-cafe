@@ -22,6 +22,28 @@ class CajaModel {
     return rows;
   }
 
+  // Obtener productos más populares
+  static async getPopularProducts(days = 30) {
+    const [rows] = await db.query(`
+      SELECT 
+        pv.*,
+        c.Nombre as categoria_nombre,
+        pv.ruta_imagen,
+        COALESCE(SUM(dv.Cantidad), 0) as total_vendido
+      FROM productos_venta pv 
+      JOIN categorias c ON pv.ID_Categoria = c.ID_Categoria
+      LEFT JOIN detalle_venta dv ON pv.ID_Producto = dv.ID_Producto
+      LEFT JOIN ventas v ON dv.ID_Venta = v.ID_Venta
+      WHERE pv.Estado = 1
+        AND (v.Fecha IS NULL OR v.Fecha >= DATE_SUB(CURDATE(), INTERVAL ? DAY))
+      GROUP BY pv.ID_Producto
+      HAVING total_vendido > 0
+      ORDER BY total_vendido DESC
+      LIMIT 20
+    `, [days]);
+    return rows;
+  }
+
   // Crear una nueva venta
   static async createSale(saleData) {
     const { ID_Usuario, Total, Metodo_Pago } = saleData;

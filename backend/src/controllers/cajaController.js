@@ -23,6 +23,18 @@ class CajaController {
     }
   }
 
+  // Obtener productos más populares
+  static async getPopularProducts(req, res) {
+    try {
+      const { days = 30 } = req.query; // Por defecto últimos 30 días
+      const popularProducts = await CajaModel.getPopularProducts(parseInt(days));
+      res.json(popularProducts);
+    } catch (error) {
+      console.error('Error al obtener productos populares:', error);
+      res.status(500).json({ error: 'Error al obtener los productos populares' });
+    }
+  }
+
   // Procesar una nueva venta
   static async processSale(req, res) {
     try {

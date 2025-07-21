@@ -48,14 +48,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="card mb-0">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="bi bi-clipboard-plus me-2"></i>Formulario de Insumo
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <form id="addInsumoForm">
+                <form id="addInsumoForm">
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nombre *</label>
@@ -65,9 +58,16 @@
                                     <label class="form-label fw-bold">Unidad *</label>
                                     <select class="form-select" id="addInsumoUnidad" required>
                                         <option value="">Seleccione una unidad</option>
-                                        <option value="ml">ml</option>
-                                        <option value="g">g</option>
-                                        <option value="Pza">Pza</option>
+                                        <option value="ml">ml (mililitros)</option>
+                                        <option value="g">g (gramos)</option>
+                                        <option value="kg">kg (kilogramos)</option>
+                                        <option value="Pza">Pza (piezas)</option>
+                                        <option value="oz">oz (onzas)</option>
+                                        <option value="tsp">tsp (cucharaditas)</option>
+                                        <option value="tbsp">tbsp (cucharadas)</option>
+                                        <option value="cc">cc (centímetros cúbicos)</option>
+                                        <option value="L">L (litros)</option>
+                                        <option value="pkg">pkg (paquetes)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -95,8 +95,6 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -124,9 +122,16 @@
                                     <label class="form-label fw-bold">Unidad *</label>
                                     <select class="form-select" id="editInsumoUnidad" required>
                                         <option value="">Seleccione una unidad</option>
-                                        <option value="ml">ml</option>
-                                        <option value="g">g</option>
-                                        <option value="Pza">Pza</option>
+                                        <option value="ml">ml (mililitros)</option>
+                                        <option value="g">g (gramos)</option>
+                                        <option value="kg">kg (kilogramos)</option>
+                                        <option value="Pza">Pza (piezas)</option>
+                                        <option value="oz">oz (onzas)</option>
+                                        <option value="tsp">tsp (cucharaditas)</option>
+                                        <option value="tbsp">tbsp (cucharadas)</option>
+                                        <option value="cc">cc (centímetros cúbicos)</option>
+                                        <option value="L">L (litros)</option>
+                                        <option value="pkg">pkg (paquetes)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">

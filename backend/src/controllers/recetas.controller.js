@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { normalizarCantidad, unidadesCompatibles, obtenerUnidadesCompatibles } = require('../utils/unitConverter');
 
 class RecetasController {
     // Obtener la receta completa de un producto
@@ -63,15 +64,24 @@ class RecetasController {
                 });
             }
 
-            // Verificar que el insumo existe
+            // Verificar que el insumo existe y obtener su unidad
             const [insumo] = await db.query(
-                'SELECT ID_Insumo FROM insumos WHERE ID_Insumo = ?',
+                'SELECT ID_Insumo, Unidad FROM insumos WHERE ID_Insumo = ?',
                 [ID_Insumo]
             );
 
             if (insumo.length === 0) {
                 return res.status(404).json({ 
                     message: 'El insumo especificado no existe' 
+                });
+            }
+
+            const unidadInsumo = insumo[0].Unidad;
+            
+            // Verificar compatibilidad de unidades
+            if (!unidadesCompatibles(Unidad, unidadInsumo)) {
+                return res.status(400).json({ 
+                    message: `Las unidades ${Unidad} y ${unidadInsumo} no son compatibles para conversión` 
                 });
             }
 
@@ -87,12 +97,22 @@ class RecetasController {
                 });
             }
 
+            // Convertir la cantidad a la unidad del insumo si es necesario
+            let cantidadFinal = Cantidad_Necesaria;
+            let unidadFinal = Unidad;
+            
+            if (Unidad !== unidadInsumo) {
+                cantidadFinal = normalizarCantidad(Cantidad_Necesaria, Unidad, unidadInsumo);
+                unidadFinal = unidadInsumo;
+                console.log(`Conversión: ${Cantidad_Necesaria} ${Unidad} = ${cantidadFinal} ${unidadFinal}`);
+            }
+            
             // Insertar la receta usando la estructura real de la tabla
             const query = `
                 INSERT INTO recetas (ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad)
                 VALUES (?, ?, ?, ?)`;
             
-            await db.query(query, [ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad]);
+            await db.query(query, [ID_Producto, ID_Insumo, cantidadFinal, unidadFinal]);
             
             res.status(201).json({ 
                 message: 'Insumo agregado a la receta exitosamente' 
@@ -124,14 +144,45 @@ class RecetasController {
                 });
             }
 
+            // Obtener la unidad del insumo para conversión
+            const [insumo] = await db.query(
+                'SELECT Unidad FROM insumos WHERE ID_Insumo = ?',
+                [ID_Insumo]
+            );
+
+            if (insumo.length === 0) {
+                return res.status(404).json({ 
+                    message: 'El insumo especificado no existe' 
+                });
+            }
+
+            const unidadInsumo = insumo[0].Unidad;
+            
+            // Verificar compatibilidad de unidades
+            if (!unidadesCompatibles(Unidad, unidadInsumo)) {
+                return res.status(400).json({ 
+                    message: `Las unidades ${Unidad} y ${unidadInsumo} no son compatibles para conversión` 
+                });
+            }
+
+            // Convertir la cantidad a la unidad del insumo si es necesario
+            let cantidadFinal = Cantidad_Necesaria;
+            let unidadFinal = Unidad;
+            
+            if (Unidad !== unidadInsumo) {
+                cantidadFinal = normalizarCantidad(Cantidad_Necesaria, Unidad, unidadInsumo);
+                unidadFinal = unidadInsumo;
+                console.log(`Conversión: ${Cantidad_Necesaria} ${Unidad} = ${cantidadFinal} ${unidadFinal}`);
+            }
+
             const query = `
                 UPDATE recetas 
                 SET Cantidad_Necesaria = ?, Unidad = ?
                 WHERE ID_Producto = ? AND ID_Insumo = ?`;
             
             const [result] = await db.query(query, [
-                Cantidad_Necesaria, 
-                Unidad, 
+                cantidadFinal, 
+                unidadFinal, 
                 ID_Producto, 
                 ID_Insumo
             ]);
@@ -230,6 +281,36 @@ class RecetasController {
             res.status(500).json({ 
                 message: 'Error al obtener los productos' 
             });
+        }
+    }
+
+    // Obtener unidades compatibles para un insumo
+    static async getUnidadesCompatibles(req, res) {
+        try {
+            const { insumoId } = req.params;
+            
+            // Obtener la unidad del insumo
+            const [insumo] = await db.query(
+                'SELECT Unidad FROM insumos WHERE ID_Insumo = ?',
+                [insumoId]
+            );
+
+            if (insumo.length === 0) {
+                return res.status(404).json({ 
+                    message: 'El insumo especificado no existe' 
+                });
+            }
+
+            const unidadInsumo = insumo[0].Unidad;
+            const unidadesCompatibles = obtenerUnidadesCompatibles(unidadInsumo);
+            
+            res.json({
+                unidadInsumo,
+                unidadesCompatibles
+            });
+        } catch (error) {
+            console.error('Error al obtener unidades compatibles:', error);
+            res.status(500).json({ message: 'Error al obtener las unidades compatibles' });
         }
     }
 }

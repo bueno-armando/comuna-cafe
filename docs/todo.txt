@@ -3,8 +3,23 @@
   * subir las imágenes por URL o localmente?
 
 - Caja:
-  * filtrado por productos más populares y ver como se implementa
-    (si se pone como el default, si se guarda la selección)
+  * no mostrar productos sin receta
+  * ver donde agregar la advertencia de que no se pueden productos que no
+    tienen receta (puede ser en otro módulo como recetas)
+
+- Recetas:
+  * conversioń entre unidades compatibles: e.g., si la unidad del insumo
+    está en kg, que se puedan seleccionar gramos en al UI y en la borrado
+    se guarde como su respectiva conversión a kg
+  * Agregar receta de smoothie de fresa para pruebas:
+    - Fresa: 100g
+    - Leche: 200ml
+    - Azúcar: 15g
+    - Hielo: 50g
+  * ⚠️ IMPORTANTE: Análisis de cambio de unidades en insumos existentes
+    - Ver documento: docs/ANALISIS_CAMBIO_UNIDADES.md
+    - Problemas: recetas inconsistentes, inventario confuso, reportes incorrectos
+    - Recomendación: NO cambiar unidades existentes, crear nuevos insumos
 
 - Reportes:
   * ver el detalle de la fecha de corte
@@ -26,3 +41,12 @@
       independientemente del tamaño de imagen o longitud de texto
     * Estandarizar estilo de la paginación en todos los módulos
     * Considerar que en todos los modulos el scroll solo sea sobre los contenidos
+
+  - Optimizaciones de rendimiento (para implementar después):
+    * Lazy loading de modales (cargar solo cuando se necesiten)
+    * Event delegation para botones de modales (un solo listener global)
+    * Debouncing en búsquedas (evitar múltiples llamadas a API)
+    * Memoización de datos frecuentemente usados
+    * Optimización de consultas SQL con índices apropiados
+    * Compresión de imágenes y assets estáticos
+    * Cache de datos en localStorage para datos que no cambian frecuentemente

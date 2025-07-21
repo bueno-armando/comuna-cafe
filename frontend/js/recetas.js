@@ -93,13 +93,58 @@
         }
     }
 
-    // Función para actualizar la unidad cuando se selecciona un insumo
-    function updateUnitForIngredient(insumoId, unitElementId) {
-        const insumo = insumosList.find(i => i.ID_Insumo === parseInt(insumoId));
+    // Función para actualizar las unidades compatibles cuando se selecciona un insumo
+    async function updateCompatibleUnits(insumoId, unitElementId) {
         const unitElement = document.getElementById(unitElementId);
         
-        if (insumo && unitElement) {
-            unitElement.textContent = insumo.Unidad;
+        if (!insumoId || !unitElement) {
+            return;
+        }
+
+        try {
+            // Obtener las unidades compatibles del backend
+            const response = await fetch(`${API.URL}/unidades-compatibles/${insumoId}`, {
+                headers: {
+                    'Authorization': `Bearer ${API.getToken()}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error al obtener unidades compatibles: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Unidades compatibles:', data);
+
+            // Limpiar el select y agregar la unidad del insumo como primera opción
+            unitElement.innerHTML = '';
+            const optionInsumo = document.createElement('option');
+            optionInsumo.value = data.unidadInsumo;
+            optionInsumo.textContent = data.unidadInsumo;
+            optionInsumo.selected = true;
+            unitElement.appendChild(optionInsumo);
+
+            // Agregar las unidades compatibles
+            if (data.unidadesCompatibles && data.unidadesCompatibles.length > 0) {
+                data.unidadesCompatibles.forEach(unidad => {
+                    const option = document.createElement('option');
+                    option.value = unidad;
+                    option.textContent = unidad;
+                    unitElement.appendChild(option);
+                });
+            }
+
+            console.log(`Unidades compatibles cargadas para insumo ${insumoId}:`, data.unidadesCompatibles);
+
+        } catch (error) {
+            console.error('Error al cargar unidades compatibles:', error);
+            notificationModal.showError('Error al cargar las unidades compatibles: ' + error.message);
+            
+            // Fallback: mostrar solo la unidad del insumo
+            const insumo = insumosList.find(i => i.ID_Insumo === parseInt(insumoId));
+            if (insumo) {
+                unitElement.innerHTML = `<option value="${insumo.Unidad}" selected>${insumo.Unidad}</option>`;
+            }
         }
     }
 
@@ -450,9 +495,10 @@
 
         const insumoId = document.getElementById('ingredientName').value;
         const cantidad = document.getElementById('ingredientQuantity').value;
+        const unidad = document.getElementById('ingredientUnit').value;
 
-        if (!insumoId || !cantidad) {
-            notificationModal.showWarning('Por favor, complete todos los campos');
+        if (!insumoId || !cantidad || !unidad) {
+            notificationModal.showWarning('Por favor, complete todos los campos incluyendo la unidad');
             return;
         }
 
@@ -462,17 +508,11 @@
         }
 
         try {
-            // Obtener el insumo seleccionado para obtener su unidad
-            const insumoSeleccionado = insumosList.find(i => i.ID_Insumo === parseInt(insumoId));
-            if (!insumoSeleccionado) {
-                throw new Error('No se encontró el insumo seleccionado');
-            }
-
             console.log('Enviando datos para agregar ingrediente:', {
                 ID_Producto: currentProductId,
                 ID_Insumo: parseInt(insumoId),
                 Cantidad_Necesaria: parseFloat(cantidad),
-                Unidad: insumoSeleccionado.Unidad
+                Unidad: unidad
             });
 
             const response = await fetch(`${API.URL}`, {
@@ -485,7 +525,7 @@
                     ID_Producto: currentProductId,
                     ID_Insumo: parseInt(insumoId),
                     Cantidad_Necesaria: parseFloat(cantidad),
-                    Unidad: insumoSeleccionado.Unidad
+                    Unidad: unidad
                 })
             });
 
@@ -546,7 +586,18 @@
         document.getElementById('editProductoId').value = productoId;
         document.getElementById('editIngredientName').value = nombre;
         document.getElementById('editIngredientQuantity').value = cantidad;
-        document.getElementById('editIngredientUnit').textContent = unidad;
+        
+        // Cargar unidades compatibles para el insumo
+        await updateCompatibleUnits(insumoId, 'editIngredientUnit');
+        
+        // Seleccionar la unidad actual
+        const unitSelect = document.getElementById('editIngredientUnit');
+        if (unitSelect) {
+            const option = Array.from(unitSelect.options).find(opt => opt.value === unidad);
+            if (option) {
+                option.selected = true;
+            }
+        }
         
         const editModal = new bootstrap.Modal(document.getElementById('editIngredientModal'));
         editModal.show();
@@ -607,7 +658,12 @@
         const productoId = document.getElementById('editProductoId').value;
         const insumoId = document.getElementById('editIngredientId').value;
         const cantidad = document.getElementById('editIngredientQuantity').value;
-        const unidad = document.getElementById('editIngredientUnit').textContent;
+        const unidad = document.getElementById('editIngredientUnit').value;
+
+        if (!unidad) {
+            notificationModal.showWarning('Por favor, seleccione una unidad');
+            return;
+        }
 
         if (parseFloat(cantidad) <= 0) {
             notificationModal.showWarning('La cantidad debe ser mayor a 0');
@@ -674,6 +730,18 @@
         // Asegurarse de que tenemos la lista de insumos
         if (insumosList.length === 0) {
             loadInsumos();
+        }
+        
+        // Limpiar el formulario
+        const form = document.getElementById('ingredientForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Limpiar el select de unidades
+        const unitSelect = document.getElementById('ingredientUnit');
+        if (unitSelect) {
+            unitSelect.innerHTML = '';
         }
         
         const addModal = new bootstrap.Modal(document.getElementById('addIngredientModal'));
@@ -752,11 +820,19 @@
             addBtn.addEventListener('click', openAddIngredientModal);
         }
 
-        // Configurar eventos para actualizar unidades
+        // Configurar eventos para actualizar unidades compatibles
         const ingredientSelect = document.getElementById('ingredientName');
         if (ingredientSelect) {
             ingredientSelect.addEventListener('change', function() {
-                updateUnitForIngredient(this.value, 'ingredientUnit');
+                if (this.value) {
+                    updateCompatibleUnits(this.value, 'ingredientUnit');
+                } else {
+                    // Limpiar el select de unidades si no hay insumo seleccionado
+                    const unitSelect = document.getElementById('ingredientUnit');
+                    if (unitSelect) {
+                        unitSelect.innerHTML = '';
+                    }
+                }
             });
         }
 

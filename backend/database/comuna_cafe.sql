@@ -116,7 +116,7 @@ CREATE TABLE `insumos`  (
   `Nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ID_Proveedor` int NOT NULL,
   `Costo` decimal(10, 2) NOT NULL,
-  `Unidad` enum('ml','g','Pza','cc','oz','tsp','tbsp') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Unidad` enum('ml','g','kg','Pza','cc','oz','tsp','tbsp','L','pkg','und') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`ID_Insumo`) USING BTREE,
   INDEX `ID_Proveedor`(`ID_Proveedor` ASC) USING BTREE,
   CONSTRAINT `insumos_ibfk_1` FOREIGN KEY (`ID_Proveedor`) REFERENCES `proveedores` (`ID_Proveedor`) ON DELETE CASCADE ON UPDATE RESTRICT
@@ -278,7 +278,7 @@ CREATE TABLE `recetas`  (
   `ID_Producto` int NOT NULL,
   `ID_Insumo` int NOT NULL,
   `Cantidad_Necesaria` decimal(10, 2) NOT NULL,
-  `Unidad` enum('ml','g','Pza','cc','oz','tsp','tbsp') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Unidad` enum('ml','g','kg','Pza','cc','oz','tsp','tbsp','L','pkg','und') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`ID_Producto`, `ID_Insumo`) USING BTREE,
   INDEX `ID_Insumo`(`ID_Insumo` ASC) USING BTREE,
   CONSTRAINT `recetas_ibfk_1` FOREIGN KEY (`ID_Producto`) REFERENCES `productos_venta` (`ID_Producto`) ON DELETE CASCADE ON UPDATE RESTRICT,

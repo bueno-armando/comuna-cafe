@@ -39,7 +39,7 @@
 | Nombre       | varchar(100), NOT NULL                    |                      |
 | ID_Proveedor | int(11), FK a proveedores, NOT NULL       |                      |
 | Costo        | decimal(10,2), NOT NULL                   | Usar punto decimal   |
-| Unidad       | enum('ml','g','Pza','cc','oz','tsp','tbsp') | NOT NULL           |
+| Unidad       | enum('ml','g','kg','Pza','cc','oz','tsp','tbsp','L','pkg') | NOT NULL           |
 
 ### Tabla `recetas`
 | Campo              | Tipo                | Notas                                    |
@@ -93,6 +93,7 @@
 - `POST /api/recetas` — crear nueva receta (ID_Producto, ID_Insumo, Cantidad_Necesaria, Unidad)
 - `PUT /api/recetas/:productoId/:insumoId` — actualizar cantidad de ingrediente
 - `DELETE /api/recetas/:productoId/:insumoId` — eliminar ingrediente de receta
+- `GET /api/recetas/unidades-compatibles/:insumoId` — obtener unidades compatibles para un insumo
 
 ### Ventas
 - `GET /api/ventas` — lista ventas con paginación (page, limit, fechaInicio, fechaFin)
@@ -383,6 +384,12 @@ Para asegurar una experiencia de usuario consistente y profesional, todos los m�
 - ✅ Conteo dinámico de ingredientes por producto
 - ✅ Modales con diseño Bootstrap consistente
 - ✅ UX profesional sin páginas vacías
+- ✅ **Sistema de conversión automática de unidades**: Conversiones automáticas entre unidades compatibles (kg↔g, L↔ml, etc.)
+- ✅ **Combo box dinámico de unidades**: Se llena automáticamente con unidades compatibles del insumo seleccionado
+- ✅ **Validación de compatibilidad**: Rechaza unidades incompatibles con mensajes claros
+- ✅ **Normalización automática**: Convierte cantidades a la unidad del insumo antes de guardar en BD
+- ✅ **Endpoint de unidades compatibles**: `/api/recetas/unidades-compatibles/:insumoId` para obtener unidades disponibles
+- ✅ **Análisis de cambio de unidades**: Documentación completa de riesgos y soluciones para cambiar unidades de insumos existentes
 
 ### Ventas
 - ✅ Paginación completa con navegación intuitiva
@@ -428,6 +435,8 @@ Para asegurar una experiencia de usuario consistente y profesional, todos los m�
 > **Sistema de Autenticación y Recuperación COMPLETADO** - Login con botón mostrar/ocultar contraseña, sistema de recuperación de emergencia, y documentación completa implementados.
 
 > **Sistema de Notificaciones Unificado COMPLETADO** - Todos los módulos utilizan modales Bootstrap profesionales en lugar de alerts básicos, proporcionando una experiencia de usuario consistente y elegante.
+
+> **Sistema de Conversión de Unidades COMPLETADO** - Conversiones automáticas entre unidades compatibles en recetas, con validación de compatibilidad y normalización automática de cantidades. Incluye análisis completo de riesgos para cambios de unidades en insumos existentes.
 
 ### Mejoras en el módulo de Usuarios
 - **Sugerencia automática de nombre de usuario**: Al ingresar nombre y apellido en el formulario de alta de usuario, el campo "Usuario" se autocompleta automáticamente con la sugerencia generada a partir de la primera letra del nombre y el apellido (sin acentos ni espacios, ejemplo: Ana Rivas → ARivas). El usuario puede editar este campo antes de guardar si lo desea.
