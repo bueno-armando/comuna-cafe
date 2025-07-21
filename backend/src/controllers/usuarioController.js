@@ -16,7 +16,8 @@ class UsuarioController {
                 nombre,
                 apellido,
                 rol,
-                estado
+                estado,
+                usuario
             } = req.query;
 
             const usuarios = await UsuarioModel.getAll({
@@ -25,7 +26,8 @@ class UsuarioController {
                 nombre,
                 apellido,
                 rol,
-                estado
+                estado,
+                usuario
             });
             
             res.json(usuarios);

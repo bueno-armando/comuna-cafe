@@ -11,7 +11,8 @@ class UsuarioModel {
                 nombre,
                 apellido,
                 rol,
-                estado
+                estado,
+                usuario
             } = filters;
 
             // Construir las condiciones WHERE
@@ -27,6 +28,11 @@ class UsuarioModel {
             if (apellido) {
                 whereConditions.push('u.Apellido LIKE ?');
                 params.push(`%${apellido}%`);
+            }
+            
+            if (usuario) {
+                whereConditions.push('u.Usuario LIKE ?');
+                params.push(`%${usuario}%`);
             }
             
             if (rol) {

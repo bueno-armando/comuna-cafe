@@ -2,10 +2,9 @@
   * tamaño de las tarjetas de producto
   * subir las imágenes por URL o localmente?
 
-- Usuarios:
-  * creación: llenar campo de usuario automáticamente cuando se llenen 
-              ambos nombre y apellido 
-
+- Caja:
+  * filtrado por productos más populares y ver como se implementa
+    (si se pone como el default, si se guarda la selección)
 
 - Reportes:
   * ver el detalle de la fecha de corte

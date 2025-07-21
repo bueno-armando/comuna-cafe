@@ -12,6 +12,138 @@
         return localStorage.getItem('token');
     }
 
+    // Función para generar nombre de usuario automáticamente
+    function generarNombreUsuario(nombre, apellido) {
+        if (!nombre || !apellido) return '';
+        
+        // Limpiar y normalizar el nombre y apellido
+        const nombreLimpio = nombre.trim().toLowerCase();
+        const apellidoLimpio = apellido.trim().toLowerCase();
+        
+        if (!nombreLimpio || !apellidoLimpio) return '';
+        
+        // Obtener la primera letra del nombre
+        const primeraLetra = nombreLimpio.charAt(0);
+        
+        // Combinar primera letra del nombre + apellido completo
+        let usuarioGenerado = primeraLetra + apellidoLimpio;
+        
+        // Remover acentos y caracteres especiales
+        usuarioGenerado = usuarioGenerado
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remover diacríticos
+            .replace(/[^a-z0-9]/g, ''); // Solo letras y números
+        
+        // Capitalizar la primera letra
+        usuarioGenerado = usuarioGenerado.charAt(0).toUpperCase() 
+            + usuarioGenerado.charAt(1).toUpperCase() + usuarioGenerado.slice(2);
+        
+        return usuarioGenerado;
+    }
+
+    // Función para verificar si un usuario ya existe
+    async function verificarUsuarioExiste(usuario) {
+        try {
+            // Buscar usuarios que coincidan exactamente con el nombre de usuario
+            const response = await fetchAPI(`${API_URL_USUARIOS}?usuario=${encodeURIComponent(usuario)}`);
+            
+            // Verificar si hay algún usuario que coincida exactamente
+            if (response.usuarios && response.usuarios.length > 0) {
+                return response.usuarios.some(user => user.Usuario === usuario);
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('Error verificando usuario:', error);
+            return false; // En caso de error, asumimos que no existe
+        }
+    }
+
+    // Función para generar un nombre de usuario único
+    async function generarUsuarioUnico(baseUsuario) {
+        let usuarioFinal = baseUsuario;
+        let contador = 1;
+        
+        // Timeout de seguridad para evitar bucles infinitos
+        const maxIntentos = 10;
+        let intentos = 0;
+        
+        // Verificar si el usuario base ya existe
+        while (await verificarUsuarioExiste(usuarioFinal) && intentos < maxIntentos) {
+            usuarioFinal = baseUsuario + contador;
+            contador++;
+            intentos++;
+        }
+        
+        return usuarioFinal;
+    }
+
+    // Función para actualizar el campo usuario automáticamente
+    async function actualizarCampoUsuario() {
+        const nombreInput = document.querySelector('#addUserModal [name="nombre"]');
+        const apellidoInput = document.querySelector('#addUserModal [name="apellido"]');
+        const usuarioInput = document.querySelector('#addUserModal [name="usuario"]');
+        
+        if (!nombreInput || !apellidoInput || !usuarioInput) return;
+        
+        const nombre = nombreInput.value.trim();
+        const apellido = apellidoInput.value.trim();
+        
+        // Asegurar que el campo usuario esté habilitado
+        usuarioInput.disabled = false;
+        
+        // Solo actualizar si ambos campos están llenos
+        if (nombre && apellido) {
+            const usuarioBase = generarNombreUsuario(nombre, apellido);
+            if (usuarioBase) {
+                try {
+                    // Mostrar indicador de carga sin deshabilitar
+                    usuarioInput.value = usuarioBase + '...';
+                    
+                    // Generar usuario único
+                    const usuarioUnico = await generarUsuarioUnico(usuarioBase);
+                    
+                    // Actualizar el campo
+                    usuarioInput.value = usuarioUnico;
+                } catch (error) {
+                    console.error('Error generando usuario único:', error);
+                    usuarioInput.value = usuarioBase;
+                }
+            }
+        } else {
+            // Si no están ambos campos llenos, limpiar el campo usuario
+            usuarioInput.value = '';
+        }
+    }
+
+    // Función para configurar el autocompletado del campo usuario
+    function setupAutoCompleteUsuario() {
+        const nombreInput = document.querySelector('#addUserModal [name="nombre"]');
+        const apellidoInput = document.querySelector('#addUserModal [name="apellido"]');
+        const usuarioInput = document.querySelector('#addUserModal [name="usuario"]');
+        
+        if (nombreInput) {
+            nombreInput.addEventListener('input', actualizarCampoUsuario);
+            nombreInput.addEventListener('blur', actualizarCampoUsuario);
+        }
+        
+        if (apellidoInput) {
+            apellidoInput.addEventListener('input', actualizarCampoUsuario);
+            apellidoInput.addEventListener('blur', actualizarCampoUsuario);
+        }
+        
+        // Asegurar que el campo usuario esté habilitado cuando se abre el modal
+        const addUserModal = document.getElementById('addUserModal');
+        if (addUserModal) {
+            addUserModal.addEventListener('show.bs.modal', function() {
+                if (usuarioInput) {
+                    usuarioInput.disabled = false;
+                    usuarioInput.value = '';
+                }
+            });
+        }
+    }
+
     async function fetchAPI(url, options = {}) {
         const headers = {
             'Content-Type': 'application/json',
@@ -476,6 +608,9 @@
         const editForm = document.getElementById('editUserForm');
         if (editForm) editForm.addEventListener('submit', saveEditUsuario);
         else console.warn('Usuarios: editUserForm no encontrado');
+
+        // Configurar autocompletado del campo usuario
+        setupAutoCompleteUsuario();
 
         // Evento para confirmar eliminación
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
