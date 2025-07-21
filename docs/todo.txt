@@ -2,6 +2,12 @@
   * tamaño de las tarjetas de producto
   * subir las imágenes por URL o localmente?
 
+- Inventario:
+  * corregir ícono de botón "registrar movimiento" de cada entrada
+  * considerar como evitar la saturación visual (la solución actual no me convence)
+  * darle funcionalidad al botón universal "ver movimientos" (primero revisar
+    si existe en la API un endpoint para esto)
+
 - Caja:
   * no mostrar productos sin receta
   * ver donde agregar la advertencia de que no se pueden productos que no
@@ -26,7 +32,6 @@
 
 - MISC:
   - Registrar la compra de insumos como gastos
-  - Revisar si coinciden la unidad de compra y uso de insumos
   - IMPORTANTE: que hacer con la variación de ingredientes?
     e.g., leche entera o deslactosada, con o sin azúcar, etc
   - Ver por que no se puede iniciar sesión desde el teléfono

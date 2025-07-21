@@ -1,5 +1,15 @@
 # Resumen de Contexto - Comuna Café
 
+## Mejoras recientes (2024)
+
+- **Conversión y selección de unidades profesional**: Tanto en recetas como en inventario, los usuarios pueden seleccionar la unidad en la que desean trabajar mediante un combo box, con conversión visual instantánea y normalización automática al guardar. El sistema soporta todas las conversiones relevantes (ml, L, oz, tsp, tbsp, cc, g, kg, etc.).
+- **Modal de registrar movimiento en inventario**: Ahora incluye combo box de unidad, conversión visual de cantidad, y botones de incremento/decremento con formateo profesional. La cantidad siempre se normaliza a la unidad base antes de enviarse al backend.
+- **Botones de acción por fila en inventario**: Ahora son solo iconos (con tooltip), aparecen únicamente al hacer hover sobre la fila, y tienen fondo y color de icono profesional (verde para registrar movimiento, azul para ver movimientos). Esto reduce la saturación visual y sigue patrones de UX de sistemas profesionales.
+- **Botón universal "Ver movimientos"**: Agregado junto al botón universal "Registrar movimiento" para acceso rápido a la vista de historial de movimientos (funcionalidad pendiente de implementar).
+- **Acción rápida por fila**: Al hacer clic en "Registrar movimiento" desde una fila, el modal se abre con el insumo preseleccionado y bloqueado, siguiendo el patrón profesional de sistemas de inventario avanzados.
+- **Trigger en base de datos recomendado**: Para que cada vez que se cree un insumo, se cree automáticamente su registro en inventario con cantidad 0, asegurando integridad y simplificando la lógica del backend.
+- **Consistencia visual y UX**: Todos los módulos relacionados con unidades y movimientos de inventario ahora tienen una experiencia de usuario coherente, profesional y moderna, alineada con los mejores sistemas del sector.
+
 ## Estructura del Proyecto
 
 - **backend/**: Node.js/Express, API REST, conexión a MySQL/MariaDB

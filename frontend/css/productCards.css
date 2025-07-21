@@ -72,3 +72,37 @@
     text-shadow: 0 2px 4px rgba(255, 255, 255, 1);
     transition: text-shadow 0.3s ease;
 } 
+
+/* Acciones por fila en inventario: ocultar por defecto, mostrar en hover */
+#inventoryTableBody tr .acciones-fila .accion-fila-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#inventoryTableBody tr:hover .acciones-fila .accion-fila-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Fondo y color de icono para botones de acción por fila */
+#inventoryTableBody tr .acciones-fila .btn-success.accion-fila-btn,
+#inventoryTableBody tr .acciones-fila .btn-info.accion-fila-btn {
+  color: #fff;
+  border-radius: 0.375rem;
+  box-shadow: none;
+}
+#inventoryTableBody tr .acciones-fila .btn-success.accion-fila-btn {
+  background-color: #198754;
+  border-color: #198754;
+}
+#inventoryTableBody tr .acciones-fila .btn-info.accion-fila-btn {
+  background-color: #0dcaf0;
+  border-color: #0dcaf0;
+}
+#inventoryTableBody tr .acciones-fila .btn-success.accion-fila-btn:hover,
+#inventoryTableBody tr .acciones-fila .btn-info.accion-fila-btn:hover {
+  filter: brightness(0.95);
+}
+#inventoryTableBody tr .acciones-fila .accion-fila-btn i {
+  color: #fff;
+} 
